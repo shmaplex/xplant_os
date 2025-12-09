@@ -1,0 +1,20 @@
+# These are supported funding model platforms
+
+# Supported funding model platforms for Nous
+# Help us keep building a smarter, safer, and more decentralized future with Nous.
+# Your contributions directly support development, infrastructure, and community initiatives.
+
+github: [shmaplex] # GitHub Sponsors: Up to 4 usernames; e.g., team members
+# open_collective: shmaplex # Open Collective: single project name
+# patreon: nous-platform            # Patreon: single username
+# ko_fi: shmaplex              # Ko-fi: single username
+# tidelift: npm/nous-core           # Tidelift: platform/package name; e.g., npm/babel
+# community_bridge: nous-project    # Community Bridge: project name
+# liberapay: nous-platform          # Liberapay: single username
+# issuehunt: nous-platform          # IssueHunt: single username
+# lfx_crowdfunding: nous-project    # LFX Crowdfunding: project name
+# polar: nous-platform              # Polar: single username
+# buy_me_a_coffee: shmaplex    # Buy Me a Coffee: single username
+# thanks_dev: shmaplex         # thanks.dev: single username
+# custom: ['https://nous.foundation/donate', 'https://patreon.com/nous-platform']
+# Custom: up to 4 custom URLs for sponsorship, donations, or special programs
