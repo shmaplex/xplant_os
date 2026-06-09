@@ -7,7 +7,7 @@ Choose the one that matches your setup:
 | File | Language | Dependencies |
 |---|---|---|
 | `curl-example.sh` | Bash/curl | curl (pre-installed on most systems) |
-| `node-example.mjs` | Node.js | `@xplant/sdk` (or just `fetch`) |
+| `node-example.mjs` | Node.js | `@shmaplex/xplant-sdk` (or just `fetch`) |
 | `python-example.py` | Python 3 | `requests` |
 
 ---

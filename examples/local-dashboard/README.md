@@ -22,7 +22,7 @@ This is useful for a wall-mounted screen in a growth room, a Raspberry Pi kiosk,
 // dashboard-poll.mjs
 // Prints live sensor readings to the terminal every 30 seconds
 
-import { XPlantClient } from "@xplant/sdk";
+import { XPlantClient } from "@shmaplex/xplant-sdk";
 
 const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
 const deviceId = process.env.XPLANT_DEVICE_ID;

@@ -33,7 +33,7 @@ assignees: ''
 - Device: <!-- e.g. ESP32-WROOM-32, Raspberry Pi 4B -->
 - OS / firmware version: <!-- e.g. Arduino IDE 2.3, Raspberry Pi OS Lite 64-bit -->
 - Language / runtime: <!-- e.g. Node.js 20, Python 3.11 -->
-- xPlant SDK version (if applicable): <!-- e.g. @xplant/sdk 0.1.0 -->
+- xPlant SDK version (if applicable): <!-- e.g. @shmaplex/xplant-sdk 0.1.0 -->
 
 **Additional context**
 

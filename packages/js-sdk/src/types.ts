@@ -1,4 +1,4 @@
-// Shared types for the @xplant/sdk
+// Shared types for the @shmaplex/xplant-sdk
 
 /** Generic API response wrapper */
 export interface XPlantApiResponse<T> {

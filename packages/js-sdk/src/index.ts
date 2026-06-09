@@ -1,4 +1,4 @@
-// @xplant/sdk — public API surface
+// @shmaplex/xplant-sdk — public API surface
 
 export { XPlantClient } from "./client.js";
 export type { XPlantClientConfig, RequestFn } from "./client.js";

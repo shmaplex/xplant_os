@@ -10,7 +10,7 @@ Thank you for helping make xplant_os better. This guide explains how the reposit
 xplant_os/
   docs/           ← documentation: quickstart, auth, API reference, scopes
   packages/       ← reusable SDK packages (npm, pip, etc.)
-    js-sdk/       ← @xplant/sdk: TypeScript/JavaScript client
+    js-sdk/       ← @shmaplex/xplant-sdk: TypeScript/JavaScript client (source at shmaplex/xplant-sdk)
   devices/        ← firmware and hardware integration examples
     arduino/      ← Arduino / ESP32 sketches (.ino + config.h)
     raspberry-pi/ ← Python scripts for Pi-based gateways and kiosks

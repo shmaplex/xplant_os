@@ -1,5 +1,5 @@
 {
-  "name": "@xplant/sdk",
+  "name": "@shmaplex/xplant-sdk",
   "version": "0.1.0",
   "description": "Official JavaScript/TypeScript SDK for the xPlant external API",
   "type": "module",
@@ -25,8 +25,7 @@
   "license": "SEE LICENSE IN ../../LICENSE",
   "repository": {
     "type": "git",
-    "url": "https://github.com/shmaplex/xplant_os.git",
-    "directory": "packages/js-sdk"
+    "url": "https://github.com/shmaplex/xplant-sdk.git"
   },
   "homepage": "https://xplant.shmaplex.com"
 }

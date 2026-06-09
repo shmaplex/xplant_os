@@ -52,7 +52,7 @@ A successful response returns HTTP 201 with a JSON body containing the created r
 ### Using Node.js
 
 ```javascript
-const client = new (require("@xplant/sdk").XPlantClient)({
+const client = new (require("@shmaplex/xplant-sdk").XPlantClient)({
   apiKey: process.env.XPLANT_API_KEY,
 });
 

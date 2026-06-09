@@ -67,16 +67,18 @@ See [docs/quickstart.md](docs/quickstart.md) for a step-by-step guide.
 
 ## Packages
 
-### `@xplant/sdk` — JavaScript / TypeScript SDK
+### `@shmaplex/xplant-sdk` — JavaScript / TypeScript SDK
 
-```
-packages/js-sdk/
+The SDK now lives in its own repository: **[shmaplex/xplant-sdk](https://github.com/shmaplex/xplant-sdk)**
+
+```bash
+npm install @shmaplex/xplant-sdk
 ```
 
 A lightweight TypeScript client for the xPlant external API. Works in Node.js and modern browsers.
 
 ```typescript
-import { XPlantClient } from "@xplant/sdk";
+import { XPlantClient } from "@shmaplex/xplant-sdk";
 
 const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
 

@@ -40,7 +40,7 @@ curl -X POST https://xplant.shmaplex.com/api/v1/device-events \
 ## Node.js example
 
 ```javascript
-import { XPlantClient } from "@xplant/sdk";
+import { XPlantClient } from "@shmaplex/xplant-sdk";
 
 const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
 

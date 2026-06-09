@@ -1,10 +1,10 @@
 /**
  * node-example.mjs
  * =================
- * Post a temperature reading to xPlant using the @xplant/sdk.
+ * Post a temperature reading to xPlant using the @shmaplex/xplant-sdk.
  *
  * Usage:
- *   npm install @xplant/sdk
+ *   npm install @shmaplex/xplant-sdk
  *   XPLANT_API_KEY="xpk_live_YOUR_KEY_HERE" \
  *   XPLANT_DEVICE_ID="YOUR_DEVICE_UUID" \
  *   node node-example.mjs
@@ -20,9 +20,9 @@ if (!apiKey)   throw new Error("Set XPLANT_API_KEY before running this script");
 if (!deviceId) throw new Error("Set XPLANT_DEVICE_ID before running this script");
 
 // ---------------------------------------------------------------------------
-// Using the @xplant/sdk (recommended)
+// Using the @shmaplex/xplant-sdk (recommended)
 // ---------------------------------------------------------------------------
-import { XPlantClient } from "@xplant/sdk";
+import { XPlantClient } from "@shmaplex/xplant-sdk";
 
 const client = new XPlantClient({ apiKey });
 
