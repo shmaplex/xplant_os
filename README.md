@@ -2,7 +2,7 @@
   <img src=".github/github-header.png" alt="xplant_os" width="full"/>
 </p>
 <p align="center">
-  Open-source SDKs, firmware, and hardware bridges for connecting physical lab devices to <a href="https://xplant.shmaplex.com">xPlant</a>.
+  Open-source SDKs, firmware, and hardware bridges for connecting physical lab devices to <a href="https://xplantpro.com">xPlant</a>.
 </p>
 
 <p align="center">
@@ -13,7 +13,7 @@
 
 ---
 
-xplant_os is the open-source companion to [xPlant](https://xplant.shmaplex.com) — a collection of SDKs, firmware examples, and hardware bridges for connecting physical lab devices and external software to your xPlant workspace.
+xplant_os is the open-source companion to [xPlant](https://xplantpro.com) — a collection of SDKs, firmware examples, and hardware bridges for connecting physical lab devices and external software to your xPlant workspace.
 
 Production auth, user data, billing, RLS policies, and application secrets live exclusively in the main xPlant app and are never part of this repository.
 
@@ -36,7 +36,7 @@ Production auth, user data, billing, RLS policies, and application secrets live 
 
 **1. Get your API key**
 
-Log in to [xplant.shmaplex.com](https://xplant.shmaplex.com), go to **Settings > Integrations > API Keys**, and generate a key. It will look like:
+Log in to [xplantpro.com](https://xplantpro.com), go to **Settings > Integrations > API Keys**, and generate a key. It will look like:
 
 ```
 xpk_live_a1b2c3d4e5f6...  (production)
