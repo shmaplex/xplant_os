@@ -1,9 +1,6 @@
 <p align="center">
   <img src=".github/github-header.png" alt="xplant_os" width="full"/>
 </p>
-
-<h1 align="center">xplant_os</h1>
-
 <p align="center">
   Open-source SDKs, firmware, and hardware bridges for connecting physical lab devices to <a href="https://xplant.shmaplex.com">xPlant</a>.
 </p>
