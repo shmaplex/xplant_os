@@ -1,46 +1,29 @@
-# Pull Request
+## Summary
 
-## Description
+<!-- What does this PR add or fix? One paragraph is enough. -->
 
-Please include a summary of the changes and the motivation for the PR.  
-Include relevant context, issue numbers, or links if applicable.
+## Type of change
 
-Fixes # (issue)
-
----
-
-## Type of Change
-
-Please delete options that are not relevant.
-
-- [ ] Bug fix (non-breaking change)
-- [ ] New feature (non-breaking change)
-- [ ] Breaking change (fix or feature that would cause existing functionality to change)
+- [ ] New device package (firmware / hardware bridge)
+- [ ] New SDK feature or language
+- [ ] New example
+- [ ] Bug fix
 - [ ] Documentation update
-- [ ] Refactor / code cleanup
-- [ ] Other (please describe):
-
----
+- [ ] Other (describe below)
 
 ## Checklist
 
-- [ ] My code follows the style guidelines of this project
-- [ ] I have performed a self-review of my code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings or errors
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] All new and existing tests pass
-- [ ] Any dependent changes have been merged and published in downstream modules
+- [ ] No real API keys, passwords, or credentials anywhere in this diff
+- [ ] `config.h` / `config.example.json` uses placeholder values only (`xpk_live_YOUR_KEY_HERE`, `YOUR_WIFI_SSID`, etc.)
+- [ ] New device folder includes a `README.md` with hardware requirements, wiring diagram, and setup steps
+- [ ] Root `README.md` updated if a new package/device/example was added
+- [ ] Code is commented enough for a hobbyist to follow
+- [ ] `docs/` updated if any public-facing API contract changed
 
----
+## Hardware tested on (if applicable)
 
-## Screenshots / GIFs (if applicable)
+<!-- e.g. "ESP32-WROOM-32 + DHT22 on breadboard" or "Raspberry Pi 4B running Raspberry Pi OS Lite 64-bit" -->
 
-Include any visual changes, UI updates, or screenshots to illustrate your changes.
+## Screenshots / serial output (if applicable)
 
----
-
-## Additional Notes
-
-Anything else reviewers should know, edge cases, or context about implementation decisions.
+<!-- Paste serial monitor output or a photo of the device working, if relevant -->

@@ -1,72 +1,173 @@
 <p align="center">
-  <img src=".github/github-header.png" alt="github header" width="full"/>
+  <img src=".github/github-header.png" alt="xplant_os" width="full"/>
 </p>
 
-# XPlant Open Source
+<h1 align="center">xplant_os</h1>
 
-Welcome to **XPlant OS**, a collection of open-source projects and tools for plant tissue culture, media management, and laboratory organization. This repository serves as a hub for the XPlant ecosystem, linking to projects that make plant tissue culture research, experimentation, and collaboration easier.
+<p align="center">
+  Open-source SDKs, firmware, and hardware bridges for connecting physical lab devices to <a href="https://xplant.shmaplex.com">xPlant</a>.
+</p>
 
----
-
-## Current Projects
-
-### 1. Media Recipe Manager
-
-📂 Coming Soon
-A decentralized tissue culture media recipe manager that allows researchers to create, share, and explore recipes. Recipes are stored on IPFS for permanence and can be indexed for discovery and collaboration.
-
-**Features:**
-
-- Recipe submission
-- Upvote/downvote
-- Search by ingredients, plants or tags
-- Decentralized storage
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-CSL%20v1.1-green" alt="License"></a>
+  <a href="https://github.com/shmaplex/xplant_os/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs Welcome"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Discord-join%20us-7289da" alt="Discord"></a>
+</p>
 
 ---
 
-## Future Open-Source Projects
+xplant_os is the open-source companion to [xPlant](https://xplant.shmaplex.com) — a collection of SDKs, firmware examples, and hardware bridges for connecting physical lab devices and external software to your xPlant workspace.
 
-### Growth Condition Logger
+Production auth, user data, billing, RLS policies, and application secrets live exclusively in the main xPlant app and are never part of this repository.
 
-A small IoT or web app to log lab conditions (temperature, humidity, light cycles) in real time. Data could be shared publicly or within private lab groups.
+---
 
-### Lab Inventory Management
+## Table of Contents
 
-Track reagents, consumables, and tools with automatic low-stock notifications and barcoding support. Could integrate with Supabase for a cloud backend and optionally decentralized storage for public resource sharing.
+- [Getting Started](#getting-started)
+- [Packages](#packages) — JavaScript/TypeScript SDK
+- [Devices](#devices) — ESP32, Raspberry Pi, ESPHome, Tasmota
+- [Examples](#examples) — Minimal working examples
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [Security](#security)
+- [License](#license)
 
-### Tissue Culture Protocol Library
+---
 
-A community-driven repository of tissue culture protocols, with versioning, step-by-step guides, and the ability for users to fork/adapt protocols. Could integrate with IPFS or Ceramic for decentralized content management.
+## Getting Started
 
-### Visual Media Analyzer
+**1. Get your API key**
 
-An image/video analyzer for culture plates or explants. Can include automatic detection of growth stages, contamination, or phenotypic traits using computer vision models.
+Log in to [xplant.shmaplex.com](https://xplant.shmaplex.com), go to **Settings > Integrations > API Keys**, and generate a key. It will look like:
 
-### Lab Collaboration Network
+```
+xpk_live_a1b2c3d4e5f6...  (production)
+xpk_dev_a1b2c3d4e5f6...   (development)
+```
 
-A lightweight social layer for sharing findings, recipes, and media between labs, possibly with Lightning Network micro-payments or token-based incentives for contributions.
+Keep this key secret. Never commit it to source control.
+
+**2. Pick your device type**
+
+| I have... | Start here |
+|---|---|
+| ESP32 or Arduino | [`devices/arduino/esp32-sensor/`](devices/arduino/esp32-sensor/) |
+| Raspberry Pi | [`devices/raspberry-pi/pi-gateway/`](devices/raspberry-pi/pi-gateway/) |
+| ESPHome device | [`devices/esphome/`](devices/esphome/) |
+| Tasmota device | [`devices/tasmota/`](devices/tasmota/) |
+| Node.js / TypeScript project | [`packages/js-sdk/`](packages/js-sdk/) |
+| Just want to try the API | [`examples/basic-sensor/`](examples/basic-sensor/) |
+
+**3. Post your first reading in 5 minutes**
+
+See [docs/quickstart.md](docs/quickstart.md) for a step-by-step guide.
+
+---
+
+## Packages
+
+### `@xplant/sdk` — JavaScript / TypeScript SDK
+
+```
+packages/js-sdk/
+```
+
+A lightweight TypeScript client for the xPlant external API. Works in Node.js and modern browsers.
+
+```typescript
+import { XPlantClient } from "@xplant/sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+
+await client.sensorReadings.create({
+  device_id: "your-device-uuid",
+  type: "temperature",
+  value: 24.5,
+  unit: "C",
+});
+```
+
+See [`packages/js-sdk/README.md`](packages/js-sdk/README.md) for full documentation.
+
+---
+
+## Devices
+
+### Arduino / ESP32
+
+| Package | Description |
+|---|---|
+| [`esp32-sensor`](devices/arduino/esp32-sensor/) | ESP32 + DHT22/BME280: posts temperature and humidity readings |
+| [`esp32-scan-station`](devices/arduino/esp32-scan-station/) | Stub: barcode/QR scan station concept |
+| [`nano-button`](devices/arduino/nano-button/) | Stub: Arduino Nano physical event button |
+
+### Raspberry Pi
+
+| Package | Description |
+|---|---|
+| [`pi-gateway`](devices/raspberry-pi/pi-gateway/) | Python MQTT/serial → xPlant HTTP bridge |
+| [`pi-bench-kiosk`](devices/raspberry-pi/pi-bench-kiosk/) | Stub: bench-top touchscreen kiosk |
+
+### ESPHome
+
+[`devices/esphome/`](devices/esphome/) — YAML templates for ESPHome-flashed devices.
+
+### Tasmota
+
+[`devices/tasmota/`](devices/tasmota/) — Webhook rule examples for Tasmota firmware.
+
+---
+
+## Examples
+
+| Example | Description |
+|---|---|
+| [`basic-sensor`](examples/basic-sensor/) | Post a sensor reading in curl, Node.js, or Python |
+| [`transfer-counter`](examples/transfer-counter/) | Log a lab transfer event via the API |
+| [`contamination-check`](examples/contamination-check/) | Record a contamination observation |
+| [`local-dashboard`](examples/local-dashboard/) | Concept: local sensor dashboard pulling from xPlant |
+
+---
+
+## Documentation
+
+| Doc | Description |
+|---|---|
+| [docs/quickstart.md](docs/quickstart.md) | 5-minute setup guide |
+| [docs/auth.md](docs/auth.md) | API key model, scopes, security model |
+| [docs/api-reference.md](docs/api-reference.md) | External endpoint reference (v1) |
+| [docs/scopes.md](docs/scopes.md) | Scope definitions and permission model |
+| [docs/contributing.md](docs/contributing.md) | How to add a new device package or SDK |
 
 ---
 
 ## Contributing
 
-We welcome contributions! If you want to add a new project or improve existing ones:
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide. The short version:
 
-1. Fork the repository
-2. Add your project under a new folder with a `README.md`
-3. Submit a pull request
+1. Fork and clone the repo
+2. Create a branch: `feature/my-device` or `fix/my-fix`
+3. Follow the directory conventions (each device gets its own folder with a `README.md`)
+4. Open a PR — use the PR template
+
+---
+
+## Security
+
+See [SECURITY.md](SECURITY.md). The key rule: **never commit API keys**. If you accidentally push a key, revoke it immediately from **Settings > Integrations > API Keys** in xPlant.
+
+Report vulnerabilities to security@shmaplex.com.
 
 ---
 
 ## License
 
-This repository is licensed under the **Common Sense License (CSL) v1.1**.
+Licensed under the [Common Sense License (CSL) v1.1](https://github.com/shmaplex/csl).
 
-- Full license text: [CSL v1.1 on GitHub](https://github.com/shmaplex/csl)
-- **Summary:** Small-scale and community users can freely use and modify the software. Large-scale commercial users (>$10M annual revenue) must contribute back proportionally to the commons (financially or via labor).
-- Ethical use restrictions: Software may not be used for military, surveillance, labor exploitation, or environmental harm.
-
-To apply the CSL license in your project files, add this header:
+- Small-scale and community users may freely use and modify this software.
+- Large-scale commercial users (>$10M annual revenue) must contribute back proportionally.
+- Ethical use restrictions apply: not for military, surveillance, labor exploitation, or environmental harm.
 
 ```
 Copyright (C) 2025 Shmaplex

@@ -1,38 +1,40 @@
 ---
 name: Bug report
-about: Create a report to help us improve
-title: ''
-labels: ''
+about: Report a problem with firmware, an SDK, or an example
+title: '[bug] '
+labels: bug
 assignees: ''
-
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**Package / device affected**
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+<!-- e.g. "devices/arduino/esp32-sensor", "packages/js-sdk", "examples/basic-sensor" -->
+
+**Describe the bug**
+
+<!-- A clear description of what went wrong. -->
+
+**To reproduce**
+
+1.
+2.
+3.
 
 **Expected behavior**
-A clear and concise description of what you expected to happen.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+<!-- What you expected to happen. -->
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+**Actual behavior**
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+<!-- What actually happened. Include serial monitor output, error messages, or stack traces. -->
+
+**Hardware / environment**
+
+- Device: <!-- e.g. ESP32-WROOM-32, Raspberry Pi 4B -->
+- OS / firmware version: <!-- e.g. Arduino IDE 2.3, Raspberry Pi OS Lite 64-bit -->
+- Language / runtime: <!-- e.g. Node.js 20, Python 3.11 -->
+- xPlant SDK version (if applicable): <!-- e.g. @xplant/sdk 0.1.0 -->
 
 **Additional context**
-Add any other context about the problem here.
+
+<!-- Anything else that might help. Paste logs here — but remove any API keys first. -->

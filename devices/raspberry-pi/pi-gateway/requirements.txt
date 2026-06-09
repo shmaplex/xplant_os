@@ -1,0 +1,3 @@
+requests>=2.31.0
+# Uncomment the line below if reading a real DHT22 via GPIO
+# adafruit-circuitpython-dht>=3.7.0

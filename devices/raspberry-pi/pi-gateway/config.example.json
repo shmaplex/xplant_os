@@ -1,0 +1,12 @@
+{
+  "api_key": "xpk_live_YOUR_KEY_HERE",
+  "device_id": "YOUR_DEVICE_UUID",
+  "xplant_base_url": "https://xplant.shmaplex.com",
+  "sensors": [
+    { "type": "temperature", "unit": "C",  "gpio_pin": 4 },
+    { "type": "humidity",    "unit": "%",  "gpio_pin": 4 }
+  ],
+  "reading_interval_seconds": 60,
+  "heartbeat_interval_seconds": 300,
+  "simulate": false
+}

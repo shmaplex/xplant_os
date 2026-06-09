@@ -1,0 +1,22 @@
+[Unit]
+Description=xPlant Raspberry Pi Gateway
+Documentation=https://github.com/shmaplex/xplant_os/tree/main/devices/raspberry-pi/pi-gateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Adjust this to your actual username and path
+User=pi
+WorkingDirectory=/home/pi/xplant_os/devices/raspberry-pi/pi-gateway
+ExecStart=/home/pi/xplant_os/devices/raspberry-pi/pi-gateway/.venv/bin/python3 gateway.py
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,42 @@
+# ---------------------------------------------------------------------------
+# IMPORTANT: API keys and credentials
+# ---------------------------------------------------------------------------
+# Never commit files containing real credentials.
+# config.h and config.json are personal device configs — keep them local.
+
+# Arduino / ESP32 device config (contains API key, Wi-Fi password)
+devices/arduino/**/config.h
+
+# Raspberry Pi gateway config (contains API key)
+devices/raspberry-pi/**/config.json
+
+# ---------------------------------------------------------------------------
+# Node.js
+# ---------------------------------------------------------------------------
+node_modules/
+packages/js-sdk/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# ---------------------------------------------------------------------------
+# OS / editor
+# ---------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo

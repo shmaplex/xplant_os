@@ -1,0 +1,105 @@
+# xplant-sensor.yaml
+# ====================
+# ESPHome configuration for posting temperature and humidity readings to xPlant.
+#
+# Hardware: ESP32 + DHT22 (change sensor section for other sensors)
+#
+# Usage:
+#   esphome run xplant-sensor.yaml
+#
+# Store credentials in secrets.yaml — never paste real keys into this file.
+# See README.md for the secrets.yaml template.
+
+substitutions:
+  device_name: "xplant-sensor"
+  xplant_base_url: "https://xplant.shmaplex.com"
+  # Override these via secrets.yaml or inline for local testing
+  xplant_api_key: "xpk_live_YOUR_KEY_HERE"
+  xplant_device_id: "YOUR_DEVICE_UUID"
+  reading_interval: "60s"
+  heartbeat_interval: "5min"
+
+esphome:
+  name: ${device_name}
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging to serial monitor
+logger:
+
+# Enable OTA updates (change the password)
+ota:
+  password: "YOUR_OTA_PASSWORD"
+
+wifi:
+  ssid: "YOUR_WIFI_SSID"
+  password: "YOUR_WIFI_PASSWORD"
+  ap:
+    ssid: "${device_name} Fallback"
+    password: "xplantfallback"
+
+captive_portal:
+
+# Enable HTTP requests
+http_request:
+  useragent: "ESPHome xPlant Gateway/1.0"
+  timeout: 10s
+
+# ---------------------------------------------------------------------------
+# Sensors — swap out for your hardware
+# ---------------------------------------------------------------------------
+sensor:
+  - platform: dht
+    model: DHT22
+    pin: GPIO4
+    temperature:
+      name: "Temperature"
+      id: temperature_sensor
+      on_value:
+        then:
+          - http_request.post:
+              url: "${xplant_base_url}/api/v1/sensor-readings"
+              headers:
+                Content-Type: application/json
+                Authorization: "Bearer ${xplant_api_key}"
+              body: >-
+                {
+                  "device_id": "${xplant_device_id}",
+                  "type": "temperature",
+                  "value": ${id(temperature_sensor).state},
+                  "unit": "C"
+                }
+    humidity:
+      name: "Humidity"
+      id: humidity_sensor
+      on_value:
+        then:
+          - http_request.post:
+              url: "${xplant_base_url}/api/v1/sensor-readings"
+              headers:
+                Content-Type: application/json
+                Authorization: "Bearer ${xplant_api_key}"
+              body: >-
+                {
+                  "device_id": "${xplant_device_id}",
+                  "type": "humidity",
+                  "value": ${id(humidity_sensor).state},
+                  "unit": "%"
+                }
+    update_interval: ${reading_interval}
+
+# ---------------------------------------------------------------------------
+# Heartbeat — fires on an interval component
+# ---------------------------------------------------------------------------
+interval:
+  - interval: ${heartbeat_interval}
+    then:
+      - http_request.post:
+          url: "${xplant_base_url}/api/v1/devices/${xplant_device_id}/heartbeat"
+          headers:
+            Content-Type: application/json
+            Authorization: "Bearer ${xplant_api_key}"
+          body: "{}"

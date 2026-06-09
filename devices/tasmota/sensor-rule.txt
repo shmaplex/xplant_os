@@ -1,0 +1,53 @@
+# Tasmota webhook rules for xPlant
+# =================================
+#
+# Prerequisite: Tasmota firmware 12.0 or later for Authorization header support.
+#
+# Before pasting these rules, set your credentials in the Tasmota console:
+#
+#   Backlog Var1 xpk_live_YOUR_KEY_HERE; Var2 YOUR_DEVICE_UUID
+#
+# Then paste each Rule block below and enable it:
+#   Rule1 1
+
+# ---------------------------------------------------------------------------
+# Rule 1: Post temperature reading when AM2301/DHT22 updates
+# (Replace AM2301 with your sensor type if different)
+# ---------------------------------------------------------------------------
+
+Rule1
+  ON AM2301#Temperature DO
+    WebSend [xplant.shmaplex.com/api/v1/sensor-readings]
+      {"device_id":"%Var2%","type":"temperature","value":%value%,"unit":"C"}
+  ENDON
+
+# ---------------------------------------------------------------------------
+# Rule 2: Post humidity reading
+# ---------------------------------------------------------------------------
+
+Rule2
+  ON AM2301#Humidity DO
+    WebSend [xplant.shmaplex.com/api/v1/sensor-readings]
+      {"device_id":"%Var2%","type":"humidity","value":%value%,"unit":"%"}
+  ENDON
+
+# ---------------------------------------------------------------------------
+# Setting the Authorization header (Tasmota 12.x+)
+# Run this once in the console to configure the Bearer token:
+# ---------------------------------------------------------------------------
+
+# WebHeader1 Authorization: Bearer xpk_live_YOUR_KEY_HERE
+
+# ---------------------------------------------------------------------------
+# Heartbeat rule: fires every 5 minutes using a timer
+# ---------------------------------------------------------------------------
+
+# Set timer in console: RuleTimer1 300
+Rule3
+  ON Rules#Timer=1 DO
+    Backlog WebSend [xplant.shmaplex.com/api/v1/devices/%Var2%/heartbeat] {};
+    RuleTimer1 300
+  ENDON
+
+# Enable all rules:
+#   Backlog Rule1 1; Rule2 1; Rule3 1; RuleTimer1 300

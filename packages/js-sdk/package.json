@@ -1,0 +1,32 @@
+{
+  "name": "@xplant/sdk",
+  "version": "0.1.0",
+  "description": "Official JavaScript/TypeScript SDK for the xPlant external API",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
+  },
+  "keywords": ["xplant", "lab", "tissue-culture", "iot", "sdk"],
+  "license": "SEE LICENSE IN ../../LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shmaplex/xplant_os.git",
+    "directory": "packages/js-sdk"
+  },
+  "homepage": "https://xplant.shmaplex.com"
+}
