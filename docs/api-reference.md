@@ -25,7 +25,7 @@ Record a sensor reading from a physical device.
   "type": "temperature",
   "value": 24.5,
   "unit": "C",
-  "timestamp": "2025-01-01T12:00:00Z"
+  "recorded_at": "2025-01-01T12:00:00Z"
 }
 ```
 
@@ -46,7 +46,7 @@ Record a sensor reading from a physical device.
   "type": "temperature",
   "value": 24.5,
   "unit": "C",
-  "timestamp": "2025-01-01T12:00:00.000Z",
+  "recorded_at": "2025-01-01T12:00:00.000Z",
   "created_at": "2025-01-01T12:00:00.123Z"
 }
 ```
@@ -69,7 +69,7 @@ Log a discrete event from a device (button press, door open, scan, etc.).
     "barcode": "XPL-2025-001",
     "scanner_mode": "transfer"
   },
-  "timestamp": "2025-01-01T12:00:00Z"
+  "recorded_at": "2025-01-01T12:00:00Z"
 }
 ```
 
@@ -88,7 +88,7 @@ Log a discrete event from a device (button press, door open, scan, etc.).
   "device_id": "uuid",
   "event_type": "scan",
   "payload": { "barcode": "XPL-2025-001", "scanner_mode": "transfer" },
-  "timestamp": "2025-01-01T12:00:00.000Z",
+  "recorded_at": "2025-01-01T12:00:00.000Z",
   "created_at": "2025-01-01T12:00:00.123Z"
 }
 ```

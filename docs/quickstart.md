@@ -43,7 +43,7 @@ curl -X POST https://xplant.shmaplex.com/api/v1/sensor-readings \
     "type": "temperature",
     "value": 24.5,
     "unit": "C",
-    "timestamp": "2025-01-01T12:00:00Z"
+    "recorded_at": "2025-01-01T12:00:00Z"
   }'
 ```
 
