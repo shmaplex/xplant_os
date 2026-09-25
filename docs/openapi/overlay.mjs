@@ -17,7 +17,16 @@
  * notes: Markdown shown under the description (for documented endpoints, only
  *        its links to guides are kept).
  * sdkNote: Markdown about the SDK call, always shown.
+ * sdkSince: the SDK release that adds this call; until SDK_VERSION reaches it,
+ *        the page shows fetch instead.
  */
+
+/**
+ * The SDK version npm serves as `latest`. Entries with `sdkSince` above it
+ * show a fetch example (and say which release brings the SDK call) until
+ * this is bumped.
+ */
+export const SDK_VERSION = "0.4.0";
 
 const PLANT_ID = "0b8e2f4c-6a1d-4c3e-9f7a-2d5b8c1e4a90";
 const EXPLANT_ID = "7c1d9e2a-3b4f-4a5c-8d6e-1f2a3b4c5d6e";
@@ -94,25 +103,29 @@ export const overlay = {
     title: "Create a plant",
     resultVar: "plant",
     idempotencyKey: "import-2026-09-25-row-0412",
-    sdk: null,
+    sdk: "const { plant, warning } = await client.plants.create(\n  $BODY,\n  { idempotencyKey: \"import-2026-09-25-row-0412\" },\n);\nif (warning) console.warn(warning); // the first stage couldn't be recorded",
+    sdkSince: "0.5.0",
   },
   "PATCH /api/v1/plants/{id}": {
     title: "Update a plant",
     path: { id: PLANT_ID },
     resultVar: "plant",
-    sdk: null,
+    sdk: `const plant = await client.plants.update(\n  "${PLANT_ID}",\n  $BODY,\n);`,
+    sdkSince: "0.5.0",
   },
   "POST /api/v1/explants": {
     title: "Create an explant",
     resultVar: "explant",
     idempotencyKey: "import-2026-09-25-line-0412",
-    sdk: null,
+    sdk: "const explant = await client.explants.create(\n  $BODY,\n  { idempotencyKey: \"import-2026-09-25-line-0412\" },\n);",
+    sdkSince: "0.5.0",
   },
   "PATCH /api/v1/explants/{id}": {
     title: "Update an explant",
     path: { id: EXPLANT_ID },
     resultVar: "explant",
-    sdk: null,
+    sdk: `const explant = await client.explants.update(\n  "${EXPLANT_ID}",\n  $BODY,\n);`,
+    sdkSince: "0.5.0",
   },
 
   // ── Transfers and stages ──────────────────────────────────────────────────
@@ -435,24 +448,27 @@ export const overlay = {
   },
 
   // ── Contaminations ────────────────────────────────────────────────────────
-  // Not in the SDK yet (sdk: null): pages show a fetch example instead.
+  // In the SDK from 0.5.0 (sdkSince); pages show fetch until SDK_VERSION reaches it.
   "GET /api/v1/contaminations": {
     title: "List contaminations",
     resultVar: "contaminations",
     query: { explant_id: EXPLANT_ID, status: "active" },
-    sdk: null,
+    sdk: "const contaminations = await client.contaminations.list($QUERY);",
+    sdkSince: "0.5.0",
   },
   "POST /api/v1/contaminations": {
     title: "Record a contamination",
     resultVar: "contamination",
     idempotencyKey: "scanner-3-line-0412-contamination",
-    sdk: null,
+    sdk: "const contamination = await client.contaminations.create(\n  $BODY,\n  { idempotencyKey: \"scanner-3-line-0412-contamination\" },\n);",
+    sdkSince: "0.5.0",
   },
   "GET /api/v1/contaminations/{id}": {
     title: "Get a contamination",
     path: { id: CONTAMINATION_ID },
     resultVar: "contamination",
-    sdk: null,
+    sdk: `const contamination = await client.contaminations.get("${CONTAMINATION_ID}");`,
+    sdkSince: "0.5.0",
   },
 
   // ── Comments ──────────────────────────────────────────────────────────────
@@ -460,13 +476,15 @@ export const overlay = {
     title: "List comments",
     resultVar: "comments",
     query: { entity_type: "explant", entity_id: EXPLANT_ID },
-    sdk: null,
+    sdk: "const comments = await client.comments.list($QUERY);",
+    sdkSince: "0.5.0",
   },
   "POST /api/v1/comments": {
     title: "Add a comment",
     resultVar: "comment",
     idempotencyKey: "bench-3-line-0412-note-1",
-    sdk: null,
+    sdk: "const comment = await client.comments.create(\n  $BODY,\n  { idempotencyKey: \"bench-3-line-0412-note-1\" },\n);",
+    sdkSince: "0.5.0",
   },
 
   // ── Media files ───────────────────────────────────────────────────────────
@@ -474,19 +492,22 @@ export const overlay = {
     title: "List media files",
     resultVar: "assets",
     query: { target: "explant", target_id: EXPLANT_ID },
-    sdk: null,
+    sdk: "const assets = await client.assets.list($QUERY);",
+    sdkSince: "0.5.0",
   },
   "POST /api/v1/assets": {
     title: "Attach a media file",
     resultVar: "asset",
     idempotencyKey: "camera-2-line-0412-photo-1",
-    sdk: null,
+    sdk: "const asset = await client.assets.create(\n  $BODY,\n  { idempotencyKey: \"camera-2-line-0412-photo-1\" },\n);",
+    sdkSince: "0.5.0",
   },
   "GET /api/v1/assets/{id}": {
     title: "Get a media file",
     path: { id: ASSET_ID },
     resultVar: "asset",
-    sdk: null,
+    sdk: `const asset = await client.assets.get("${ASSET_ID}");`,
+    sdkSince: "0.5.0",
   },
 
   // ── Media recipes ─────────────────────────────────────────────────────────
@@ -494,25 +515,29 @@ export const overlay = {
     title: "List media recipes",
     resultVar: "recipes",
     query: { status: "published" },
-    sdk: null,
+    sdk: "const recipes = await client.mediaRecipes.list($QUERY);",
+    sdkSince: "0.5.0",
   },
   "POST /api/v1/media-recipes": {
     title: "Create a media recipe",
     resultVar: "recipe",
     idempotencyKey: "recipes-sync-half-ms-v3",
-    sdk: null,
+    sdk: "const recipe = await client.mediaRecipes.create(\n  $BODY,\n  { idempotencyKey: \"recipes-sync-half-ms-v3\" },\n);",
+    sdkSince: "0.5.0",
   },
   "GET /api/v1/media-recipes/{id}": {
     title: "Get a media recipe",
     path: { id: RECIPE_ID },
     resultVar: "recipe",
-    sdk: null,
+    sdk: `const recipe = await client.mediaRecipes.get("${RECIPE_ID}");`,
+    sdkSince: "0.5.0",
   },
   "PATCH /api/v1/media-recipes/{id}": {
     title: "Update a media recipe",
     path: { id: RECIPE_ID },
     resultVar: "recipe",
-    sdk: null,
+    sdk: `const recipe = await client.mediaRecipes.update(\n  "${RECIPE_ID}",\n  $BODY,\n);`,
+    sdkSince: "0.5.0",
   },
 
   // ── Equipment ─────────────────────────────────────────────────────────────
@@ -520,20 +545,23 @@ export const overlay = {
     title: "List equipment",
     resultVar: "equipment",
     query: { category: "autoclave_pressure_cooker", status: "active" },
-    sdk: null,
+    sdk: "const equipment = await client.equipment.list($QUERY);",
+    sdkSince: "0.5.0",
   },
   "GET /api/v1/equipment/{id}": {
     title: "Get a piece of equipment",
     path: { id: EQUIPMENT_ID },
     resultVar: "item",
-    sdk: null,
+    sdk: `const item = await client.equipment.get("${EQUIPMENT_ID}");`,
+    sdkSince: "0.5.0",
   },
   "GET /api/v1/equipment/{id}/events": {
     title: "List equipment events",
     path: { id: EQUIPMENT_ID },
     resultVar: "events",
     query: { kind: "calibration" },
-    sdk: null,
+    sdk: `const events = await client.equipment.listEvents("${EQUIPMENT_ID}", $QUERY);`,
+    sdkSince: "0.5.0",
   },
   "POST /api/v1/equipment/{id}/events": {
     slug: "create-equipment-event",
@@ -558,24 +586,28 @@ export const overlay = {
     title: "List culture line prices",
     resultVar: "prices",
     query: { plant_id: PLANT_ID },
-    sdk: null,
+    sdk: "const prices = await client.pricing.listCultureLines($QUERY);",
+    sdkSince: "0.5.0",
   },
   "GET /api/v1/pricing/events": {
     title: "List price changes",
     resultVar: "events",
     query: { plant_id: PLANT_ID, from: "2026-09-01T00:00:00Z" },
-    sdk: null,
+    sdk: "const events = await client.pricing.listEvents($QUERY);",
+    sdkSince: "0.5.0",
   },
   "GET /api/v1/commerce/order-lines": {
     title: "List order lines",
     resultVar: "lines",
     query: { from: "2026-09-01T00:00:00Z", to: "2026-09-25T00:00:00Z" },
-    sdk: null,
+    sdk: "const lines = await client.commerce.listOrderLines($QUERY);",
+    sdkSince: "0.5.0",
   },
   "GET /api/v1/commerce/sell-through": {
     title: "Get sell-through",
     resultVar: "sellThrough",
     query: { from: "2026-09-01T00:00:00Z", to: "2026-09-25T00:00:00Z" },
-    sdk: null,
+    sdk: "const sellThrough = await client.commerce.getSellThrough($QUERY);",
+    sdkSince: "0.5.0",
   },
 };

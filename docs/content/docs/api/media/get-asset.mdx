@@ -20,7 +20,7 @@ curl https://app.xplantpro.com/api/v1/assets/9e1a3c5b-7d9f-4b1d-a3c5-e7f9b1d3f5a
 ```
 
 ```js tab="JavaScript" tab-group="lang"
-// Not in @shmaplex/xplant-sdk yet, so this uses fetch directly.
+// Coming in @shmaplex/xplant-sdk 0.5.0; until then, fetch directly.
 const res = await fetch("https://app.xplantpro.com/api/v1/assets/9e1a3c5b-7d9f-4b1d-a3c5-e7f9b1d3f5a7", {
   method: "GET",
   headers: { Authorization: `Bearer ${process.env.XPLANT_API_KEY}` },

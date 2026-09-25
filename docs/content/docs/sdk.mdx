@@ -135,7 +135,7 @@ The buffer stamps `recorded_at` and `external_id` on each reading, keeps reading
 | `client.sensorReadings` | `list`, `create`, `createBatch`, `buffer` |
 | `client.equipment` | `recordEvent` |
 
-Some newer endpoints aren't in the SDK yet: creating and updating plants and explants, contaminations, comments, media files, media recipes, equipment reads, pricing and sell-through. Their reference pages show a plain `fetch` example instead.
+SDK 0.5.0 adds methods for the newer endpoints: `plants.create` / `update`, `explants.create` / `update`, `contaminations`, `comments`, `assets`, `mediaRecipes`, `equipment.list` / `get` / `listEvents`, `pricing` and `commerce`. Until 0.5.0 is on npm, those endpoints' reference pages show a plain `fetch` example.
 
 A device client can only call `sensorReadings.create`, `sensorReadings.createBatch`, `sensorReadings.buffer`, `devices.heartbeat` and `devices.recordEvent`, and only for its own device.
 

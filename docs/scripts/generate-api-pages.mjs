@@ -14,7 +14,7 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { overlay } from "../openapi/overlay.mjs";
+import { SDK_VERSION, overlay } from "../openapi/overlay.mjs";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const CHECK = process.argv.includes("--check");
@@ -378,8 +378,15 @@ function pythonExample(o) {
   ].join("\n");
 }
 
+/** "0.5.0" > "0.4.0", compared numerically part by part. */
+const versionAbove = (a, b) => {
+  const [x, y] = [a, b].map((v) => v.split(".").map(Number));
+  for (let i = 0; i < 3; i += 1) if ((x[i] ?? 0) !== (y[i] ?? 0)) return (x[i] ?? 0) > (y[i] ?? 0);
+  return false;
+};
+
 /** For endpoints the SDK doesn't cover yet: plain fetch, same shape as the curl example. */
-function fetchExample(o) {
+function fetchExample(o, since) {
   const { url, qs } = exampleUrl(o);
   const token = o.deviceToken ? "XPLANT_DEVICE_TOKEN" : "XPLANT_API_KEY";
   const headers = { Authorization: "__AUTH__" };
@@ -390,7 +397,9 @@ function fetchExample(o) {
   if (body) init.push(`  body: JSON.stringify(${js(body).replace(/\n/g, "\n  ")}),`);
   const result = o.extra.resultVar ?? "data";
   return [
-    "// Not in @shmaplex/xplant-sdk yet, so this uses fetch directly.",
+    since
+      ? `// Coming in @shmaplex/xplant-sdk ${since}; until then, fetch directly.`
+      : "// Not in @shmaplex/xplant-sdk yet, so this uses fetch directly.",
     `const res = await fetch("${qs ? `${url}?${qs}` : url}", {`,
     ...init,
     "});",
@@ -405,6 +414,7 @@ function fetchExample(o) {
 function jsExample(o) {
   const sdk = o.extra.sdk;
   if (sdk === null) return fetchExample(o);
+  if (o.extra.sdkSince && versionAbove(o.extra.sdkSince, SDK_VERSION)) return fetchExample(o, o.extra.sdkSince);
   if (!sdk) {
     errors.push(`${o.key}: overlay has no sdk call (use sdk: null if the SDK doesn't cover it yet)`);
     return "";
