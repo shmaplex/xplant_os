@@ -14,6 +14,20 @@ import { PageActions } from "@/components/page-actions";
 import { SiteFooter } from "@/components/site-footer";
 import { getPageMarkdownUrl, gitConfig, siteUrl } from "@/lib/shared";
 import { source } from "@/lib/source";
+import type { ComponentProps } from "react";
+
+/**
+ * Links inside page content. Files (/llms-full.txt, /openapi.json, *.md)
+ * aren't pages, and client-side navigation to one lands on the 404 page,
+ * so they get a plain anchor; everything else keeps Fumadocs' linking.
+ */
+function contentLink(RelativeLink: ReturnType<typeof createRelativeLink>) {
+  return function ContentLink(props: ComponentProps<"a">) {
+    const href = props.href ?? "";
+    if (href.startsWith("/") && /\.[a-z0-9]+$/i.test(href.split("#")[0])) return <a {...props} />;
+    return <RelativeLink {...props} />;
+  };
+}
 
 export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
   const params = await props.params;
@@ -31,7 +45,7 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
       {endpoint ? <EndpointHeader endpoint={endpoint} /> : null}
       <PageActions markdownPath={markdownPath} markdownUrl={`${siteUrl}${markdownPath}`} />
       <DocsBody>
-        <MDX components={getMDXComponents({ a: createRelativeLink(source, page) })} />
+        <MDX components={getMDXComponents({ a: contentLink(createRelativeLink(source, page)) })} />
       </DocsBody>
       {/* API pages are generated from the spec, so there is nothing to edit by hand. */}
       {endpoint ? null : (

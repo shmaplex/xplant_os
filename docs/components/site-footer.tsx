@@ -46,7 +46,10 @@ function FooterAnchor({ link, className }: { link: FooterLink; className?: strin
     "rounded-sm text-fd-muted-foreground transition-colors hover:text-fd-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring",
     className,
   );
-  return link.external ? (
+  // Files such as /llms-full.txt aren't pages: client-side navigation to them
+  // lands on the 404 page, so they get a plain anchor like external links.
+  const isFile = /\.[a-z0-9]+$/i.test(link.href);
+  return link.external || isFile ? (
     <a href={link.href} className={cls} {...(link.href.startsWith("http") ? { target: "_blank", rel: "noopener" } : {})}>
       {link.text}
     </a>
