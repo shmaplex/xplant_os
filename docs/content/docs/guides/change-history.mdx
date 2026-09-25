@@ -50,13 +50,13 @@ for entity in ("plant", "explant"):
 ```
 
 ```js tab="JavaScript" tab-group="lang"
-import { XPlantClient, paginate } from "@shmaplex/xplant-sdk";
+import { XPlantClient } from "@shmaplex/xplant-sdk";
 
 const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY, retry: true });
 
 async function pull(entity, since) {
   let cursor = since;
-  for await (const event of paginate((page) => client.events.list({ entity, since, ...page }))) {
+  for await (const event of client.events.list({ entity, since })) {
     await applyToMyCopy(entity, event); // your code
     cursor = event.created_at;
   }
@@ -75,5 +75,5 @@ curl "https://app.xplantpro.com/api/v1/events?entity=plant&since=2026-09-24T00:0
 ## Tips
 
 - **Store the cursor only after you've applied the events.** If your job crashes halfway, the next run picks up where the last successful one ended.
-- **Overlap slightly, then de-duplicate.** Several events can share a timestamp, and an exclusive `since` would skip any you hadn't reached yet. Pass a `since` a little earlier than your last `created_at` (a few seconds is plenty) and ignore events whose id you've already applied.
+- **Overlap, then de-duplicate.** Events written together share a timestamp, and a write can land a moment after its timestamp. Start `since` about a minute before the newest `created_at` you've seen, and store events keyed by their id so the overlap is harmless.
 - **Run it on a schedule** (every few minutes to hourly) rather than in a tight loop. It's well inside the [rate limits](/docs/rate-limits) either way.

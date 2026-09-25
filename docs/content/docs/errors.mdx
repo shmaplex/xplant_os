@@ -18,6 +18,7 @@ A failed request answers with a non-2xx status and this body:
 | --- | --- | --- |
 | `400` | `VALIDATION_ERROR` | The `Idempotency-Key` header is malformed. Or: The request body is not valid JSON. |
 | `401` | `UNAUTHORIZED` | The key is missing, malformed or revoked, or its owner is no longer a member of the workspace. |
+| `402` | `DEVICE_LIMIT_REACHED` | Registering a device would go past the plan's device allowance. |
 | `402` | `PAID_PLAN_REQUIRED` | The workspace is not on a paid plan. The API is available on paid plans. |
 | `403` | `DEVICE_TOKEN_NOT_ACCEPTED` | A device token was sent; this operation needs a workspace API key. |
 | `403` | `DEVICE_TOKEN_WRONG_DEVICE` | A device token was used to write about a device other than its own. |
@@ -37,7 +38,8 @@ A failed request answers with a non-2xx status and this body:
 | --- | --- | --- |
 | `VALIDATION_ERROR` | No | Fix the request. The `error` text names the first field that failed, e.g. `title: title is required`. |
 | `UNAUTHORIZED` | No | Check the key. It may be mistyped or revoked, or its creator may have left the workspace. |
-| `PAID_PLAN_REQUIRED` | No | The workspace needs a paid plan to use the API. |
+| `PAID_PLAN_REQUIRED` | No | The workspace's plan doesn't include the API. It's included with xPlant+ Teams and Enterprise; see [plans](https://www.xplantpro.com/en/subscriptions). |
+| `DEVICE_LIMIT_REACHED` | No | Registering this device would go past your plan's device allowance. Retire a device you no longer use, or see [plans](https://www.xplantpro.com/en/subscriptions). |
 | `FORBIDDEN` | No | Give the integration a key with the scope named in `error`. |
 | `DEVICE_TOKEN_NOT_ACCEPTED` | No | This endpoint needs a workspace key. Device tokens only write readings, events and heartbeats. |
 | `DEVICE_TOKEN_WRONG_DEVICE` | No | The token belongs to a different device than the `device_id` you sent. |

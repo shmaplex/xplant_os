@@ -9,6 +9,8 @@ description: Register a device, give it a device token, and post batched sensor 
 
 From your own computer, with a workspace key: [register the device and create its token](/docs/device-tokens#setting-up-a-device). Put the device id and the `xpd_` token on the device. The device never sees a workspace key.
 
+How many devices you can register depends on your [plan](https://www.xplantpro.com/en/subscriptions); registering past the allowance answers `402 DEVICE_LIMIT_REACHED`.
+
 A gateway that reads several probes is usually one device posting several reading types. If you'd rather see each probe as its own device, register each one and give the gateway a token per device.
 
 ## 2. Post readings, in batches
@@ -145,7 +147,7 @@ while True:
     time.sleep(1)
 ```
 
-The [Raspberry Pi gateway](https://github.com/shmaplex/xplant_os/tree/main/devices/raspberry-pi/pi-gateway) in this repository is a complete, installable version.
+The [Raspberry Pi gateway](https://github.com/shmaplex/xplant_os/tree/main/devices/raspberry-pi/pi-gateway) in this repository is a complete, installable version. In JavaScript, the SDK's [`sensorReadings.buffer()`](/docs/sdk#buffering-sensor-readings-on-a-device) does all of this for you.
 
 ## 3. Heartbeats and events
 

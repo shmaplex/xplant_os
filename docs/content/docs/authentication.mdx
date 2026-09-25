@@ -18,6 +18,18 @@ There are two kinds of credential, and they are not interchangeable.
 | Lives on | A server, a script, an integration you run | The device itself: a Raspberry Pi, a gateway, a microcontroller |
 | Created in | Settings → Integrations → API Keys | With the API, using a workspace key (see [Device tokens](/docs/device-tokens)) |
 
+## Plans and access
+
+The xPlant API is included with **xPlant+ Teams** and **Enterprise**. On other plans, requests answer `402 PAID_PLAN_REQUIRED`; see [plans](https://www.xplantpro.com/en/subscriptions) to upgrade.
+
+Your key unlocks what your plan allows:
+
+- **Scopes decide what a key can reach.** Grant the least it needs, and give each integration its own key.
+- **Your plan's allowances still apply.** Registering devices beyond your plan's allowance, for example, answers `402 DEVICE_LIMIT_REACHED`. See [plans](https://www.xplantpro.com/en/subscriptions) for what each plan includes.
+- **A key acts only in the workspace it was created in**, and only while the person who created it is still a member there.
+
+Enterprise customers can scope organisation-specific integrations and API requirements with us: [support@xplantpro.com](mailto:support@xplantpro.com).
+
 ## Creating a key
 
 1. Open **Settings → Integrations → [API Keys](https://app.xplantpro.com/settings/integrations/api-keys)** in xPlant.
@@ -46,7 +58,7 @@ Call [`GET /me`](/docs/api/account/get-me) to see which key you're using and eve
 | You get | Because |
 | --- | --- |
 | `401 UNAUTHORIZED` | The key is missing, mistyped or revoked, or the person who created it has left the workspace. |
-| `402 PAID_PLAN_REQUIRED` | The workspace is no longer on a paid plan. The API is available on paid plans. |
+| `402 PAID_PLAN_REQUIRED` | The workspace's plan doesn't include the API. It's included with xPlant+ Teams and Enterprise; see [plans](https://www.xplantpro.com/en/subscriptions). |
 | `403 FORBIDDEN` | The key is valid but lacks the scope this endpoint needs. The `error` text names it, e.g. `Missing scope: write:tasks`. |
 | `403 DEVICE_TOKEN_NOT_ACCEPTED` | You sent a device token to an endpoint that needs a workspace key. |
 

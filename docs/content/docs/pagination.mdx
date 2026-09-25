@@ -26,7 +26,8 @@ curl "https://app.xplantpro.com/api/v1/…?limit=200&cursor=eyJ…" \
 
 - Treat the cursor as opaque: don't parse it, build it or store it for long.
 - Keep the same filters and `limit` for every page of one walk.
-- `cursor` can't be combined with `offset`.
+- `cursor` can't be combined with an `offset` above 0; that answers `422`.
+- A cursor that has expired or no longer applies answers `422 INVALID_CURSOR`: start again from the first page.
 
 A cursor picks up exactly where the last page ended, so records created while you're paging don't shift what you see.
 
@@ -44,19 +45,29 @@ Offsets count records at the moment you ask. If a record is added or removed ahe
 
 ## In code
 
-The SDK's `paginate` handles both kinds, so your loop doesn't change when a list moves to cursors:
+The SDK's list methods handle both kinds, so your code doesn't change when a list moves to cursors. Awaiting a list gives you one page; iterating it gives you every row:
 
 ```js tab="JavaScript" tab-group="lang"
-import { XPlantClient, paginate } from "@shmaplex/xplant-sdk";
+import { XPlantClient } from "@shmaplex/xplant-sdk";
 
 const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
 
-for await (const plant of paginate((page) => client.plants.list(page))) {
+// One page, as an array.
+const firstPage = await client.plants.list({ limit: 200 });
+
+// Every row, fetched a page at a time as you go.
+for await (const plant of client.plants.list()) {
   console.log(plant.id);
 }
 
-// Extra filters go alongside the page:
-for await (const event of paginate((page) => client.events.list({ entity: "explant", ...page }))) {
+// Page by page, with a cursor you can save and resume from later.
+for await (const { data, nextCursor, hasMore } of client.explants.list().pages()) {
+  await save(data, nextCursor);
+}
+const resumed = await client.explants.list({ cursor: savedCursor });
+
+// Filters go in the same object:
+for await (const event of client.events.list({ entity: "explant" })) {
   // …
 }
 ```

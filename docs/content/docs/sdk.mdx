@@ -1,13 +1,15 @@
 ---
 title: JavaScript SDK
-description: "@shmaplex/xplant-sdk: a typed client for Node.js and modern browsers, with retries, idempotency and paging built in."
+description: "@shmaplex/xplant-sdk: a typed server-side client for Node.js 18+ and other fetch runtimes, with retries, timeouts, idempotency and paging built in."
 ---
 
 ```bash
 npm install @shmaplex/xplant-sdk
 ```
 
-The source, issues and full README live at [github.com/shmaplex/xplant_sdk](https://github.com/shmaplex/xplant_sdk). Every endpoint page in the [API reference](/docs/api) shows the SDK call next to curl and Python.
+The source, issues and full reference live at **[github.com/shmaplex/xplant_sdk](https://github.com/shmaplex/xplant_sdk#readme)**. Every endpoint page in the [API reference](/docs/api) shows the SDK call next to curl and Python.
+
+The SDK runs on **Node.js 18+** and any runtime with standard `fetch`: Deno, Bun, edge and serverless functions. **Call the API from your server, not a web page.** The API doesn't send CORS headers, and keys don't belong in front-end code.
 
 ## Create a client
 
@@ -27,32 +29,59 @@ const device = new XPlantClient({ deviceToken: process.env.XPLANT_DEVICE_TOKEN }
 | `deviceToken` | A device token (`xpd_…`). Give exactly one of `apiKey` or `deviceToken`. The client refuses a `deviceToken` that doesn't start with `xpd_`, so a workspace key can't end up on a device by mistake. |
 | `baseUrl` | Defaults to `https://app.xplantpro.com`. You shouldn't need to change it. |
 | `retry` | `true`, or `{ maxRetries, baseDelayMs, maxDelayMs }`. Off unless set. |
-| `fetch` | Your own `fetch`, for older runtimes or testing. |
+| `timeout` | Milliseconds per attempt. Defaults to 60 seconds; `0` means no timeout. Can also be set per call. |
+| `fetch` | Your own `fetch`, for testing or unusual runtimes. |
+
+## Lists and paging
+
+Awaiting a list method gives you one page, as an array. Iterating it gives you every row, fetched a page at a time as you go:
+
+```js
+// One page.
+const plants = await client.plants.list({ limit: 200 });
+
+// Every row.
+for await (const plant of client.plants.list()) {
+  console.log(plant.id);
+}
+
+// Page by page, with a cursor you can save and resume from.
+for await (const { data, nextCursor, hasMore } of client.explants.list().pages()) {
+  await save(data, nextCursor);
+}
+const next = await client.explants.list({ cursor: savedCursor });
+```
+
+This works the same whether a list pages by cursor or by offset. See [Pagination](/docs/pagination).
 
 ## Errors
 
-Every API failure throws an `XPlantError`:
-
 ```js
-import { XPlantError } from "@shmaplex/xplant-sdk";
+import { XPlantError, XPlantConnectionError, XPlantTimeoutError } from "@shmaplex/xplant-sdk";
 
 try {
   await client.tasks.create({ title: "Check jar 47" });
 } catch (err) {
   if (err instanceof XPlantError) {
+    // The API answered with an error.
     console.log(err.status, err.code, err.message, err.retryAfter);
+  } else if (err instanceof XPlantTimeoutError) {
+    // No answer within the timeout.
+    console.log(`Timed out after ${err.timeout} ms`);
+  } else if (err instanceof XPlantConnectionError) {
+    // Never got an answer; the underlying fetch error is on err.cause.
   }
 }
 ```
 
-Branch on `err.code`. `err.message` includes the API's `error` text, which may be reworded. A request that never got a response (a network failure) rejects with the underlying fetch error, not an `XPlantError`.
+Branch on `err.code`. `err.message` includes the API's `error` text, which may be reworded. `XPlantTimeoutError` is a kind of `XPlantConnectionError`, so one check covers both.
 
 ## Retries
 
 With `retry` on, the client:
 
 - waits out `Retry-After` on `429 RATE_LIMIT_EXCEEDED` and `409 IDEMPOTENCY_IN_FLIGHT`, up to `maxDelayMs`;
-- backs off exponentially on `502`, `503`, `504` and network errors, for reads and for writes that are safe to replay;
+- backs off exponentially on `502`, `503`, `504` and connection errors, for reads and for writes that are safe to replay;
 - on endpoints that honour [idempotency](/docs/idempotency), generates an `Idempotency-Key` if you didn't pass one, and reuses it across its own attempts.
 
 ## Idempotency
@@ -63,15 +92,26 @@ Pass `{ idempotencyKey }` as the last argument to any write:
 await client.sopRuns.start({ sop_id: sopId }, { idempotencyKey: "station-3-wk38-start" });
 ```
 
-## Paging
+## Buffering sensor readings on a device
+
+For a device posting readings continuously, the buffer batches, retries and de-duplicates for you:
 
 ```js
-import { paginate } from "@shmaplex/xplant-sdk";
+const device = new XPlantClient({ deviceToken: process.env.XPLANT_DEVICE_TOKEN });
 
-for await (const plant of paginate((page) => client.plants.list(page))) {
-  console.log(plant.id);
-}
+const buffer = device.sensorReadings.buffer({
+  flushIntervalMs: 30_000,
+  maxBatch: 500,
+  onError: (err) => console.error(err),
+});
+
+buffer.add({ device_id: process.env.XPLANT_DEVICE_ID, type: "temperature", value: 23.4, unit: "C" });
+
+// On shutdown, send what's left:
+await buffer.close();
 ```
+
+It stamps `recorded_at` and `external_id` on each reading, keeps readings through outages (up to 10,000), and drops and reports readings that are invalid. The queue is held in memory only, so readings still queued when the process dies are lost. See [Sensors and devices](/docs/guides/sensors-and-devices).
 
 ## Resources
 
@@ -90,10 +130,10 @@ for await (const plant of paginate((page) => client.plants.list(page))) {
 | `client.sopRuns` | `start`, `get`, `recordStepEvent`, `recordMeasurement` |
 | `client.labels` | `resolve`, `recordScan` |
 | `client.devices` | `list`, `get`, `register`, `heartbeat`, `listTokens`, `createToken`, `recordEvent` |
-| `client.sensorReadings` | `list`, `create`, `createBatch` |
+| `client.sensorReadings` | `list`, `create`, `createBatch`, `buffer` |
 | `client.equipment` | `recordEvent` |
 
-A device client can only call `sensorReadings.create`, `sensorReadings.createBatch`, `devices.heartbeat` and `devices.recordEvent`, and only for its own device.
+A device client can only call `sensorReadings.create`, `sensorReadings.createBatch`, `sensorReadings.buffer`, `devices.heartbeat` and `devices.recordEvent`, and only for its own device.
 
 ## Other languages
 

@@ -8,6 +8,8 @@ endpoint: {"method":"POST","path":"/api/v1/devices","scopes":["write:devices"],"
 
 Next, [create a device token](/docs/api/devices/create-device-token) for it. The device should carry that token, never a workspace key.
 
+Registering past your plan's device allowance answers `402 DEVICE_LIMIT_REACHED`.
+
 > **Full schema coming soon.** The complete request and response schema for this endpoint is being published. The example below shows a typical call.
 
 ## Example

@@ -320,7 +320,8 @@ export const overlay = {
     resultVar: "device",
     body: { name: "Grow room Pi", type: "gateway", hardware: "Raspberry Pi 4B" },
     sdk: "const device = await client.devices.register($BODY);",
-    notes: "Next, [create a device token](/docs/api/devices/create-device-token) for it. The device should carry that token, never a workspace key.",
+    notes:
+      "Next, [create a device token](/docs/api/devices/create-device-token) for it. The device should carry that token, never a workspace key.\n\nRegistering past your plan's device allowance answers `402 DEVICE_LIMIT_REACHED`.",
   },
   "POST /api/v1/devices/{deviceId}/heartbeat": {
     slug: "send-heartbeat",

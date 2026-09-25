@@ -438,7 +438,7 @@ function errorsSection(o) {
     rows.push([`\`${status}\``, codes.map((c) => `\`${c}\``).join(", ") || "—", cell(when)]);
   }
   const also = [];
-  if (!listed.has("PAID_PLAN_REQUIRED")) also.push("`402 PAID_PLAN_REQUIRED` if the key's owner no longer has a paid workspace");
+  if (!listed.has("PAID_PLAN_REQUIRED")) also.push("`402 PAID_PLAN_REQUIRED` if the workspace's plan doesn't include the API");
   if (!listed.has("RATE_LIMIT_EXCEEDED")) also.push("`429 RATE_LIMIT_EXCEEDED` over the [rate limit](/docs/rate-limits)");
   if (o.deviceToken && !listed.has("DEVICE_TOKEN_WRONG_DEVICE"))
     also.push("`403 DEVICE_TOKEN_WRONG_DEVICE` if a device token writes about another device");
@@ -725,6 +725,7 @@ files.set(
 
 /** Codes the API returns that the spec doesn't declare yet (their endpoints are still undocumented). */
 const KNOWN_CODES = [
+  { status: "402", code: "DEVICE_LIMIT_REACHED", when: "Registering a device would go past the plan's device allowance." },
   { status: "409", code: "SOP_RUN_NOT_EFFECTIVE", when: "The SOP has no version in force, so it can't be run yet." },
   { status: "409", code: "SOP_RUN_CLOSED", when: "The run is completed; its record can't change." },
 ];

@@ -134,9 +134,7 @@ curl -X PATCH "https://app.xplantpro.com/api/v1/tasks/$TASK_ID" \
 List tasks earliest-due first, optionally by column or assignee:
 
 ```js tab="JavaScript" tab-group="lang"
-import { paginate } from "@shmaplex/xplant-sdk";
-
-for await (const task of paginate((page) => client.tasks.list({ status: "todo", ...page }))) {
+for await (const task of client.tasks.list({ status: "todo" })) {
   console.log(task.due_date, task.priority, task.title);
 }
 ```
