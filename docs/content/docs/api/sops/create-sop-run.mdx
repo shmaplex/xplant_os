@@ -59,6 +59,9 @@ const run = await client.sopRuns.start(
   },
   { idempotencyKey: "station-3-wk38-start" },
 );
+if (run.trainingWarning) {
+  // e.g. { qualification: "expiring", expires_on: "2026-10-01" }: show it to the technician
+}
 ```
 
 ```python tab="Python" tab-group="lang"

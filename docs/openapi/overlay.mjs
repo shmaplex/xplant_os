@@ -26,7 +26,7 @@
  * show a fetch example (and say which release brings the SDK call) until
  * this is bumped.
  */
-export const SDK_VERSION = "0.6.0";
+export const SDK_VERSION = "0.6.1";
 
 const PLANT_ID = "0b8e2f4c-6a1d-4c3e-9f7a-2d5b8c1e4a90";
 const EXPLANT_ID = "7c1d9e2a-3b4f-4a5c-8d6e-1f2a3b4c5d6e";
@@ -277,7 +277,7 @@ export const overlay = {
     resultVar: "run",
     idempotencyKey: "station-3-wk38-start",
     body: { sop_id: SOP_ID, batch_code: "WK-38" },
-    sdk: 'const run = await client.sopRuns.start(\n  $BODY,\n  { idempotencyKey: "station-3-wk38-start" },\n);',
+    sdk: 'const run = await client.sopRuns.start(\n  $BODY,\n  { idempotencyKey: "station-3-wk38-start" },\n);\nif (run.trainingWarning) {\n  // e.g. { qualification: "expiring", expires_on: "2026-10-01" }: show it to the technician\n}',
     notes:
       "A run always follows the version in force, and you can't name a different one. An SOP with no version in force answers `409 SOP_RUN_NOT_EFFECTIVE`. See [Run an SOP from a bench station](/docs/guides/sop-runs).",
   },

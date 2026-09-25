@@ -57,6 +57,10 @@ const run = await client.sopRuns.start(
   { sop_id: sopId, batch_code: "WK-38" },
   { idempotencyKey: "station-3-wk38-start" },
 );
+if (run.trainingWarning) {
+  // { qualification: "untrained" | "expired" | "revoked" | "expiring", expires_on }
+  showWarning(run.trainingWarning); // your station's UI
+}
 ```
 
 ```python tab="Python" tab-group="lang"

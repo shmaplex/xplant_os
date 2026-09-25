@@ -9,7 +9,7 @@ npm install @shmaplex/xplant-sdk
 
 The source, issues and full reference live at **[github.com/shmaplex/xplant_sdk](https://github.com/shmaplex/xplant_sdk#readme)**. Every endpoint page in the [API reference](/docs/api) shows the SDK call next to curl and Python.
 
-These docs match **@shmaplex/xplant-sdk 0.6.0**. The SDK runs on **Node.js 18+** and any runtime with standard `fetch`: Deno, Bun, edge and serverless functions. **Call the API from your server, not a web page.** The API doesn't send CORS headers, and keys don't belong in front-end code.
+These docs match **@shmaplex/xplant-sdk 0.6.1**. The SDK runs on **Node.js 18+** and any runtime with standard `fetch`: Deno, Bun, edge and serverless functions. **Call the API from your server, not a web page.** The API doesn't send CORS headers, and keys don't belong in front-end code.
 
 ## Create a client
 
@@ -123,7 +123,7 @@ buffer.add({ device_id: process.env.XPLANT_DEVICE_ID, type: "temperature", value
 await buffer.close();
 ```
 
-`sensorReadings.create()` resolves to the stored reading, or to `null` when the reading duplicated one already stored (same device, `external_id` and `recorded_at`).
+`sensorReadings.create()` resolves with the stored reading, including when it duplicated one already stored (nothing new is written). `devices.recordEvent()` takes an optional `external_id` and behaves the same way. The `meta.duplicate` flag that marks a repeat is in the response envelope; call `client.requestEnvelope()` when you need `meta`.
 
 The buffer stamps `recorded_at` and `external_id` on each reading, keeps readings through outages (up to 10,000), and drops and reports readings that are invalid. The queue is held in memory only, so readings still queued when the process dies are lost. See [Sensors and devices](/docs/guides/sensors-and-devices).
 
