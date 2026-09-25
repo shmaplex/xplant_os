@@ -4094,7 +4094,7 @@
           "Account"
         ],
         "summary": "Get the calling key",
-        "description": "Who the calling key is: its name, the workspace it acts in, and every scope it holds. Make this the first call an integration makes — it confirms the key works and tells you in one answer what it may do, instead of one `403` at a time.\n\nIt needs no scope, and it returns nothing about the workspace beyond its id.",
+        "description": "Who the calling key is: its name, the workspace it acts in, the scopes it holds, and which of them it can use right now. Make this the first call an integration makes: it confirms the key works and tells you in one answer what it may do, instead of one `403` at a time.\n\nA key never does more than its owner can in xPlant. `effectiveScopes` drops any scope above the owner's current role, and on a plan that includes connected devices only (`apiAccess: \"devices\"`) it keeps just the device scopes.\n\nIt needs no scope, and it returns nothing about the workspace beyond its id.",
         "security": [
           {
             "bearerAuth": []
@@ -4143,6 +4143,13 @@
                       "read:transfers",
                       "write:transfers"
                     ],
+                    "effectiveScopes": [
+                      "read:plants",
+                      "read:transfers",
+                      "write:transfers"
+                    ],
+                    "role": "member",
+                    "apiAccess": "full",
                     "workspace": {
                       "id": "8c2d4f6a-1b3e-4a5c-9d7e-0f1a2b3c4d5e"
                     },
@@ -11879,7 +11886,26 @@
             "items": {
               "type": "string"
             },
-            "description": "Every scope the key holds, such as `read:plants` or `write:transfers`. Check here before calling rather than discovering a missing scope from a `403`."
+            "description": "Every scope the key was created with, such as `read:plants` or `write:transfers`."
+          },
+          "effectiveScopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The scopes the key can use right now: its scopes, capped at what its owner's current role may do in xPlant and at what the workspace's plan includes. Check here before calling rather than discovering a limit from a `403` or a `402`."
+          },
+          "role": {
+            "type": "string",
+            "description": "The key owner's role in the workspace as of this request: `owner`, `admin`, `manager`, `member`, `viewer` or `guest`. A key never does more than this role can in xPlant."
+          },
+          "apiAccess": {
+            "type": "string",
+            "enum": [
+              "full",
+              "devices"
+            ],
+            "description": "`full` when the workspace's plan includes the API (xPlant+ Teams and Enterprise). `devices` on plans that include connected devices only: the key can register devices, manage their tokens, and post their readings and events."
           },
           "workspace": {
             "type": "object",
@@ -11916,6 +11942,9 @@
         "required": [
           "key",
           "scopes",
+          "effectiveScopes",
+          "role",
+          "apiAccess",
           "workspace",
           "user"
         ]

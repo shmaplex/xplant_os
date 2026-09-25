@@ -9,7 +9,7 @@ A failed request answers with a non-2xx status and this body:
 { "ok": false, "data": null, "error": "Missing scope: write:tasks", "code": "FORBIDDEN" }
 ```
 
-**Branch on `code`, never on `error`.** Codes are stable; the `error` text is written for people and may be reworded. Several different failures can share a status (a `403` can be a missing scope or the wrong kind of credential), so the status alone isn't enough either.
+**Branch on `code`, never on `error`.** Codes are stable; the `error` text is written for people and may be reworded. Several different failures can share a status (a `403` can be a missing scope, the owner's role, or the wrong kind of credential), so the status alone isn't enough either. As a rule of thumb, `402` is about the plan and `403` is about the role or a missing scope.
 
 ## Error codes
 
@@ -39,9 +39,9 @@ A failed request answers with a non-2xx status and this body:
 | --- | --- | --- |
 | `VALIDATION_ERROR` | No | Fix the request. The `error` text names the first field that failed, e.g. `title: title is required`. |
 | `UNAUTHORIZED` | No | Check the key. It may be mistyped or revoked, or its creator may have left the workspace. |
-| `PAID_PLAN_REQUIRED` | No | The workspace's plan doesn't include the API. It's included with xPlant+ Teams and Enterprise; see [plans](https://www.xplantpro.com/en/subscriptions). |
+| `PAID_PLAN_REQUIRED` | No | The workspace's plan doesn't include this call. Teams and Enterprise include the whole API; Hobby and Pro Lab keys can connect devices only; Free has no API access. See [Plans and access](/docs/authentication#plans-and-access). |
 | `DEVICE_LIMIT_REACHED` | No | Registering this device would go past your plan's device allowance. Retire a device you no longer use, or see [plans](https://www.xplantpro.com/en/subscriptions). |
-| `FORBIDDEN` | No | Give the integration a key with the scope named in `error`. |
+| `FORBIDDEN` | No | Either the key lacks the scope named in `error` (use a key that has it), or the owner's role is below what the scope needs (the message names the role; see [Plans and access](/docs/authentication#plans-and-access)). |
 | `DEVICE_TOKEN_NOT_ACCEPTED` | No | This endpoint needs a workspace key. Device tokens only write readings, events and heartbeats. |
 | `DEVICE_TOKEN_WRONG_DEVICE` | No | The token belongs to a different device than the `device_id` you sent. |
 | `NOT_FOUND` | No | The id doesn't exist in this workspace (or belongs to another one; the two look the same on purpose). |

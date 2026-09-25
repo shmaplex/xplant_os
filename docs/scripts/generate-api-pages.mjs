@@ -428,7 +428,8 @@ function responseSection(o) {
   if (rows.length > 0) out.push(fieldTable(rows), "");
 
   const specExample = media?.example ?? Object.values(media?.examples ?? {})[0]?.value;
-  const example = o.extra.response ?? (specExample && "ok" in specExample ? specExample.data : specExample) ?? null;
+  const fromSpec = specExample && "ok" in specExample ? specExample.data : specExample;
+  const example = fromSpec ?? o.extra.response ?? null;
   if (example !== null) {
     out.push('```json title="Response"', JSON.stringify({ ok: true, data: example }, null, 2), "```", "");
   }
@@ -674,6 +675,13 @@ files.set(
 }
 
 // Scopes page
+//
+// Minimum role and plan per scope, as the API enforces them. The spec's
+// x-scopes doesn't carry these yet; when it does, read them from there.
+const MANAGER_SCOPES = new Set(["read:pricing", "read:commerce", "write:demand"]);
+const DEVICE_PLAN_SCOPES = new Set(["read:devices", "write:devices", "write:sensor_readings", "write:device_events"]);
+const minRole = (s) => s.minRole ?? (MANAGER_SCOPES.has(s.id) ? "`manager`" : s.id.startsWith("write:") ? "`member`" : "Any member");
+const plansFor = (s) => s.plans ?? (DEVICE_PLAN_SCOPES.has(s.id) ? "All paid plans" : "Teams, Enterprise");
 {
   const byScope = new Map();
   for (const o of operations) for (const s of o.scopes) byScope.set(s, [...(byScope.get(s) ?? []), o]);
@@ -692,6 +700,8 @@ files.set(
     "A key carries exactly the scopes you choose when you create it in [Settings → Integrations → API Keys](https://app.xplantpro.com/settings/integrations/api-keys). There is no default set, and no scope implies another: `write:tasks` does not grant `read:tasks`.",
     "",
     "**Scopes are fixed when a key is created.** To change what an integration can do, create a new key with the scopes it needs, move the integration to it, then revoke the old key.",
+    "",
+    "**A key never does more than its owner can in xPlant.** Each scope also needs a minimum role from the key's owner and a plan that includes it (both shown below). Above the owner's role, a call answers `403 FORBIDDEN`; outside the plan, `402 PAID_PLAN_REQUIRED`. [`GET /me`](/docs/api/account/get-me) lists the key's `effectiveScopes`: what it can use right now. See [Plans and access](/docs/authentication#plans-and-access).",
     "",
     "Scope names follow `<read|write>:<resource>`. Grant each integration only what it calls.",
     "",
@@ -720,7 +730,7 @@ files.set(
     lines.push(`### ${category}`, "");
     lines.push(
       table(
-        ["Scope", "Allows", "Endpoints"],
+        ["Scope", "Allows", "Minimum role", "Plans", "Endpoints"],
         scopeCatalogue
           .filter((s) => s.category === category)
           .map((s) => {
@@ -728,6 +738,8 @@ files.set(
             return [
               `\`${s.id}\``,
               cell(s.description),
+              minRole(s),
+              plansFor(s),
               ops.length > 0
                 ? ops.map((o) => `[\`${o.method} ${o.path.replace(/^\/api\/v1/, "")}\`](${opUrl(o)})`).join("<br />")
                 : "No endpoint yet",

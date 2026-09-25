@@ -9,6 +9,8 @@ A key carries exactly the scopes you choose when you create it in [Settings → 
 
 **Scopes are fixed when a key is created.** To change what an integration can do, create a new key with the scopes it needs, move the integration to it, then revoke the old key.
 
+**A key never does more than its owner can in xPlant.** Each scope also needs a minimum role from the key's owner and a plan that includes it (both shown below). Above the owner's role, a call answers `403 FORBIDDEN`; outside the plan, `402 PAID_PLAN_REQUIRED`. [`GET /me`](/docs/api/account/get-me) lists the key's `effectiveScopes`: what it can use right now. See [Plans and access](/docs/authentication#plans-and-access).
+
 Scope names follow `<read|write>:<resource>`. Grant each integration only what it calls.
 
 A request without the scope it needs gets `403 FORBIDDEN`, and the message names the missing scope, for example `Missing scope: write:tasks`. To see what a key holds before you call anything, use [`GET /me`](/docs/api/account/get-me); it needs no scope.
@@ -30,107 +32,107 @@ Device tokens (`xpd_`) don't carry scopes. They can only write readings, heartbe
 
 ### Workspace
 
-| Scope | Allows | Endpoints |
-| --- | --- | --- |
-| `read:workspace` | Read workspace and lab settings | [`GET /workspaces`](/docs/api/account/list-workspaces) |
+| Scope | Allows | Minimum role | Plans | Endpoints |
+| --- | --- | --- | --- | --- |
+| `read:workspace` | Read workspace and lab settings | Any member | Teams, Enterprise | [`GET /workspaces`](/docs/api/account/list-workspaces) |
 
 ### Plants
 
-| Scope | Allows | Endpoints |
-| --- | --- | --- |
-| `read:plants` | Read plant records | [`GET /plants`](/docs/api/plants/list-plants)<br />[`GET /plants/{id}`](/docs/api/plants/get-plant) |
-| `write:plants` | Create and update plant records | No endpoint yet |
+| Scope | Allows | Minimum role | Plans | Endpoints |
+| --- | --- | --- | --- | --- |
+| `read:plants` | Read plant records | Any member | Teams, Enterprise | [`GET /plants`](/docs/api/plants/list-plants)<br />[`GET /plants/{id}`](/docs/api/plants/get-plant) |
+| `write:plants` | Create and update plant records | `member` | Teams, Enterprise | No endpoint yet |
 
 ### Explants
 
-| Scope | Allows | Endpoints |
-| --- | --- | --- |
-| `read:explants` | Read explant records | [`GET /explants`](/docs/api/explants/list-explants)<br />[`GET /explants/{id}`](/docs/api/explants/get-explant) |
-| `write:explants` | Create and update explant records | No endpoint yet |
+| Scope | Allows | Minimum role | Plans | Endpoints |
+| --- | --- | --- | --- | --- |
+| `read:explants` | Read explant records | Any member | Teams, Enterprise | [`GET /explants`](/docs/api/explants/list-explants)<br />[`GET /explants/{id}`](/docs/api/explants/get-explant) |
+| `write:explants` | Create and update explant records | `member` | Teams, Enterprise | No endpoint yet |
 
 ### Contaminations
 
-| Scope | Allows | Endpoints |
-| --- | --- | --- |
-| `read:contaminations` | Read contamination logs | No endpoint yet |
-| `write:contaminations` | Submit contamination observations | No endpoint yet |
+| Scope | Allows | Minimum role | Plans | Endpoints |
+| --- | --- | --- | --- | --- |
+| `read:contaminations` | Read contamination logs | Any member | Teams, Enterprise | No endpoint yet |
+| `write:contaminations` | Submit contamination observations | `member` | Teams, Enterprise | No endpoint yet |
 
 ### Tasks
 
-| Scope | Allows | Endpoints |
-| --- | --- | --- |
-| `read:tasks` | Read scheduled tasks and due work | [`GET /tasks`](/docs/api/tasks/list-tasks)<br />[`GET /tasks/{id}`](/docs/api/tasks/get-task)<br />[`GET /tasks/demand`](/docs/api/tasks/list-demand-signals) |
-| `write:tasks` | Create, update, complete, and reopen tasks | [`POST /tasks`](/docs/api/tasks/create-task)<br />[`PATCH /tasks/{id}`](/docs/api/tasks/update-task) |
-| `write:demand` | Push sales/order demand numbers per genus for task prioritization | [`POST /tasks/demand`](/docs/api/tasks/create-demand-signal) |
+| Scope | Allows | Minimum role | Plans | Endpoints |
+| --- | --- | --- | --- | --- |
+| `read:tasks` | Read scheduled tasks and due work | Any member | Teams, Enterprise | [`GET /tasks`](/docs/api/tasks/list-tasks)<br />[`GET /tasks/{id}`](/docs/api/tasks/get-task)<br />[`GET /tasks/demand`](/docs/api/tasks/list-demand-signals) |
+| `write:tasks` | Create, update, complete, and reopen tasks | `member` | Teams, Enterprise | [`POST /tasks`](/docs/api/tasks/create-task)<br />[`PATCH /tasks/{id}`](/docs/api/tasks/update-task) |
+| `write:demand` | Push sales/order demand numbers per genus for task prioritization | `manager` | Teams, Enterprise | [`POST /tasks/demand`](/docs/api/tasks/create-demand-signal) |
 
 ### Comments
 
-| Scope | Allows | Endpoints |
-| --- | --- | --- |
-| `read:comments` | Read notes and comments on lab records | No endpoint yet |
-| `write:comments` | Add notes and comments to lab records | No endpoint yet |
+| Scope | Allows | Minimum role | Plans | Endpoints |
+| --- | --- | --- | --- | --- |
+| `read:comments` | Read notes and comments on lab records | Any member | Teams, Enterprise | No endpoint yet |
+| `write:comments` | Add notes and comments to lab records | `member` | Teams, Enterprise | No endpoint yet |
 
 ### Media
 
-| Scope | Allows | Endpoints |
-| --- | --- | --- |
-| `read:assets` | Read photos and media attached to lab records | No endpoint yet |
-| `write:assets` | Attach photos and media to lab records | No endpoint yet |
-| `read:media_recipes` | Read media recipe data | No endpoint yet |
-| `write:media_recipes` | Create and update media recipes | No endpoint yet |
+| Scope | Allows | Minimum role | Plans | Endpoints |
+| --- | --- | --- | --- | --- |
+| `read:assets` | Read photos and media attached to lab records | Any member | Teams, Enterprise | No endpoint yet |
+| `write:assets` | Attach photos and media to lab records | `member` | Teams, Enterprise | No endpoint yet |
+| `read:media_recipes` | Read media recipe data | Any member | Teams, Enterprise | No endpoint yet |
+| `write:media_recipes` | Create and update media recipes | `member` | Teams, Enterprise | No endpoint yet |
 
 ### Transfers
 
-| Scope | Allows | Endpoints |
-| --- | --- | --- |
-| `read:transfers` | Read transfer and stage history for plants and explants | [`GET /stages`](/docs/api/transfers-and-stages/list-stages)<br />[`GET /transfers`](/docs/api/transfers-and-stages/list-transfers) |
-| `write:transfers` | Record transfers and advance the stage of plants and explants | [`POST /stages`](/docs/api/transfers-and-stages/create-stage)<br />[`POST /transfers`](/docs/api/transfers-and-stages/create-transfer) |
+| Scope | Allows | Minimum role | Plans | Endpoints |
+| --- | --- | --- | --- | --- |
+| `read:transfers` | Read transfer and stage history for plants and explants | Any member | Teams, Enterprise | [`GET /stages`](/docs/api/transfers-and-stages/list-stages)<br />[`GET /transfers`](/docs/api/transfers-and-stages/list-transfers) |
+| `write:transfers` | Record transfers and advance the stage of plants and explants | `member` | Teams, Enterprise | [`POST /stages`](/docs/api/transfers-and-stages/create-stage)<br />[`POST /transfers`](/docs/api/transfers-and-stages/create-transfer) |
 
 ### SOPs
 
-| Scope | Allows | Endpoints |
-| --- | --- | --- |
-| `read:sops` | Read SOP templates and steps | [`GET /sops`](/docs/api/sops/list-sops)<br />[`GET /sops/{id}`](/docs/api/sops/get-sop) |
-| `read:sop_runs` | Read SOP execution history: who ran which step, when | [`GET /sop-runs/{id}`](/docs/api/sops/get-sop-run) |
-| `write:sop_runs` | Create and advance SOP run sessions | [`POST /sop-runs`](/docs/api/sops/create-sop-run) |
-| `write:sop_steps` | Post confirmations, scans and measurements against a step of an SOP run | [`POST /sop-runs/{id}/steps/{stepId}/events`](/docs/api/sops/create-sop-step-event)<br />[`POST /sop-runs/{id}/steps/{stepId}/measurements`](/docs/api/sops/create-sop-step-measurement) |
+| Scope | Allows | Minimum role | Plans | Endpoints |
+| --- | --- | --- | --- | --- |
+| `read:sops` | Read SOP templates and steps | Any member | Teams, Enterprise | [`GET /sops`](/docs/api/sops/list-sops)<br />[`GET /sops/{id}`](/docs/api/sops/get-sop) |
+| `read:sop_runs` | Read SOP execution history: who ran which step, when | Any member | Teams, Enterprise | [`GET /sop-runs/{id}`](/docs/api/sops/get-sop-run) |
+| `write:sop_runs` | Create and advance SOP run sessions | `member` | Teams, Enterprise | [`POST /sop-runs`](/docs/api/sops/create-sop-run) |
+| `write:sop_steps` | Post confirmations, scans and measurements against a step of an SOP run | `member` | Teams, Enterprise | [`POST /sop-runs/{id}/steps/{stepId}/events`](/docs/api/sops/create-sop-step-event)<br />[`POST /sop-runs/{id}/steps/{stepId}/measurements`](/docs/api/sops/create-sop-step-measurement) |
 
 ### Labels
 
-| Scope | Allows | Endpoints |
-| --- | --- | --- |
-| `read:labels` | Resolve QR/barcode label codes to entity records | [`GET /labels/resolve`](/docs/api/labels/resolve-label) |
-| `write:label_scans` | Submit label scan events | [`POST /label-scans`](/docs/api/labels/create-label-scan) |
+| Scope | Allows | Minimum role | Plans | Endpoints |
+| --- | --- | --- | --- | --- |
+| `read:labels` | Resolve QR/barcode label codes to entity records | Any member | Teams, Enterprise | [`GET /labels/resolve`](/docs/api/labels/resolve-label) |
+| `write:label_scans` | Submit label scan events | `member` | Teams, Enterprise | [`POST /label-scans`](/docs/api/labels/create-label-scan) |
 
 ### Devices
 
-| Scope | Allows | Endpoints |
-| --- | --- | --- |
-| `read:devices` | List registered devices and their status | [`GET /devices`](/docs/api/devices/list-devices)<br />[`GET /devices/{deviceId}/tokens`](/docs/api/devices/list-device-tokens) |
-| `write:devices` | Register devices, send heartbeats, and manage device tokens | [`POST /devices`](/docs/api/devices/create-device)<br />[`POST /devices/{deviceId}/heartbeat`](/docs/api/devices/send-heartbeat)<br />[`POST /devices/{deviceId}/tokens`](/docs/api/devices/create-device-token)<br />[`DELETE /devices/{deviceId}/tokens/{tokenId}`](/docs/api/devices/revoke-device-token) |
-| `read:sensor_readings` | Query historical sensor readings | [`GET /sensor-readings`](/docs/api/sensor-readings/list-sensor-readings) |
-| `write:sensor_readings` | Submit environmental sensor readings (temperature, humidity, etc.) | [`POST /sensor-readings`](/docs/api/sensor-readings/create-sensor-readings) |
-| `write:device_events` | Submit device status events | [`POST /device-events`](/docs/api/devices/create-device-event) |
+| Scope | Allows | Minimum role | Plans | Endpoints |
+| --- | --- | --- | --- | --- |
+| `read:devices` | List registered devices and their status | Any member | All paid plans | [`GET /devices`](/docs/api/devices/list-devices)<br />[`GET /devices/{deviceId}/tokens`](/docs/api/devices/list-device-tokens) |
+| `write:devices` | Register devices, send heartbeats, and manage device tokens | `member` | All paid plans | [`POST /devices`](/docs/api/devices/create-device)<br />[`POST /devices/{deviceId}/heartbeat`](/docs/api/devices/send-heartbeat)<br />[`POST /devices/{deviceId}/tokens`](/docs/api/devices/create-device-token)<br />[`DELETE /devices/{deviceId}/tokens/{tokenId}`](/docs/api/devices/revoke-device-token) |
+| `read:sensor_readings` | Query historical sensor readings | Any member | Teams, Enterprise | [`GET /sensor-readings`](/docs/api/sensor-readings/list-sensor-readings) |
+| `write:sensor_readings` | Submit environmental sensor readings (temperature, humidity, etc.) | `member` | All paid plans | [`POST /sensor-readings`](/docs/api/sensor-readings/create-sensor-readings) |
+| `write:device_events` | Submit device status events | `member` | All paid plans | [`POST /device-events`](/docs/api/devices/create-device-event) |
 
 ### Equipment
 
-| Scope | Allows | Endpoints |
-| --- | --- | --- |
-| `read:equipment` | Read the lab equipment library and its maintenance history | No endpoint yet |
-| `write:equipment_events` | Record that a piece of equipment was used, calibrated, serviced or faulted | [`POST /equipment/{id}/events`](/docs/api/equipment/create-equipment-event) |
+| Scope | Allows | Minimum role | Plans | Endpoints |
+| --- | --- | --- | --- | --- |
+| `read:equipment` | Read the lab equipment library and its maintenance history | Any member | Teams, Enterprise | No endpoint yet |
+| `write:equipment_events` | Record that a piece of equipment was used, calibrated, serviced or faulted | `member` | Teams, Enterprise | [`POST /equipment/{id}/events`](/docs/api/equipment/create-equipment-event) |
 
 ### Commercial
 
-| Scope | Allows | Endpoints |
-| --- | --- | --- |
-| `read:pricing` | Read culture line prices, pricing tiers, and price history | No endpoint yet |
-| `read:commerce` | Read store order lines and sell-through summaries | No endpoint yet |
+| Scope | Allows | Minimum role | Plans | Endpoints |
+| --- | --- | --- | --- | --- |
+| `read:pricing` | Read culture line prices, pricing tiers, and price history | `manager` | Teams, Enterprise | No endpoint yet |
+| `read:commerce` | Read store order lines and sell-through summaries | `manager` | Teams, Enterprise | No endpoint yet |
 
 ### History
 
-| Scope | Allows | Endpoints |
-| --- | --- | --- |
-| `read:events` | Read plant and explant edit history (audit events) | [`GET /events`](/docs/api/change-history/list-change-events) |
+| Scope | Allows | Minimum role | Plans | Endpoints |
+| --- | --- | --- | --- | --- |
+| `read:events` | Read plant and explant edit history (audit events) | Any member | Teams, Enterprise | [`GET /events`](/docs/api/change-history/list-change-events) |
 
 ### No scope needed
 

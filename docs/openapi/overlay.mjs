@@ -35,20 +35,6 @@ export const overlay = {
     sdk: "const me = await client.me.get();\nconsole.log(me.scopes); // e.g. [\"read:plants\", \"write:sensor_readings\"]",
     notes:
       "This endpoint needs no scope, but it still needs a valid, active key. Use it to check a key's scopes before calling anything else, rather than finding a missing scope one `403` at a time. Only the key's **prefix** is ever returned, never the key itself.",
-    response: {
-      key: {
-        id: "3a5c7e9b-1d3f-4a5c-9e7b-1d3f5a7c9e1b",
-        name: "Grow room bridge",
-        prefix: "xpk_live_abcd",
-        environment: "production",
-        status: "active",
-        lastUsedAt: "2026-09-01T10:00:00.000Z",
-        createdAt: "2026-08-01T10:00:00.000Z",
-      },
-      scopes: ["read:plants", "write:sensor_readings"],
-      workspace: { id: "6d8f0b2c-4e6a-4c8e-8b0d-2f4a6c8e0b2d" },
-      user: { id: MEMBER_ID },
-    },
   },
   "GET /api/v1/workspaces": {
     slug: "list-workspaces",

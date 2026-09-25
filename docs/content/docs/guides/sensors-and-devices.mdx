@@ -169,7 +169,7 @@ curl -X POST https://app.xplantpro.com/api/v1/device-events \
 
 ## 4. Read readings back
 
-From a dashboard or a script (with a workspace key holding `read:sensor_readings`, not the device token):
+From a dashboard or a script, with a workspace key holding `read:sensor_readings` (not the device token). Reading readings back through the API needs xPlant+ Teams or Enterprise; on Hobby and Pro Lab the data is visible in xPlant.
 
 ```bash
 curl "https://app.xplantpro.com/api/v1/sensor-readings?device_id=$DEVICE_ID&type=temperature&since=2026-09-24T00:00:00Z&limit=200" \

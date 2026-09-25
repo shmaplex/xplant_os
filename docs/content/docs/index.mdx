@@ -11,7 +11,7 @@ The xPlant API connects your lab's own systems to your xPlant workspace: schedul
 - **One header.** `Authorization: Bearer <key>`. Workspace keys start with `xpk_`; device tokens start with `xpd_`.
 - **One envelope.** Success is `{ "ok": true, "data": … }`. Failure is `{ "ok": false, "data": null, "error": "…", "code": "STABLE_CODE" }`. Branch on `code`.
 - **Scopes you choose.** A key can do exactly what its scopes allow, and nothing else. There is no default set.
-- **Included with xPlant+ Teams and Enterprise.** Other plans answer `402 PAID_PLAN_REQUIRED`. See [Plans and access](/docs/authentication#plans-and-access).
+- **Bounded by your plan and your role.** Teams and Enterprise include the whole API; Hobby and Pro Lab keys can connect devices only. A key never does more than its owner can in xPlant. See [Plans and access](/docs/authentication#plans-and-access).
 
 ## Start here
 

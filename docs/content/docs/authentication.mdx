@@ -20,13 +20,52 @@ There are two kinds of credential, and they are not interchangeable.
 
 ## Plans and access
 
-The xPlant API is included with **xPlant+ Teams** and **Enterprise**. On other plans, requests answer `402 PAID_PLAN_REQUIRED`; see [plans](https://www.xplantpro.com/en/subscriptions) to upgrade.
+Three things bound what a key can do: **its scopes**, **its owner's role**, and **the workspace's plan**. A key never does more than its owner can in xPlant.
 
-Your key unlocks what your plan allows:
+### By plan
 
-- **Scopes decide what a key can reach.** Grant the least it needs, and give each integration its own key.
-- **Your plan's allowances still apply.** Registering devices beyond your plan's allowance, for example, answers `402 DEVICE_LIMIT_REACHED`. See [plans](https://www.xplantpro.com/en/subscriptions) for what each plan includes.
-- **A key acts only in the workspace it was created in**, and only while the person who created it is still a member there.
+| Plan | What API keys can do |
+| --- | --- |
+| xPlant+ Teams, Enterprise | The whole API: every scope. |
+| Hobby, Pro Lab | Connect devices only: `read:devices`, `write:devices`, `write:sensor_readings` and `write:device_events`. Keys can register devices, manage their tokens, and post their readings and events. They can't read sensor readings back; that data is visible in xPlant. |
+| Free | No API access. Every request answers `402 PAID_PLAN_REQUIRED`. |
+
+A call outside what the plan includes answers `402 PAID_PLAN_REQUIRED`. See [plans](https://www.xplantpro.com/en/subscriptions) to upgrade. Your plan's allowances still apply too: registering devices beyond the plan's allowance answers `402 DEVICE_LIMIT_REACHED`.
+
+### By role
+
+A key acts with its owner's role in the workspace, as it is at the time of each request. If the owner's role changes, the key follows.
+
+| Scopes | Minimum role of the key's owner |
+| --- | --- |
+| `read:` scopes, except the two below | Any active member |
+| `write:` scopes, except the one below | `member` |
+| `read:pricing`, `read:commerce`, `write:demand` | `manager` |
+
+Roles rank `owner` > `admin` > `manager` > `member` > `viewer` > `guest`. A call that needs more than the owner's role answers `403 FORBIDDEN`, and the message names the scope and the role it needs, for example:
+
+```json
+{
+  "ok": false,
+  "data": null,
+  "error": "This key's owner is a viewer in this workspace, which cannot use write:tasks (needs member or above). A key never does more than its owner can in xPlant.",
+  "code": "FORBIDDEN"
+}
+```
+
+The wording can change; branch on `code`. As a rule of thumb, **`402` is about the plan, and `403` is about the role or a missing scope.**
+
+### When you create a key
+
+You can only grant scopes that your role and your plan allow. A scope above your role is refused with `403`, and one above your plan with `402`, and both messages name the scopes involved.
+
+### Check before you call
+
+[`GET /me`](/docs/api/account/get-me) returns the key's `scopes` (what it was created with), `effectiveScopes` (what it can use right now, after the role and plan limits), the owner's `role`, and `apiAccess`: `full` on Teams and Enterprise, `devices` on plans whose keys can connect devices only.
+
+### Devices after a plan lapses
+
+Device tokens keep posting readings, events and heartbeats after a plan lapses, so sensors don't go quiet. New devices and new tokens follow the plan's device allowance.
 
 Enterprise customers can scope organisation-specific integrations and API requirements with us: [support@xplantpro.com](mailto:support@xplantpro.com).
 
@@ -58,8 +97,8 @@ Call [`GET /me`](/docs/api/account/get-me) to see which key you're using and eve
 | You get | Because |
 | --- | --- |
 | `401 UNAUTHORIZED` | The key is missing, mistyped or revoked, or the person who created it has left the workspace. |
-| `402 PAID_PLAN_REQUIRED` | The workspace's plan doesn't include the API. It's included with xPlant+ Teams and Enterprise; see [plans](https://www.xplantpro.com/en/subscriptions). |
-| `403 FORBIDDEN` | The key is valid but lacks the scope this endpoint needs. The `error` text names it, e.g. `Missing scope: write:tasks`. |
+| `402 PAID_PLAN_REQUIRED` | The workspace's plan doesn't include this call. Teams and Enterprise include the whole API; Hobby and Pro Lab keys can connect devices only; Free has no API access. See [Plans and access](#plans-and-access). |
+| `403 FORBIDDEN` | The key lacks the scope this endpoint needs, or its owner's role is below what the scope needs. The `error` text says which, e.g. `Missing scope: write:tasks`. |
 | `403 DEVICE_TOKEN_NOT_ACCEPTED` | You sent a device token to an endpoint that needs a workspace key. |
 
 A key is tied to the member who created it. When someone leaves the workspace, their keys stop working, so create keys for long-running integrations from an account that will stay.

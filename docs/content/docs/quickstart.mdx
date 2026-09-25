@@ -3,7 +3,7 @@ title: Quickstart
 description: Create an API key and make your first three calls, in about five minutes.
 ---
 
-You need an xPlant workspace on **xPlant+ Teams** or **Enterprise**, which include the API, and permission to manage its integrations.
+You need an xPlant workspace on **xPlant+ Teams** or **Enterprise**, which include the whole API (Hobby and Pro Lab keys can connect devices only), and a role of `member` or above to grant the scopes below.
 
 ## 1. Create a key
 
@@ -23,7 +23,7 @@ export XPLANT_API_KEY="xpk_live_…"
 
 ## 2. Check the key
 
-`GET /me` tells you who the key is and which scopes it holds. It needs no scope, so it's the safest first call.
+`GET /me` tells you who the key is, which scopes it holds, and which it can use right now (`effectiveScopes`, after your role and plan). It needs no scope, so it's the safest first call.
 
 ```bash tab="curl" tab-group="lang"
 curl https://app.xplantpro.com/api/v1/me \
@@ -59,13 +59,16 @@ You should see:
   "data": {
     "key": { "name": "Quickstart", "prefix": "xpk_live_abcd", "status": "active" },
     "scopes": ["read:workspace", "read:plants", "read:tasks"],
+    "effectiveScopes": ["read:workspace", "read:plants", "read:tasks"],
+    "role": "member",
+    "apiAccess": "full",
     "workspace": { "id": "…" },
     "user": { "id": "…" }
   }
 }
 ```
 
-If you get `401 UNAUTHORIZED`, the key is wrong or has been revoked. If you get `402 PAID_PLAN_REQUIRED`, your workspace's plan doesn't include the API; see [plans](https://www.xplantpro.com/en/subscriptions).
+If you get `401 UNAUTHORIZED`, the key is wrong or has been revoked. If you get `402 PAID_PLAN_REQUIRED`, your workspace's plan doesn't include this call; see [Plans and access](/docs/authentication#plans-and-access).
 
 ## 3. Read some data
 

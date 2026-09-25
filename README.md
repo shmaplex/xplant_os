@@ -90,22 +90,26 @@ The xPlant application itself, user data and credentials are never part of this 
 | Rate limits | 1,000 requests/min per key or token, 3,000/min per workspace; `429` with `Retry-After`, see [Rate limits](https://docs.xplantpro.com/docs/rate-limits) |
 | Safe retries | `Idempotency-Key` on supported writes, see [Idempotency](https://docs.xplantpro.com/docs/idempotency) |
 | Paging | `limit` up to 200, with a cursor or `offset`, see [Pagination](https://docs.xplantpro.com/docs/pagination) |
-| Plans | Included with xPlant+ Teams and Enterprise, see [Plans and access](#plans-and-access) |
+| Plans | Whole API on xPlant+ Teams and Enterprise; devices only on Hobby and Pro Lab, see [Plans and access](#plans-and-access) |
 | Spec | [OpenAPI 3](https://docs.xplantpro.com/openapi.json) |
 
 What you can do with it: read plants and explants, record transfers and stage changes, sync tasks and push demand signals, run SOPs from a bench station, resolve and log label scans, register devices and stream sensor readings, and record equipment use and maintenance. See the [guides](https://docs.xplantpro.com/docs/guides).
 
 ## Plans and access
 
-The xPlant API is included with **xPlant+ Teams** and **Enterprise**. On other plans, requests answer `402 PAID_PLAN_REQUIRED`; see [plans](https://www.xplantpro.com/en/subscriptions) to upgrade.
+| Plan | What API keys can do |
+|---|---|
+| xPlant+ Teams, Enterprise | The whole API: every scope |
+| Hobby, Pro Lab | Connect devices only: register devices, manage their tokens, post readings and events |
+| Free | No API access (`402 PAID_PLAN_REQUIRED`) |
 
-Your key unlocks what your plan allows:
+- **A key never does more than its owner can in xPlant.** Reads need any active member, writes need `member`, and `read:pricing`, `read:commerce` and `write:demand` need `manager`. Above the owner's role, calls answer `403 FORBIDDEN`.
+- **Scopes decide what a key can reach** within those limits. Grant the least it needs, and give each integration its own key.
+- `GET /me` shows a key's `effectiveScopes`: what it can use right now.
+- Plan allowances still apply: registering devices past the allowance answers `402 DEVICE_LIMIT_REACHED`. See [plans](https://www.xplantpro.com/en/subscriptions).
+- Enterprise customers can scope organisation-specific integrations with us: [support@xplantpro.com](mailto:support@xplantpro.com).
 
-- **Scopes decide what a key can reach.** Grant the least it needs, and give each integration its own key.
-- **Your plan's allowances still apply.** For example, registering devices beyond your plan's allowance answers `402 DEVICE_LIMIT_REACHED`; see [plans](https://www.xplantpro.com/en/subscriptions).
-- **A key acts only in the workspace it was created in**, and only while the person who created it is still a member there.
-
-Enterprise customers can scope organisation-specific integrations and API requirements with us: [support@xplantpro.com](mailto:support@xplantpro.com).
+Details: [Plans and access](https://docs.xplantpro.com/docs/authentication#plans-and-access).
 
 ---
 
