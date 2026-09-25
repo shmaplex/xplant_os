@@ -57,7 +57,8 @@ import os
 import requests
 from datetime import datetime, timezone
 
-at = datetime.now(timezone.utc).isoformat()
+# UTC ending in "Z": isoformat()'s "+00:00" is rejected.
+at = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
 device_id = os.environ["XPLANT_DEVICE_ID"]
 requests.post(
     "https://app.xplantpro.com/api/v1/sensor-readings",
@@ -82,6 +83,8 @@ requests.post(
 - once 500 readings are queued (the per-request maximum).
 
 A single reading without the `readings` wrapper also works. Treat it as the fallback for a device that can only ever hold one pending reading, not as the default.
+
+**Send `recorded_at` in UTC ending in `Z`**, for example `2026-09-25T12:00:00.000Z`. A timestamp with an offset such as `+00:00` is rejected with `422 VALIDATION_ERROR`. In Python, `datetime.now(timezone.utc).isoformat()` ends in `+00:00`, so swap it for `Z` as the examples do.
 
 **Make retries harmless.** Put `external_id` and `recorded_at` on every reading. Readings are de-duplicated on the device, `external_id` and `recorded_at`, so re-sending a batch after a network failure doesn't store anything twice. (`Idempotency-Key` isn't used on this endpoint.) Build `external_id` from something stable: the device, the channel and the sample time.
 
@@ -110,7 +113,7 @@ def queue(reading_type, value, unit):
         "type": reading_type,
         "value": value,
         "unit": unit,
-        "recorded_at": now.isoformat(),
+        "recorded_at": now.isoformat(timespec="milliseconds").replace("+00:00", "Z"),
         # Stable per device, channel and second: re-sending it is a no-op.
         "external_id": f"{DEVICE_ID}-{reading_type}-{int(now.timestamp())}",
     })

@@ -111,6 +111,20 @@ sudo journalctl -u xplant-gateway -f
 
 ---
 
+## Batching
+
+The gateway doesn't post each reading as it's taken. It buffers readings and posts them in batches, which uses a small fraction of the requests and keeps readings through a network outage.
+
+| Setting | Default | What it does |
+|---|---|---|
+| `batch_flush_interval_seconds` | `60` | How often the buffer is posted. |
+| `batch_max_readings` | `100` | Readings per request (the API accepts up to 500). A full batch posts straight away. |
+| `batch_buffer_limit` | `5000` | The most readings kept while xPlant is unreachable. Past it, the oldest are dropped and logged. |
+
+Every reading carries the time it was taken (`recorded_at`) and an `external_id`, so a batch retried after a lost response is never stored twice.
+
+---
+
 ## Simulate mode
 
 Set `"simulate": true` in `config.json` to generate fake sensor data without any GPIO hardware. Useful for testing your device token and device ID before hooking up hardware.

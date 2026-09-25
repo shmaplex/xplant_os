@@ -95,6 +95,19 @@ def load_config(path: Path) -> dict[str, Any]:
     config.setdefault("heartbeat_interval_seconds", 300)
     config.setdefault("simulate", False)
 
+    # Readings accumulate locally and post in batches. One HTTP request per
+    # reading would be a request per sensor per interval — at a 60s interval
+    # that is ~43k requests per sensor per month, against an endpoint that
+    # accepts 500 readings in a single call.
+    config.setdefault("batch_flush_interval_seconds", 60)
+    config.setdefault("batch_max_readings", 100)
+    # Cap the retry buffer so a long outage cannot exhaust memory. Oldest
+    # readings are dropped first once this is exceeded.
+    config.setdefault("batch_buffer_limit", 5000)
+
+    # The API rejects payloads over 500 readings.
+    config["batch_max_readings"] = min(int(config["batch_max_readings"]), 500)
+
     return config
 
 
@@ -215,30 +228,83 @@ def post_with_retry(
 # xPlant API calls
 # ---------------------------------------------------------------------------
 
-def post_sensor_reading(
+def build_reading(
     config: dict[str, Any],
     sensor: dict[str, Any],
     value: float,
-) -> None:
-    """POST a single sensor reading to /api/v1/sensor-readings."""
+) -> dict[str, Any]:
+    """
+    Build one reading, stamped with the time it was TAKEN.
+
+    The field is `recorded_at`, not `timestamp`. The API ignores fields it
+    doesn't know, so a `timestamp` field is silently dropped and the reading
+    falls back to the time the request arrives. That is
+    invisible while readings post immediately, and wrong the moment one is
+    buffered through an outage or a retry — exactly when the real
+    observation time matters.
+    """
+    # The API wants UTC ending in "Z"; isoformat() would end in "+00:00",
+    # which it rejects.
+    recorded_at = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    return {
+        "device_id":   config["device_id"],
+        "type":        sensor["type"],
+        "value":       value,
+        "unit":        sensor["unit"],
+        "recorded_at": recorded_at,
+        # Stable per device, channel and moment: if a batch is retried after
+        # the server stored it but the response was lost, the repeat is
+        # skipped instead of stored twice.
+        "external_id": f"{config['device_id']}-{sensor['type']}-{recorded_at}",
+    }
+
+
+def post_sensor_readings(
+    config: dict[str, Any],
+    readings: list[dict[str, Any]],
+) -> bool:
+    """
+    POST a batch of readings to /api/v1/sensor-readings.
+
+    Returns True when the batch was accepted. On failure the caller keeps the
+    readings buffered and retries them in the next flush — each one still
+    carrying the `recorded_at` from when it was taken.
+    """
+    if not readings:
+        return True
+
     url = config["xplant_base_url"].rstrip("/") + "/api/v1/sensor-readings"
     headers = {
         "Authorization": f"Bearer {config['device_token']}",
         "Content-Type": "application/json",
     }
-    payload = {
-        "device_id": config["device_id"],
-        "type":      sensor["type"],
-        "value":     value,
-        "unit":      sensor["unit"],
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-    }
 
-    description = f"sensor_reading({sensor['type']})"
-    success = post_with_retry(url, headers, payload, description)
+    description = f"sensor_readings(batch of {len(readings)})"
+    success = post_with_retry(url, headers, {"readings": readings}, description)
 
     if success:
-        log.info("Posted %s = %s %s", sensor["type"], value, sensor["unit"])
+        log.info("Posted batch of %d reading(s)", len(readings))
+
+    return success
+
+
+def flush_readings(config: dict[str, Any], buffer: list[dict[str, Any]]) -> None:
+    """
+    Post everything buffered, in chunks the API will accept, mutating `buffer`
+    in place to drop only what was successfully delivered. Stops at the first
+    failed chunk so ordering is preserved for the next attempt.
+    """
+    max_batch = config["batch_max_readings"]
+
+    while buffer:
+        chunk = buffer[:max_batch]
+        if not post_sensor_readings(config, chunk):
+            log.warning(
+                "Batch failed; keeping %d reading(s) buffered for retry",
+                len(buffer),
+            )
+            return
+        del buffer[: len(chunk)]
 
 
 def send_heartbeat(config: dict[str, Any]) -> None:
@@ -264,36 +330,62 @@ def send_heartbeat(config: dict[str, Any]) -> None:
 # ---------------------------------------------------------------------------
 
 def run(config: dict[str, Any]) -> None:
-    reading_interval  = config["reading_interval_seconds"]
+    reading_interval   = config["reading_interval_seconds"]
     heartbeat_interval = config["heartbeat_interval_seconds"]
-    simulate          = config["simulate"]
-    sensors           = config["sensors"]
+    flush_interval     = config["batch_flush_interval_seconds"]
+    buffer_limit       = config["batch_buffer_limit"]
+    simulate           = config["simulate"]
+    sensors            = config["sensors"]
 
     if simulate:
         log.info("Running in SIMULATE mode — no real GPIO reads")
 
+    buffer: list[dict[str, Any]] = []
     last_reading   = 0.0
     last_heartbeat = 0.0
+    last_flush     = 0.0
 
     log.info(
-        "Gateway started | device=%s | reading every %ds | heartbeat every %ds",
+        "Gateway started | device=%s | reading every %ds | "
+        "posting every %ds (max %d per batch) | heartbeat every %ds",
         config["device_id"],
         reading_interval,
+        flush_interval,
+        config["batch_max_readings"],
         heartbeat_interval,
     )
 
     while True:
         now = time.monotonic()
 
-        # Post sensor readings
+        # Take readings into the buffer
         if now - last_reading >= reading_interval:
             last_reading = now
             for sensor in sensors:
                 try:
                     value = get_sensor_value(sensor, simulate)
-                    post_sensor_reading(config, sensor, value)
+                    buffer.append(build_reading(config, sensor, value))
+                    log.debug("Read %s = %s %s", sensor["type"], value, sensor["unit"])
                 except Exception as exc:
                     log.error("Error reading %s: %s", sensor["type"], exc)
+
+            if len(buffer) > buffer_limit:
+                dropped = len(buffer) - buffer_limit
+                del buffer[:dropped]
+                log.error(
+                    "Buffer limit (%d) exceeded — dropped %d oldest reading(s). "
+                    "xPlant has been unreachable for a long time.",
+                    buffer_limit, dropped,
+                )
+
+        # Post the buffer on the flush interval, or as soon as it fills a batch
+        due = now - last_flush >= flush_interval
+        if buffer and (due or len(buffer) >= config["batch_max_readings"]):
+            last_flush = now
+            try:
+                flush_readings(config, buffer)
+            except Exception as exc:
+                log.error("Error posting readings: %s", exc)
 
         # Send heartbeat
         if now - last_heartbeat >= heartbeat_interval:

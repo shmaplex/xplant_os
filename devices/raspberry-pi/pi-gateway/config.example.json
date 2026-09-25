@@ -8,5 +8,8 @@
   ],
   "reading_interval_seconds": 60,
   "heartbeat_interval_seconds": 300,
+  "batch_flush_interval_seconds": 60,
+  "batch_max_readings": 100,
+  "batch_buffer_limit": 5000,
   "simulate": false
 }

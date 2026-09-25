@@ -16,6 +16,7 @@ Python 3.8+ required.
 import os
 import sys
 import json
+from datetime import datetime, timezone
 
 import requests
 
@@ -47,6 +48,11 @@ def post_sensor_reading(reading_type: str, value: float, unit: str) -> dict:
         "type": reading_type,
         "value": value,
         "unit": unit,
+        # The field is `recorded_at`, not `timestamp`: the API ignores fields
+        # it doesn't know, so a `timestamp` would be dropped and the reading
+        # would get the time the request arrived. Send the time the reading
+        # was taken, in UTC ending in "Z" (isoformat()'s "+00:00" is rejected).
+        "recorded_at": datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z"),
     }
 
     resp = requests.post(
