@@ -8,9 +8,7 @@ Thank you for helping make xplant_os better. This guide explains how the reposit
 
 ```
 xplant_os/
-  docs/           ← documentation: quickstart, auth, API reference, scopes
-  packages/       ← reusable SDK packages (npm, pip, etc.)
-    js-sdk/       ← @shmaplex/xplant-sdk: TypeScript/JavaScript client (source at shmaplex/xplant-sdk)
+  docs/           ← the documentation site (docs.xplantpro.com): guides in docs/content/docs, API pages generated from docs/openapi
   devices/        ← firmware and hardware integration examples
     arduino/      ← Arduino / ESP32 sketches (.ino + config.h)
     raspberry-pi/ ← Python scripts for Pi-based gateways and kiosks
@@ -32,43 +30,37 @@ xplant_os/
    - Hardware requirements (components, wiring diagram in ASCII)
    - Software/library dependencies
    - Step-by-step setup instructions
-   - A link to the API key settings page: `https://xplant.shmaplex.com/settings/integrations`
+   - A link to the API key settings page: `https://app.xplantpro.com/settings/integrations/api-keys`
 3. Add the firmware/script source file(s).
-4. Add a `config.h` or `config.example.json` with placeholder values — **never real keys**.
+4. Add a `config.h` or `config.example.json` with placeholder values — **never real keys or tokens**. Devices authenticate with a device token (`xpd_…`), never a workspace key.
 5. Reference the new package from the root `README.md` devices table.
 
-### Adding a new SDK language
+### SDKs
 
-1. Create a folder under `packages/<language>-sdk/`.
-2. Follow the same structure as `packages/js-sdk/`: `src/`, `README.md`, package manifest.
-3. Implement at minimum: `XPlantClient` (key auth, base URL), `sensorReadings.create()`, `devices.heartbeat()`.
-4. Add tests if your language has a standard testing tool.
+The JavaScript / TypeScript SDK, `@shmaplex/xplant-sdk`, lives in its own repository: [shmaplex/xplant_sdk](https://github.com/shmaplex/xplant_sdk). Open SDK issues and pull requests there.
+
+To propose an SDK for another language, open a [new package proposal](https://github.com/shmaplex/xplant_os/issues/new?template=new_package.md) first.
 
 ### Adding a new example
 
 1. Create a folder under `examples/<name>/`.
 2. Add a `README.md` explaining what the example demonstrates.
 3. Keep source files short and heavily commented — these are for developers new to xPlant.
-4. Use `YOUR_XPLANT_API_KEY` or `xpk_live_YOUR_KEY_HERE` as the placeholder key string.
+4. Use `xpk_live_YOUR_KEY_HERE` as the placeholder for a workspace key and `xpd_live_YOUR_TOKEN_HERE` for a device token. Code that runs on a device must use a device token, never a workspace key.
 
 ### Documentation changes
 
-Edit files in `docs/`. Keep language clear and aimed at hardware developers and hobbyists, not just software engineers.
+The docs site lives in `docs/` (Next.js + Fumadocs). Guides are MDX files in `docs/content/docs/`. The API reference and the scopes page are **generated**. Don't edit `docs/content/docs/api/` or `scopes.mdx` by hand:
+
+- the spec is vendored in `docs/openapi/openapi.json` (update it with `npm run sync:openapi -- <path>`),
+- examples and SDK calls live in `docs/openapi/overlay.mjs`,
+- `npm run generate` rebuilds the pages, and `npm run check` fails if they're stale or if anything private slipped in.
+
+See [`docs/README.md`](docs/README.md). Keep language clear and aimed at hardware developers and hobbyists, not just software engineers.
 
 ---
 
 ## Development workflow
-
-### JS SDK
-
-```bash
-cd packages/js-sdk
-npm install      # install dev dependencies
-npm run build    # tsc compile
-npm test         # run tests (if present)
-```
-
-No lockfile is committed — add `package-lock.json` to your `.gitignore` locally if your npm version auto-generates one.
 
 ### Arduino / ESP32
 

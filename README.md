@@ -2,7 +2,7 @@
   <img src=".github/github-header.png" alt="xplant_os" width="full"/>
 </p>
 <p align="center">
-  Open-source SDKs, firmware, and hardware bridges for connecting physical lab devices to <a href="https://xplantpro.com">xPlant</a>.
+  Open-source SDKs, firmware, and hardware bridges for connecting physical lab devices to <a href="https://www.xplantpro.com">xPlant</a>.
 </p>
 
 <p align="center">
@@ -13,16 +13,16 @@
 
 ---
 
-xplant_os is the open-source companion to [xPlant](https://xplantpro.com) — a collection of SDKs, firmware examples, and hardware bridges for connecting physical lab devices and external software to your xPlant workspace.
+xplant_os is the open-source companion to [xPlant](https://www.xplantpro.com) — a collection of SDKs, firmware examples, and hardware bridges for connecting physical lab devices and external software to your xPlant workspace.
 
-Production auth, user data, billing, RLS policies, and application secrets live exclusively in the main xPlant app and are never part of this repository.
+The xPlant application itself, user data and credentials are never part of this repository.
 
 ---
 
 ## Table of Contents
 
 - [Getting Started](#getting-started)
-- [Packages](#packages) — JavaScript/TypeScript SDK
+- [Packages](#packages): JavaScript/TypeScript SDK
 - [Devices](#devices) — ESP32, Raspberry Pi, ESPHome, Tasmota
 - [Examples](#examples) — Minimal working examples
 - [Documentation](#documentation)
@@ -34,18 +34,17 @@ Production auth, user data, billing, RLS policies, and application secrets live 
 
 ## Getting Started
 
-**1. Get your API key**
+**📖 Full documentation: [docs.xplantpro.com](https://docs.xplantpro.com)**: quickstart, guides, every endpoint, and AI-friendly Markdown of every page.
 
-Log in to [xplantpro.com](https://xplantpro.com), go to **Settings > Integrations > API Keys**, and generate a key. It will look like:
+**1. Get a key**
 
-```
-xpk_live_a1b2c3d4e5f6...  (production)
-xpk_dev_a1b2c3d4e5f6...   (development)
-```
+In xPlant, open **Settings > Integrations > [API Keys](https://app.xplantpro.com/settings/integrations/api-keys)** and create a key with only the [scopes](https://docs.xplantpro.com/docs/scopes) you need. Workspace keys start with `xpk_live_` or `xpk_dev_` (both act on your real workspace; there is no sandbox). Keep them on servers and scripts you control, never in source control.
 
-Keep this key secret. Never commit it to source control.
+**2. Devices get device tokens, not keys**
 
-**2. Pick your device type**
+A Raspberry Pi, an ESP32 or any other box in the lab carries a **device token** (`xpd_…`) that can only post its own readings, events and heartbeats. Use your workspace key once, from your own computer, to [register the device and create its token](https://docs.xplantpro.com/docs/device-tokens).
+
+**3. Pick your starting point**
 
 | I have... | Start here |
 |---|---|
@@ -53,41 +52,41 @@ Keep this key secret. Never commit it to source control.
 | Raspberry Pi | [`devices/raspberry-pi/pi-gateway/`](devices/raspberry-pi/pi-gateway/) |
 | ESPHome device | [`devices/esphome/`](devices/esphome/) |
 | Tasmota device | [`devices/tasmota/`](devices/tasmota/) |
-| Node.js / TypeScript project | [`packages/js-sdk/`](packages/js-sdk/) |
-| Just want to try the API | [`examples/basic-sensor/`](examples/basic-sensor/) |
-
-**3. Post your first reading in 5 minutes**
-
-See [docs/quickstart.md](docs/quickstart.md) for a step-by-step guide.
+| Node.js / TypeScript project | [`@shmaplex/xplant-sdk`](https://github.com/shmaplex/xplant_sdk) |
+| Just want to try the API | [Quickstart](https://docs.xplantpro.com/docs/quickstart) |
 
 ---
 
 ## Packages
 
-### `@shmaplex/xplant-sdk` — JavaScript / TypeScript SDK
+### `@shmaplex/xplant-sdk`: JavaScript / TypeScript SDK
 
-The SDK now lives in its own repository: **[shmaplex/xplant-sdk](https://github.com/shmaplex/xplant-sdk)**
+The SDK lives in its own repository: **[shmaplex/xplant_sdk](https://github.com/shmaplex/xplant_sdk)**
 
 ```bash
 npm install @shmaplex/xplant-sdk
 ```
 
-A lightweight TypeScript client for the xPlant external API. Works in Node.js and modern browsers.
+A typed client for the xPlant API, for Node.js and modern browsers, with retries, idempotency and paging built in.
 
 ```typescript
 import { XPlantClient } from "@shmaplex/xplant-sdk";
 
+// On a server or in a script: a workspace key.
 const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+const tasks = await client.tasks.list({ status: "todo" });
 
-await client.sensorReadings.create({
-  device_id: "your-device-uuid",
+// On a device: a device token.
+const device = new XPlantClient({ deviceToken: process.env.XPLANT_DEVICE_TOKEN });
+await device.sensorReadings.create({
+  device_id: process.env.XPLANT_DEVICE_ID,
   type: "temperature",
   value: 24.5,
   unit: "C",
 });
 ```
 
-See [`packages/js-sdk/README.md`](packages/js-sdk/README.md) for full documentation.
+See the [SDK README](https://github.com/shmaplex/xplant_sdk#readme) and the [SDK page](https://docs.xplantpro.com/docs/sdk) for more.
 
 ---
 
@@ -122,22 +121,27 @@ See [`packages/js-sdk/README.md`](packages/js-sdk/README.md) for full documentat
 
 | Example | Description |
 |---|---|
-| [`basic-sensor`](examples/basic-sensor/) | Post a sensor reading in curl, Node.js, or Python |
-| [`transfer-counter`](examples/transfer-counter/) | Log a lab transfer event via the API |
-| [`contamination-check`](examples/contamination-check/) | Record a contamination observation |
+| [`basic-sensor`](examples/basic-sensor/) | Post sensor readings and a heartbeat with a device token, in curl, Node.js or Python |
+| [`transfer-counter`](examples/transfer-counter/) | Record a transfer via the API |
+| [`contamination-check`](examples/contamination-check/) | Planned: log a contamination observation, once that endpoint ships |
 | [`local-dashboard`](examples/local-dashboard/) | Concept: local sensor dashboard pulling from xPlant |
 
 ---
 
 ## Documentation
 
-| Doc | Description |
+The documentation site at **[docs.xplantpro.com](https://docs.xplantpro.com)** is built from [`docs/`](docs/) in this repository:
+
+| | |
 |---|---|
-| [docs/quickstart.md](docs/quickstart.md) | 5-minute setup guide |
-| [docs/auth.md](docs/auth.md) | API key model, scopes, security model |
-| [docs/api-reference.md](docs/api-reference.md) | External endpoint reference (v1) |
-| [docs/scopes.md](docs/scopes.md) | Scope definitions and permission model |
-| [docs/contributing.md](docs/contributing.md) | How to add a new device package or SDK |
+| [Quickstart](https://docs.xplantpro.com/docs/quickstart) | A first call in five minutes |
+| [Authentication](https://docs.xplantpro.com/docs/authentication) | Workspace keys and device tokens |
+| [Scopes](https://docs.xplantpro.com/docs/scopes) | All 34 scopes and the endpoints they unlock |
+| [API reference](https://docs.xplantpro.com/docs/api) | Every endpoint, generated from the OpenAPI spec |
+| [Guides](https://docs.xplantpro.com/docs/guides) | Task sync, SOP runs, label scanning, sensors and more |
+| [llms-full.txt](https://docs.xplantpro.com/llms-full.txt) | The whole API as one Markdown file, for AI assistants |
+
+To run the site locally, see [`docs/README.md`](docs/README.md).
 
 ---
 
@@ -154,7 +158,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide. The short version:
 
 ## Security
 
-See [SECURITY.md](SECURITY.md). The key rule: **never commit API keys**. If you accidentally push a key, revoke it immediately from **Settings > Integrations > API Keys** in xPlant.
+See [SECURITY.md](SECURITY.md). The key rules: **never commit keys or tokens**, and **never put a workspace key on a device**. If you accidentally push a key, revoke it immediately in **Settings > Integrations > [API Keys](https://app.xplantpro.com/settings/integrations/api-keys)**.
 
 Report vulnerabilities to security@shmaplex.com.
 
