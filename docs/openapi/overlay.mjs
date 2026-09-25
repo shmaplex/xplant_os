@@ -167,7 +167,7 @@ export const overlay = {
     title: "Advance a stage",
     description: "Moves a plant or explant to a new tissue-culture stage.",
     resultVar: "stage",
-    body: { plant_id: PLANT_ID, stage: "Multiplication" },
+    body: { explant_id: EXPLANT_ID, stage: "multiplication" },
     sdk: "const stage = await client.stages.advance($BODY);",
     notes:
       "One call completes the current stage and makes the new one current. `stage` is required; give exactly one of `plant_id` or `explant_id`.",

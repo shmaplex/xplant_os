@@ -75,22 +75,24 @@ Optional fields: `transfer_date`, `from_location`, `to_location`, `transfer_cycl
 
 One call completes the current stage and makes the new one current. `stage` is required; give exactly one of `plant_id` or `explant_id`.
 
+Send `stage` as a key from your lab's stage list. Plants and explants have separate lists: an explant might move to `multiplication` or `root_induction`, a plant to `production`. Use the stages your lab has set up in xPlant.
+
 ```bash tab="curl" tab-group="lang"
 curl -X POST https://app.xplantpro.com/api/v1/stages \
   -H "Authorization: Bearer $XPLANT_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"plant_id": "0b8e2f4c-6a1d-4c3e-9f7a-2d5b8c1e4a90", "stage": "Multiplication"}'
+  -d '{"explant_id": "7c1d9e2a-3b4f-4a5c-8d6e-1f2a3b4c5d6e", "stage": "multiplication"}'
 ```
 
 ```js tab="JavaScript" tab-group="lang"
-await client.stages.advance({ plant_id: plant.id, stage: "Multiplication" });
+await client.stages.advance({ explant_id: explant.id, stage: "multiplication" });
 ```
 
 ```python tab="Python" tab-group="lang"
 requests.post(
     f"{BASE}/stages",
     headers=HEADERS,
-    json={"plant_id": plant["id"], "stage": "Multiplication"},
+    json={"explant_id": explant["id"], "stage": "multiplication"},
     timeout=10,
 ).raise_for_status()
 ```
