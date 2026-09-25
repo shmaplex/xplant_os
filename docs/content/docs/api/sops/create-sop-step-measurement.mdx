@@ -144,7 +144,7 @@ measurement = body["data"]
 | `409` | `IDEMPOTENCY_IN_FLIGHT` | A request with this `Idempotency-Key` is still being processed; retry after `Retry-After` seconds. |
 | `409` | `SOP_RUN_CLOSED` | The run has ended: its status is one of `completed`, `failed`, `cancelled`, `archived`. An ended run's record is final and takes no more evidence. |
 | `422` | `VALIDATION_ERROR` | The `Idempotency-Key` header is malformed. |
-| `422` | `VALIDATION_ERROR` | A field failed validation — a missing `unit`, a `value` that is not a number, or a `recorded_at` that is not a timestamp with a time zone. `error` gives the first problem but does not name the field. |
+| `422` | `VALIDATION_ERROR` | A field failed validation — a missing `unit`, a `value` that is not a number, or a `recorded_at` that is not a timestamp with a time zone. `error` names the field with the first problem, for example `sop_id: Invalid uuid`. |
 | `429` | `RATE_LIMIT_EXCEEDED` | Too many requests for this key, device token or workspace. Wait `Retry-After` seconds. |
 | `500` | `SOP_STEP_EVENT_CREATE_FAILED` | The evidence could not be saved. Retry with the same `Idempotency-Key`. |
 

@@ -10949,7 +10949,7 @@
             }
           },
           "422": {
-            "description": "`VALIDATION_ERROR` — The `Idempotency-Key` header is malformed.\n\n`VALIDATION_ERROR` — A field failed validation, for example a missing `barcode` or a `scanned_at` that is not a timestamp with a time zone. `error` gives the first problem but does not name the field.",
+            "description": "`VALIDATION_ERROR` — The `Idempotency-Key` header is malformed.\n\n`VALIDATION_ERROR` — A field failed validation, for example a missing `barcode` or a `scanned_at` that is not a timestamp with a time zone. `error` names the field with the first problem, for example `scanned_at: Invalid datetime`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10979,7 +10979,7 @@
               },
               {
                 "code": "VALIDATION_ERROR",
-                "when": "A field failed validation, for example a missing `barcode` or a `scanned_at` that is not a timestamp with a time zone. `error` gives the first problem but does not name the field."
+                "when": "A field failed validation, for example a missing `barcode` or a `scanned_at` that is not a timestamp with a time zone. `error` names the field with the first problem, for example `scanned_at: Invalid datetime`."
               }
             ],
             "headers": {
@@ -17165,7 +17165,7 @@
             }
           },
           "422": {
-            "description": "`VALIDATION_ERROR` — The `Idempotency-Key` header is malformed.\n\n`VALIDATION_ERROR` — A field failed validation, for example `sop_id` is missing or is not an id. `error` gives the first problem but does not name the field.",
+            "description": "`VALIDATION_ERROR` — The `Idempotency-Key` header is malformed.\n\n`VALIDATION_ERROR` — A field failed validation, for example `sop_id` is missing or is not an id. `error` names the field with the first problem, for example `sop_id: Invalid uuid`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -17195,7 +17195,7 @@
               },
               {
                 "code": "VALIDATION_ERROR",
-                "when": "A field failed validation, for example `sop_id` is missing or is not an id. `error` gives the first problem but does not name the field."
+                "when": "A field failed validation, for example `sop_id` is missing or is not an id. `error` names the field with the first problem, for example `sop_id: Invalid uuid`."
               }
             ],
             "headers": {
@@ -17951,7 +17951,7 @@
             }
           },
           "422": {
-            "description": "`VALIDATION_ERROR` — The `Idempotency-Key` header is malformed.\n\n`VALIDATION_ERROR` — A field failed validation — an `event_type` outside the list, or a `recorded_at` that is not a timestamp with a time zone. `error` gives the first problem but does not name the field.",
+            "description": "`VALIDATION_ERROR` — The `Idempotency-Key` header is malformed.\n\n`VALIDATION_ERROR` — A field failed validation — an `event_type` outside the list, or a `recorded_at` that is not a timestamp with a time zone. `error` names the field with the first problem, for example `sop_id: Invalid uuid`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -17981,7 +17981,7 @@
               },
               {
                 "code": "VALIDATION_ERROR",
-                "when": "A field failed validation — an `event_type` outside the list, or a `recorded_at` that is not a timestamp with a time zone. `error` gives the first problem but does not name the field."
+                "when": "A field failed validation — an `event_type` outside the list, or a `recorded_at` that is not a timestamp with a time zone. `error` names the field with the first problem, for example `sop_id: Invalid uuid`."
               }
             ],
             "headers": {
@@ -18431,7 +18431,7 @@
             }
           },
           "422": {
-            "description": "`VALIDATION_ERROR` — The `Idempotency-Key` header is malformed.\n\n`VALIDATION_ERROR` — A field failed validation — a missing `unit`, a `value` that is not a number, or a `recorded_at` that is not a timestamp with a time zone. `error` gives the first problem but does not name the field.",
+            "description": "`VALIDATION_ERROR` — The `Idempotency-Key` header is malformed.\n\n`VALIDATION_ERROR` — A field failed validation — a missing `unit`, a `value` that is not a number, or a `recorded_at` that is not a timestamp with a time zone. `error` names the field with the first problem, for example `sop_id: Invalid uuid`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -18461,7 +18461,7 @@
               },
               {
                 "code": "VALIDATION_ERROR",
-                "when": "A field failed validation — a missing `unit`, a `value` that is not a number, or a `recorded_at` that is not a timestamp with a time zone. `error` gives the first problem but does not name the field."
+                "when": "A field failed validation — a missing `unit`, a `value` that is not a number, or a `recorded_at` that is not a timestamp with a time zone. `error` names the field with the first problem, for example `sop_id: Invalid uuid`."
               }
             ],
             "headers": {
@@ -26272,6 +26272,6 @@
   },
   "x-docs-source": {
     "ref": "origin/main",
-    "commit": "741aebc86"
+    "commit": "2c47cb1a5"
   }
 }
