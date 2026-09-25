@@ -26,7 +26,7 @@
  * show a fetch example (and say which release brings the SDK call) until
  * this is bumped.
  */
-export const SDK_VERSION = "0.5.0";
+export const SDK_VERSION = "0.6.0";
 
 const PLANT_ID = "0b8e2f4c-6a1d-4c3e-9f7a-2d5b8c1e4a90";
 const EXPLANT_ID = "7c1d9e2a-3b4f-4a5c-8d6e-1f2a3b4c5d6e";
@@ -414,7 +414,7 @@ export const overlay = {
     title: "List sensor readings",
     description: "Stored sensor readings, filtered by device, room, type or time.",
     resultVar: "readings",
-    query: { device_id: DEVICE_ID, type: "temperature", since: "2026-09-24T00:00:00Z", limit: 200 },
+    query: { device_id: DEVICE_ID, type: "temperature", since: "2026-09-24T00:00:00Z", until: "2026-09-25T00:00:00Z", limit: 1000 },
     sdk: "const readings = await client.sensorReadings.list($QUERY);",
   },
   "POST /api/v1/sensor-readings": {

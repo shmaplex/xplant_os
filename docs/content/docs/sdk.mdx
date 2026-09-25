@@ -9,7 +9,7 @@ npm install @shmaplex/xplant-sdk
 
 The source, issues and full reference live at **[github.com/shmaplex/xplant_sdk](https://github.com/shmaplex/xplant_sdk#readme)**. Every endpoint page in the [API reference](/docs/api) shows the SDK call next to curl and Python.
 
-These docs match **@shmaplex/xplant-sdk 0.5.0**. The SDK runs on **Node.js 18+** and any runtime with standard `fetch`: Deno, Bun, edge and serverless functions. **Call the API from your server, not a web page.** The API doesn't send CORS headers, and keys don't belong in front-end code.
+These docs match **@shmaplex/xplant-sdk 0.6.0**. The SDK runs on **Node.js 18+** and any runtime with standard `fetch`: Deno, Bun, edge and serverless functions. **Call the API from your server, not a web page.** The API doesn't send CORS headers, and keys don't belong in front-end code.
 
 ## Create a client
 
@@ -52,7 +52,7 @@ for await (const { data, nextCursor, hasMore } of client.explants.list().pages()
 const next = await client.explants.list({ cursor: savedCursor });
 ```
 
-This works the same whether a list pages by cursor or by offset. See [Pagination](/docs/pagination).
+Every list pages by cursor, including `devices.list()`, `devices.listTokens(deviceId)` and `sensorReadings.list()`. Pass request options such as `{ signal }` after the list parameters: `devices.list(params, options)`, `devices.listTokens(deviceId, params, options)`. `devices.get(id)` searches every page. See [Pagination](/docs/pagination).
 
 ## Errors
 
@@ -64,7 +64,7 @@ try {
 } catch (err) {
   if (err instanceof XPlantError) {
     // The API answered with an error.
-    console.log(err.status, err.code, err.message, err.retryAfter);
+    console.log(err.status, err.code, err.message, err.retryAfter, err.requestId);
   } else if (err instanceof XPlantTimeoutError) {
     // No answer within the timeout.
     console.log(`Timed out after ${err.timeout} ms`);
@@ -75,6 +75,18 @@ try {
 ```
 
 Branch on `err.code`. `err.message` includes the API's `error` text, which may be reworded. `XPlantTimeoutError` is a kind of `XPlantConnectionError`, so one check covers both.
+
+## Request IDs
+
+Every response carries an `X-Request-Id`. The SDK exposes it as `requestId`: on errors (`err.requestId`), and on each page from `.pages()` (`page.requestId`). Log it, and quote it when you contact support.
+
+```js
+try {
+  await client.tasks.get(taskId);
+} catch (err) {
+  if (err instanceof XPlantError) console.error(`${err.code} (request ${err.requestId})`);
+}
+```
 
 ## Retries
 
