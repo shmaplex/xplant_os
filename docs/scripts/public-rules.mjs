@@ -64,11 +64,26 @@ export const rules = [
     files: /\.(md|mdx|json|mjs|py|sh|ino|ya?ml|txt)$/,
   },
   {
+    id: "lab-terminology",
+    pattern: /\breplat(e|ed|es|ing)\b|@rivera\b/gi,
+    why: "one lab's own terminology, or a handle that reads as a real person; use \"subculture\" and a fictional handle such as @sam",
+  },
+  {
     id: "email",
     pattern: /\b[\w.+-]+@(?!example\.(com|org)\b)[\w-]+(\.[\w-]+)+\b/g,
     allow: ["support@xplantpro.com", "security@shmaplex.com"],
     why: "only the published addresses may appear",
   },
+];
+
+/**
+ * Replacements the spec sync applies to every string it vendors, so wording
+ * the public docs must not carry can't come back with the next sync.
+ */
+export const scrub = [
+  [/\bReplat(e|ed|es|ing)\b/g, (_m, s) => `Subcultur${{ e: "e", ed: "ed", es: "es", ing: "ing" }[s]}`],
+  [/\breplat(e|ed|es|ing)\b/g, (_m, s) => `subcultur${{ e: "e", ed: "ed", es: "es", ing: "ing" }[s]}`],
+  [/@rivera\b/gi, "@sam"],
 ];
 
 /** Returns [{ id, why, match, line }] for one file's text. */

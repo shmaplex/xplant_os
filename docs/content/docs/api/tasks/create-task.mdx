@@ -38,7 +38,7 @@ Send an `Idempotency-Key` header to make retries safe: a repeat with the same ke
 ```bash tab="curl" tab-group="lang"
 curl -X POST https://app.xplantpro.com/api/v1/tasks \
   -H "Authorization: Bearer $XPLANT_API_KEY" \
-  -H "Idempotency-Key: bench-3-replate-line-0412" \
+  -H "Idempotency-Key: bench-3-subculture-line-0412" \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Transfer the Alocasia line onto fresh medium",
@@ -66,7 +66,7 @@ const task = await client.tasks.create(
     assigned_to: "0d7e4b9a-6f21-4c3e-8a5b-2e9f1c7d4a60",
     genus: "Alocasia",
   },
-  { idempotencyKey: "bench-3-replate-line-0412" },
+  { idempotencyKey: "bench-3-subculture-line-0412" },
 );
 ```
 
@@ -78,7 +78,7 @@ resp = requests.post(
     "https://app.xplantpro.com/api/v1/tasks",
     headers={
         "Authorization": f"Bearer {os.environ['XPLANT_API_KEY']}",
-        "Idempotency-Key": "bench-3-replate-line-0412",
+        "Idempotency-Key": "bench-3-subculture-line-0412",
     },
     json={
         "title": "Transfer the Alocasia line onto fresh medium",

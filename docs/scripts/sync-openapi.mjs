@@ -20,7 +20,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { scan } from "./public-rules.mjs";
+import { scan, scrub } from "./public-rules.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const target = path.join(here, "..", "openapi", "openapi.json");
@@ -82,14 +82,19 @@ function cleanText(text) {
   return out.length > 0 ? out : undefined;
 }
 
+function scrubText(text) {
+  return scrub.reduce((t, [pattern, replacement]) => t.replace(pattern, replacement), text);
+}
+
 function clean(node) {
   if (Array.isArray(node)) return node.map(clean);
+  if (typeof node === "string") return scrubText(node);
   if (!node || typeof node !== "object") return node;
   const out = {};
   for (const [key, value] of Object.entries(node)) {
     if (INTERNAL_KEYS.has(key)) continue;
     if (key === "description" || key === "summary") {
-      const text = cleanText(value);
+      const text = cleanText(typeof value === "string" ? scrubText(value) : value);
       if (text !== undefined) out[key] = text;
       continue;
     }

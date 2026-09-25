@@ -199,15 +199,15 @@ export const overlay = {
     title: "Create a task",
     description: "Adds a task to the workspace.",
     resultVar: "task",
-    idempotencyKey: "bench-3-replate-line-0412",
+    idempotencyKey: "bench-3-subculture-line-0412",
     body: {
-      title: "Replate LINE-0412",
+      title: "Subculture LINE-0412",
       category: "transfer",
       priority: "urgent",
       due_date: "2026-10-02T09:00:00Z",
       assigned_to: MEMBER_ID,
     },
-    sdk: 'const task = await client.tasks.create(\n  $BODY,\n  { idempotencyKey: "bench-3-replate-line-0412" },\n);',
+    sdk: 'const task = await client.tasks.create(\n  $BODY,\n  { idempotencyKey: "bench-3-subculture-line-0412" },\n);',
   },
   "GET /api/v1/tasks/{id}": {
     slug: "get-task",
