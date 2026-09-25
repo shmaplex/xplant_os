@@ -11,6 +11,7 @@ import { notFound } from "next/navigation";
 import { EndpointHeader } from "@/components/endpoint-header";
 import { getMDXComponents } from "@/components/mdx";
 import { PageActions } from "@/components/page-actions";
+import { SiteFooter } from "@/components/site-footer";
 import { getPageMarkdownUrl, gitConfig, siteUrl } from "@/lib/shared";
 import { source } from "@/lib/source";
 
@@ -38,6 +39,7 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
           href={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/${gitConfig.contentDir}/${page.path}`}
         />
       )}
+      <SiteFooter compact />
     </DocsPage>
   );
 }

@@ -54,8 +54,8 @@ Device tokens (`xpd_`) don't carry scopes. They can only write readings, heartbe
 
 | Scope | Allows | Minimum role | Plans | Endpoints |
 | --- | --- | --- | --- | --- |
-| `read:contaminations` | Read contamination logs | Any member | Teams, Enterprise | No endpoint yet |
-| `write:contaminations` | Submit contamination observations | `member` | Teams, Enterprise | No endpoint yet |
+| `read:contaminations` | Read contamination logs | Any member | Teams, Enterprise | [`GET /contaminations`](/docs/api/contaminations/list-contaminations)<br />[`GET /contaminations/{id}`](/docs/api/contaminations/get-contamination) |
+| `write:contaminations` | Submit contamination observations | `member` | Teams, Enterprise | [`POST /contaminations`](/docs/api/contaminations/create-contamination) |
 
 ### Tasks
 
@@ -69,17 +69,17 @@ Device tokens (`xpd_`) don't carry scopes. They can only write readings, heartbe
 
 | Scope | Allows | Minimum role | Plans | Endpoints |
 | --- | --- | --- | --- | --- |
-| `read:comments` | Read notes and comments on lab records | Any member | Teams, Enterprise | No endpoint yet |
-| `write:comments` | Add notes and comments to lab records | `member` | Teams, Enterprise | No endpoint yet |
+| `read:comments` | Read notes and comments on lab records | Any member | Teams, Enterprise | [`GET /comments`](/docs/api/comments/list-comments) |
+| `write:comments` | Add notes and comments to lab records | `member` | Teams, Enterprise | [`POST /comments`](/docs/api/comments/create-comment) |
 
 ### Media
 
 | Scope | Allows | Minimum role | Plans | Endpoints |
 | --- | --- | --- | --- | --- |
-| `read:assets` | Read photos and media attached to lab records | Any member | Teams, Enterprise | No endpoint yet |
-| `write:assets` | Attach photos and media to lab records | `member` | Teams, Enterprise | No endpoint yet |
-| `read:media_recipes` | Read media recipe data | Any member | Teams, Enterprise | No endpoint yet |
-| `write:media_recipes` | Create and update media recipes | `member` | Teams, Enterprise | No endpoint yet |
+| `read:assets` | Read photos and media attached to lab records | Any member | Teams, Enterprise | [`GET /assets`](/docs/api/media/list-assets)<br />[`GET /assets/{id}`](/docs/api/media/get-asset) |
+| `write:assets` | Attach photos and media to lab records | `member` | Teams, Enterprise | [`POST /assets`](/docs/api/media/create-asset) |
+| `read:media_recipes` | Read media recipe data | Any member | Teams, Enterprise | [`GET /media-recipes`](/docs/api/media/list-media-recipes)<br />[`GET /media-recipes/{id}`](/docs/api/media/get-media-recipe) |
+| `write:media_recipes` | Create and update media recipes | `member` | Teams, Enterprise | [`POST /media-recipes`](/docs/api/media/create-media-recipe)<br />[`PATCH /media-recipes/{id}`](/docs/api/media/update-media-recipe) |
 
 ### Transfers
 

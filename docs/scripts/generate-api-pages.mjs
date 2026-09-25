@@ -378,10 +378,35 @@ function pythonExample(o) {
   ].join("\n");
 }
 
+/** For endpoints the SDK doesn't cover yet: plain fetch, same shape as the curl example. */
+function fetchExample(o) {
+  const { url, qs } = exampleUrl(o);
+  const token = o.deviceToken ? "XPLANT_DEVICE_TOKEN" : "XPLANT_API_KEY";
+  const headers = { Authorization: "__AUTH__" };
+  if (o.idempotent && o.extra.idempotencyKey) headers["Idempotency-Key"] = o.extra.idempotencyKey;
+  const body = exampleBody(o);
+  if (body) headers["Content-Type"] = "application/json";
+  const init = [`  method: "${o.method}",`, `  headers: ${js(headers).replace(/\n/g, "\n  ")},`];
+  if (body) init.push(`  body: JSON.stringify(${js(body).replace(/\n/g, "\n  ")}),`);
+  const result = o.extra.resultVar ?? "data";
+  return [
+    "// Not in @shmaplex/xplant-sdk yet, so this uses fetch directly.",
+    `const res = await fetch("${qs ? `${url}?${qs}` : url}", {`,
+    ...init,
+    "});",
+    "const body = await res.json();",
+    "if (!body.ok) throw new Error(`${res.status} ${body.code}: ${body.error}`);",
+    `const ${result} = body.data;`,
+  ]
+    .join("\n")
+    .replace('"__AUTH__"', `\`Bearer \${process.env.${token}}\``);
+}
+
 function jsExample(o) {
   const sdk = o.extra.sdk;
+  if (sdk === null) return fetchExample(o);
   if (!sdk) {
-    errors.push(`${o.key}: overlay has no sdk call`);
+    errors.push(`${o.key}: overlay has no sdk call (use sdk: null if the SDK doesn't cover it yet)`);
     return "";
   }
   const body = exampleBody(o) ?? {};

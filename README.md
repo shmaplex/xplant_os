@@ -242,7 +242,7 @@ Guide: [Sensors and devices](https://docs.xplantpro.com/docs/guides/sensors-and-
 |---|---|
 | [`basic-sensor`](examples/basic-sensor/) | Post sensor readings and a heartbeat with a device token, in curl, Node.js or Python |
 | [`transfer-counter`](examples/transfer-counter/) | Look up an explant by your own code and record a transfer |
-| [`contamination-check`](examples/contamination-check/) | Planned: log a contamination observation, once that endpoint ships |
+| [`contamination-check`](examples/contamination-check/) | Scan a vessel label and record a contamination against it |
 | [`local-dashboard`](examples/local-dashboard/) | Concept: a local sensor dashboard pulling from xPlant |
 
 ---

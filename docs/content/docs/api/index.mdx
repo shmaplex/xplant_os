@@ -54,6 +54,14 @@ The machine-readable spec is [openapi.json](/openapi.json) (OpenAPI 3).
 | --- | --- | --- |
 | [`GET /events`](/docs/api/change-history/list-change-events) | List change history | `read:events` |
 
+## Contaminations
+
+| Endpoint | What it does | Scope |
+| --- | --- | --- |
+| [`GET /contaminations`](/docs/api/contaminations/list-contaminations) | List contaminations | `read:contaminations` |
+| [`POST /contaminations`](/docs/api/contaminations/create-contamination) | Record a contamination | `write:contaminations` |
+| [`GET /contaminations/{id}`](/docs/api/contaminations/get-contamination) | Get a contamination | `read:contaminations` |
+
 ## Tasks and demand
 
 | Endpoint | What it does | Scope |
@@ -64,6 +72,25 @@ The machine-readable spec is [openapi.json](/openapi.json) (OpenAPI 3).
 | [`PATCH /tasks/{id}`](/docs/api/tasks/update-task) | Update a task | `write:tasks` |
 | [`GET /tasks/demand`](/docs/api/tasks/list-demand-signals) | List demand signals | `read:tasks` |
 | [`POST /tasks/demand`](/docs/api/tasks/create-demand-signal) | Record a demand signal | `write:demand` |
+
+## Comments
+
+| Endpoint | What it does | Scope |
+| --- | --- | --- |
+| [`GET /comments`](/docs/api/comments/list-comments) | List comments | `read:comments` |
+| [`POST /comments`](/docs/api/comments/create-comment) | Add a comment | `write:comments` |
+
+## Media
+
+| Endpoint | What it does | Scope |
+| --- | --- | --- |
+| [`GET /assets`](/docs/api/media/list-assets) | List media files | `read:assets` |
+| [`POST /assets`](/docs/api/media/create-asset) | Attach a media file | `write:assets` |
+| [`GET /assets/{id}`](/docs/api/media/get-asset) | Get a media file | `read:assets` |
+| [`GET /media-recipes`](/docs/api/media/list-media-recipes) | List media recipes | `read:media_recipes` |
+| [`POST /media-recipes`](/docs/api/media/create-media-recipe) | Create a media recipe | `write:media_recipes` |
+| [`GET /media-recipes/{id}`](/docs/api/media/get-media-recipe) | Get a media recipe | `read:media_recipes` |
+| [`PATCH /media-recipes/{id}`](/docs/api/media/update-media-recipe) | Update a media recipe | `write:media_recipes` |
 
 ## SOPs and runs
 

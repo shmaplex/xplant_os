@@ -66,7 +66,9 @@ export function renderLlmsIndex(): string {
     `- API base URL: ${apiOrigin}/api/v1`,
     "- Auth: `Authorization: Bearer <key>`; workspace keys start `xpk_`, device tokens start `xpd_`.",
     '- Every response is `{"ok":true,"data":...}` or `{"ok":false,"data":null,"error":"...","code":"STABLE_CODE"}`; branch on `code`, never on `error`.',
-    "- JavaScript SDK: `npm install @shmaplex/xplant-sdk`",
+    "- JavaScript SDK: `npm install @shmaplex/xplant-sdk` (https://github.com/shmaplex/xplant_sdk)",
+    "- Product: xPlant, lab management for plant tissue culture: https://www.xplantpro.com",
+    "- Plans (which include the API): https://www.xplantpro.com/en/subscriptions",
     `- Everything on one page: ${siteUrl}/llms-full.txt`,
     `- Support: ${supportEmail}`,
   ];

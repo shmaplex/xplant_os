@@ -132,9 +132,9 @@ device = body["data"]
 | --- | --- | --- |
 | `400` | `VALIDATION_ERROR` | The request body is not valid JSON. |
 | `401` | `UNAUTHORIZED` | The key is missing, malformed or revoked, or its owner is no longer a member of the workspace. |
-| `402` | `PAID_PLAN_REQUIRED` | The workspace is not on a paid plan. The API is available on paid plans. |
+| `402` | `PAID_PLAN_REQUIRED` | The workspace has no paid plan. Connecting devices is included with every paid plan. |
 | `402` | `DEVICE_LIMIT_REACHED` | The workspace has connected every device its plan includes. Retire a device it no longer uses, or contact support to raise the limit. |
-| `403` | `FORBIDDEN` | The key lacks a scope this operation requires; `error` names the scope. |
+| `403` | `FORBIDDEN` | The key lacks a scope this operation requires, or its owner's current role in the workspace cannot use it — a key never does more than its owner can in xPlant. `error` names the scope, and for a role, the role it needs. |
 | `403` | `DEVICE_TOKEN_NOT_ACCEPTED` | A device token was sent; this operation needs a workspace API key. |
 | `404` | `NOT_FOUND` | `room_id` does not name a growing room in the workspace. Nothing was registered. |
 | `409` | `IDEMPOTENCY_IN_FLIGHT` | A request with this `Idempotency-Key` is still being processed; retry after `Retry-After` seconds. |

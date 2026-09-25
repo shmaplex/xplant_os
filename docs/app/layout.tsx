@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono } from "next/font/google";
-import { Banner } from "fumadocs-ui/components/banner";
 import { Provider } from "@/components/provider";
 import { appName, siteUrl } from "@/lib/shared";
 import "./global.css";
@@ -43,13 +42,6 @@ export default function Layout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body className="flex min-h-screen flex-col font-sans antialiased">
-        {/* Remove once @shmaplex/xplant-sdk 0.4.0 is the npm "latest". */}
-        <Banner id="sdk-0-4-pending" className="bg-fd-secondary text-fd-secondary-foreground">
-          <span className="px-2 text-center text-sm text-pretty">
-            The JavaScript examples use @shmaplex/xplant-sdk 0.4.0, which is on its way to npm. Until it lands,{" "}
-            <code className="font-mono">npm install</code> gives you an older version. curl and Python examples work today.
-          </span>
-        </Banner>
         <Provider>{children}</Provider>
       </body>
     </html>

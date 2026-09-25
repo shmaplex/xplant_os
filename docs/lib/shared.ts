@@ -12,7 +12,21 @@ export const siteUrl = (process.env.SITE_URL ?? "https://docs.xplantpro.com").re
 /** The API and the app. www.xplantpro.com is the marketing site only. */
 export const apiOrigin = "https://app.xplantpro.com";
 export const apiKeysUrl = `${apiOrigin}/settings/integrations/api-keys`;
+export const signInUrl = `${apiOrigin}/en/login`;
+export const signUpUrl = `${apiOrigin}/en/signup`;
+
+/** Marketing pages this site links back to (all checked to resolve). */
 export const marketingUrl = "https://www.xplantpro.com";
+export const marketing = {
+  home: marketingUrl,
+  howItWorks: `${marketingUrl}/en/how-it-works`,
+  plans: `${marketingUrl}/en/subscriptions`,
+  faq: `${marketingUrl}/en/faq`,
+  support: `${marketingUrl}/en/support`,
+  about: `${marketingUrl}/en/about`,
+  privacy: `${marketingUrl}/en/legal/privacy`,
+  terms: `${marketingUrl}/en/legal/terms`,
+};
 export const supportEmail = "support@xplantpro.com";
 export const sdkRepoUrl = "https://github.com/shmaplex/xplant_sdk";
 

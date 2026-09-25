@@ -106,8 +106,8 @@ event = body["data"]
 | --- | --- | --- |
 | `400` | `VALIDATION_ERROR` | The request body is not valid JSON. |
 | `401` | `UNAUTHORIZED` | The key is missing, malformed or revoked, or its owner is no longer a member of the workspace. |
-| `402` | `PAID_PLAN_REQUIRED` | The workspace is not on a paid plan. The API is available on paid plans. |
-| `403` | `FORBIDDEN` | The key lacks a scope this operation requires; `error` names the scope. |
+| `402` | `PAID_PLAN_REQUIRED` | The workspace has no paid plan. Connecting devices is included with every paid plan. |
+| `403` | `FORBIDDEN` | The key lacks a scope this operation requires, or its owner's current role in the workspace cannot use it — a key never does more than its owner can in xPlant. `error` names the scope, and for a role, the role it needs. |
 | `403` | `DEVICE_TOKEN_WRONG_DEVICE` | A device token was used to write about a device other than its own. |
 | `404` | `NOT_FOUND` | `device_id` does not name a device in the workspace. |
 | `422` | `VALIDATION_ERROR` | A field failed validation. `error` names the first one, for example `event_type: Invalid enum value`. |

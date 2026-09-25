@@ -1,6 +1,6 @@
 import { ArrowRight, BookOpen, Braces, Cpu, KeyRound, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { apiKeysUrl, siteUrl } from "@/lib/shared";
+import { apiKeysUrl, marketing, siteUrl } from "@/lib/shared";
 
 const cards = [
   {
@@ -86,6 +86,17 @@ export default function HomePage() {
               Get an API key
             </a>
           </div>
+          <p className="text-sm text-fd-muted-foreground">
+            New to xPlant?{" "}
+            <a href={marketing.howItWorks} className="font-medium text-fd-foreground underline underline-offset-4">
+              See how it works
+            </a>{" "}
+            or{" "}
+            <a href={marketing.plans} className="font-medium text-fd-foreground underline underline-offset-4">
+              compare plans
+            </a>
+            .
+          </p>
         </div>
 
         <div className="min-w-0 overflow-hidden rounded-2xl border border-fd-border bg-fd-card shadow-sm">

@@ -104,7 +104,7 @@ me = body["data"]
 | Status | Code | When |
 | --- | --- | --- |
 | `401` | `UNAUTHORIZED` | The key is missing, malformed or revoked, or its owner is no longer a member of the workspace. |
-| `402` | `PAID_PLAN_REQUIRED` | The workspace is not on a paid plan. The API is available on paid plans. |
+| `402` | `PAID_PLAN_REQUIRED` | The workspace's plan does not include the API. The full API is included with xPlant+ Teams and Enterprise; on Hobby and Pro Lab, keys can connect devices only. |
 | `403` | `DEVICE_TOKEN_NOT_ACCEPTED` | A device token was sent; this operation needs a workspace API key. |
 | `429` | `RATE_LIMIT_EXCEEDED` | Too many requests for this key, device token or workspace. Wait `Retry-After` seconds. |
 

@@ -20,9 +20,13 @@ A repeat with the same key returns **the first response**, with the same status 
 The header is honoured on these endpoints, and only these:
 
 {/* generated:idempotent-endpoints */}
+- [`POST /assets`](/docs/api/media/create-asset): Attach a media file
+- [`POST /comments`](/docs/api/comments/create-comment): Add a comment
+- [`POST /contaminations`](/docs/api/contaminations/create-contamination): Record a contamination
 - [`POST /devices`](/docs/api/devices/create-device): Register a device
 - [`POST /equipment/{id}/events`](/docs/api/equipment/create-equipment-event): Record an equipment event
 - [`POST /label-scans`](/docs/api/labels/create-label-scan): Record a label scan
+- [`POST /media-recipes`](/docs/api/media/create-media-recipe): Create a media recipe
 - [`POST /sop-runs`](/docs/api/sops/create-sop-run): Start an SOP run
 - [`POST /sop-runs/{id}/steps/{stepId}/events`](/docs/api/sops/create-sop-step-event): Record step evidence
 - [`POST /sop-runs/{id}/steps/{stepId}/measurements`](/docs/api/sops/create-sop-step-measurement): Record a step measurement

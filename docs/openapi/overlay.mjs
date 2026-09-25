@@ -8,7 +8,8 @@
  * short note. `npm run check` fails if an entry here has no operation in the
  * spec, or an operation in the spec has no entry here.
  *
- * sdk:   the JavaScript lines after the client is created (`client` for a
+ * sdk:   null when the SDK doesn't cover the endpoint yet (the page shows fetch);
+ *        otherwise the JavaScript lines after the client is created (`client` for a
  *        workspace key, `device` for a device token). `$QUERY` and `$BODY` are
  *        replaced with the `query` / `body` examples as JS literals; or pass a
  *        function ({ js, body, query }) => string for anything else.
@@ -24,6 +25,9 @@ const RUN_ID = "2a4c6e8b-1d3f-4b5a-a7c9-e1f3a5b7c9d1";
 const DEVICE_ID = "5f7a9c1e-3b5d-4f7a-9c1e-3b5d7f9a1c3e";
 const EQUIPMENT_ID = "8b0d2f4a-6c8e-4a0b-8d2f-4a6c8e0b2d4f";
 const MEMBER_ID = "1c3e5a7b-9d1f-4b3d-8e5a-7b9d1f3b5d7e";
+const CONTAMINATION_ID = "6a8c0e2b-4d6f-4a8c-9e0b-2d4f6a8c0e2b";
+const ASSET_ID = "9e1a3c5b-7d9f-4b1d-a3c5-e7f9b1d3f5a7";
+const RECIPE_ID = "4b6d8f0a-2c4e-4d6f-8a0c-2e4b6d8f0a2c";
 
 export const overlay = {
   // ── Account ───────────────────────────────────────────────────────────────
@@ -399,6 +403,87 @@ export const overlay = {
     sdk: ({ js, body }) => `const stored = await device.sensorReadings.createBatch(${js(body.readings)});`,
     notes:
       "Send a batch (`{\"readings\": [...]}`, up to 500) rather than one request per reading: batching uses far less of your rate limit. Put `external_id` and `recorded_at` on every reading so a retried batch doesn't store duplicates. See [Sensors and devices](/docs/guides/sensors-and-devices).",
+  },
+
+  // ── Contaminations ────────────────────────────────────────────────────────
+  // Not in the SDK yet (sdk: null): pages show a fetch example instead.
+  "GET /api/v1/contaminations": {
+    title: "List contaminations",
+    resultVar: "contaminations",
+    query: { explant_id: EXPLANT_ID, status: "active" },
+    sdk: null,
+  },
+  "POST /api/v1/contaminations": {
+    title: "Record a contamination",
+    resultVar: "contamination",
+    idempotencyKey: "scanner-3-line-0412-contamination",
+    sdk: null,
+  },
+  "GET /api/v1/contaminations/{id}": {
+    title: "Get a contamination",
+    path: { id: CONTAMINATION_ID },
+    resultVar: "contamination",
+    sdk: null,
+  },
+
+  // ── Comments ──────────────────────────────────────────────────────────────
+  "GET /api/v1/comments": {
+    title: "List comments",
+    resultVar: "comments",
+    query: { entity_type: "explant", entity_id: EXPLANT_ID },
+    sdk: null,
+  },
+  "POST /api/v1/comments": {
+    title: "Add a comment",
+    resultVar: "comment",
+    idempotencyKey: "bench-3-line-0412-note-1",
+    sdk: null,
+  },
+
+  // ── Media files ───────────────────────────────────────────────────────────
+  "GET /api/v1/assets": {
+    title: "List media files",
+    resultVar: "assets",
+    query: { target: "explant", target_id: EXPLANT_ID },
+    sdk: null,
+  },
+  "POST /api/v1/assets": {
+    title: "Attach a media file",
+    resultVar: "asset",
+    idempotencyKey: "camera-2-line-0412-photo-1",
+    sdk: null,
+  },
+  "GET /api/v1/assets/{id}": {
+    title: "Get a media file",
+    path: { id: ASSET_ID },
+    resultVar: "asset",
+    sdk: null,
+  },
+
+  // ── Media recipes ─────────────────────────────────────────────────────────
+  "GET /api/v1/media-recipes": {
+    title: "List media recipes",
+    resultVar: "recipes",
+    query: { status: "published" },
+    sdk: null,
+  },
+  "POST /api/v1/media-recipes": {
+    title: "Create a media recipe",
+    resultVar: "recipe",
+    idempotencyKey: "recipes-sync-half-ms-v3",
+    sdk: null,
+  },
+  "GET /api/v1/media-recipes/{id}": {
+    title: "Get a media recipe",
+    path: { id: RECIPE_ID },
+    resultVar: "recipe",
+    sdk: null,
+  },
+  "PATCH /api/v1/media-recipes/{id}": {
+    title: "Update a media recipe",
+    path: { id: RECIPE_ID },
+    resultVar: "recipe",
+    sdk: null,
   },
 
   // ── Equipment ─────────────────────────────────────────────────────────────

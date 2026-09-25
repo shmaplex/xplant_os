@@ -1,5 +1,5 @@
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
-import { apiKeysUrl, gitConfig, marketingUrl } from "./shared";
+import { apiKeysUrl, gitConfig, marketing } from "./shared";
 
 function Wordmark() {
   return (
@@ -23,7 +23,8 @@ export function baseOptions(): BaseLayoutProps {
       { text: "Docs", url: "/docs", active: "nested-url" },
       { text: "API reference", url: "/docs/api", active: "nested-url" },
       { text: "Get an API key", url: apiKeysUrl, external: true },
-      { text: "xplantpro.com", url: marketingUrl, external: true },
+      { text: "Pricing", url: marketing.plans, external: true },
+      { text: "xplantpro.com", url: marketing.home, external: true },
     ],
   };
 }
