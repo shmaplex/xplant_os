@@ -41,14 +41,14 @@ Device tokens (`xpd_`) don't carry scopes. They can only write readings, heartbe
 | Scope | Allows | Minimum role | Plans | Endpoints |
 | --- | --- | --- | --- | --- |
 | `read:plants` | Read plant records | Any member | Teams, Enterprise | [`GET /plants`](/docs/api/plants/list-plants)<br />[`GET /plants/{id}`](/docs/api/plants/get-plant) |
-| `write:plants` | Create and update plant records | `member` | Teams, Enterprise | No endpoint yet |
+| `write:plants` | Create and update plant records | `member` | Teams, Enterprise | [`POST /plants`](/docs/api/plants/create-plant)<br />[`PATCH /plants/{id}`](/docs/api/plants/update-plant) |
 
 ### Explants
 
 | Scope | Allows | Minimum role | Plans | Endpoints |
 | --- | --- | --- | --- | --- |
 | `read:explants` | Read explant records | Any member | Teams, Enterprise | [`GET /explants`](/docs/api/explants/list-explants)<br />[`GET /explants/{id}`](/docs/api/explants/get-explant) |
-| `write:explants` | Create and update explant records | `member` | Teams, Enterprise | No endpoint yet |
+| `write:explants` | Create and update explant records | `member` | Teams, Enterprise | [`POST /explants`](/docs/api/explants/create-explant)<br />[`PATCH /explants/{id}`](/docs/api/explants/update-explant) |
 
 ### Contaminations
 
@@ -118,15 +118,15 @@ Device tokens (`xpd_`) don't carry scopes. They can only write readings, heartbe
 
 | Scope | Allows | Minimum role | Plans | Endpoints |
 | --- | --- | --- | --- | --- |
-| `read:equipment` | Read the lab equipment library and its maintenance history | Any member | Teams, Enterprise | No endpoint yet |
+| `read:equipment` | Read the lab equipment library and its maintenance history | Any member | Teams, Enterprise | [`GET /equipment`](/docs/api/equipment/list-equipment)<br />[`GET /equipment/{id}`](/docs/api/equipment/get-equipment)<br />[`GET /equipment/{id}/events`](/docs/api/equipment/list-equipment-events) |
 | `write:equipment_events` | Record that a piece of equipment was used, calibrated, serviced or faulted | `member` | Teams, Enterprise | [`POST /equipment/{id}/events`](/docs/api/equipment/create-equipment-event) |
 
 ### Commercial
 
 | Scope | Allows | Minimum role | Plans | Endpoints |
 | --- | --- | --- | --- | --- |
-| `read:pricing` | Read culture line prices, pricing tiers, and price history | `manager` | Teams, Enterprise | No endpoint yet |
-| `read:commerce` | Read store order lines and sell-through summaries | `manager` | Teams, Enterprise | No endpoint yet |
+| `read:pricing` | Read culture line prices, pricing tiers, and price history | `manager` | Teams, Enterprise | [`GET /pricing/culture-lines`](/docs/api/commerce/list-culture-line-prices)<br />[`GET /pricing/events`](/docs/api/commerce/list-price-events) |
+| `read:commerce` | Read store order lines and sell-through summaries | `manager` | Teams, Enterprise | [`GET /commerce/order-lines`](/docs/api/commerce/list-order-lines)<br />[`GET /commerce/sell-through`](/docs/api/commerce/get-sell-through) |
 
 ### History
 
@@ -137,5 +137,3 @@ Device tokens (`xpd_`) don't carry scopes. They can only write readings, heartbe
 ### No scope needed
 
 - [`GET /me`](/docs/api/account/get-me): Get the calling key
-
-Scopes marked “No endpoint yet” can already be granted to a key, and endpoints that use them are on the way. This page updates as they ship.

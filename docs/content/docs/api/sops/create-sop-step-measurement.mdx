@@ -138,12 +138,12 @@ measurement = body["data"]
 | `402` | `PAID_PLAN_REQUIRED` | The workspace's plan does not include the API. The full API is included with xPlant+ Teams and Enterprise; on Hobby and Pro Lab, keys can connect devices only. |
 | `403` | `FORBIDDEN` | The key lacks a scope this operation requires, or its owner's current role in the workspace cannot use it — a key never does more than its owner can in xPlant. `error` names the scope, and for a role, the role it needs. |
 | `403` | `DEVICE_TOKEN_NOT_ACCEPTED` | A device token was sent; this operation needs a workspace API key. |
-| `404` | `NOT_FOUND` | No run with this id exists in the key's workspace. |
+| `404` | `NOT_FOUND` | No run with this id exists in the key's workspace, or the run id is not a well-formed id. |
 | `409` | `IDEMPOTENCY_IN_FLIGHT` | A request with this `Idempotency-Key` is still being processed; retry after `Retry-After` seconds. |
 | `409` | `SOP_RUN_CLOSED` | The run is complete. A completed run's record is final and takes no more evidence. |
 | `422` | `VALIDATION_ERROR` | The `Idempotency-Key` header is malformed. |
 | `422` | `VALIDATION_ERROR` | A field failed validation — a missing `unit`, a `value` that is not a number, or a `recorded_at` that is not a UTC timestamp. `error` gives the first problem but does not name the field. |
 | `429` | `RATE_LIMIT_EXCEEDED` | Too many requests for this key, device token or workspace. Wait `Retry-After` seconds. |
-| `500` | `SOP_STEP_EVENT_CREATE_FAILED` | The evidence could not be saved, or the run id is not a well-formed id. Check the id, then retry with the same `Idempotency-Key`. |
+| `500` | `SOP_STEP_EVENT_CREATE_FAILED` | The evidence could not be saved. Retry with the same `Idempotency-Key`. |
 
 Branch on `code`, never on the `error` text. See [Errors](/docs/errors).

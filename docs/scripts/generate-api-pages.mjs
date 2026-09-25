@@ -783,10 +783,12 @@ const plansFor = (s) => s.plans ?? (DEVICE_PLAN_SCOPES.has(s.id) ? "All paid pla
       "",
     );
   }
-  lines.push(
-    "Scopes marked “No endpoint yet” can already be granted to a key, and endpoints that use them are on the way. This page updates as they ship.",
-    "",
-  );
+  if (scopeCatalogue.some((s) => !byScope.has(s.id))) {
+    lines.push(
+      "Scopes marked “No endpoint yet” can already be granted to a key, and endpoints that use them are on the way. This page updates as they ship.",
+      "",
+    );
+  }
   files.set("scopes.mdx", `${lines.join("\n").trim()}\n`);
 }
 

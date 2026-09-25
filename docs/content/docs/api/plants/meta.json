@@ -2,6 +2,8 @@
   "title": "Plants",
   "pages": [
     "list-plants",
-    "get-plant"
+    "create-plant",
+    "get-plant",
+    "update-plant"
   ]
 }

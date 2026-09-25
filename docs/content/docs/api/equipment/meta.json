@@ -1,6 +1,9 @@
 {
   "title": "Equipment",
   "pages": [
+    "list-equipment",
+    "get-equipment",
+    "list-equipment-events",
     "create-equipment-event"
   ]
 }

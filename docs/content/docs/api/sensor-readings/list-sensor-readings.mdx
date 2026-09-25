@@ -104,6 +104,7 @@ readings = body["data"]
 | `402` | `PAID_PLAN_REQUIRED` | The workspace's plan does not include the API. The full API is included with xPlant+ Teams and Enterprise; on Hobby and Pro Lab, keys can connect devices only. |
 | `403` | `FORBIDDEN` | The key lacks a scope this operation requires, or its owner's current role in the workspace cannot use it — a key never does more than its owner can in xPlant. `error` names the scope, and for a role, the role it needs. |
 | `403` | `DEVICE_TOKEN_NOT_ACCEPTED` | A device token was sent; this operation needs a workspace API key. |
+| `422` | `VALIDATION_ERROR` | A query parameter is malformed: `device_id` or `room_id` is not a UUID, `since` is not a timestamp, or `limit` is not a whole number. `error` names the parameter, for example `device_id: must be a UUID`. |
 | `429` | `RATE_LIMIT_EXCEEDED` | Too many requests for this key, device token or workspace. Wait `Retry-After` seconds. |
 | `500` | `READINGS_QUERY_FAILED` | The readings could not be read. Retry later. |
 

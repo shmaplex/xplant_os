@@ -72,10 +72,10 @@ export const overlay = {
     title: "List explants",
     description: "Explant records for the key's workspace, optionally matched by your own identifier.",
     resultVar: "explants",
-    query: { external_id: "LINE-0412" },
-    sdk: "const explants = await client.explants.list($QUERY);\n\n// Or resolve one of your own codes straight to a record (or null):\nconst batch = await client.explants.findByExternalId(\"LINE-0412\");",
+    query: { externalId: "LINE-0412" },
+    sdk: "const explants = await client.explants.list({ external_id: \"LINE-0412\" });\n\n// Or resolve one of your own codes straight to a record (or null):\nconst batch = await client.explants.findByExternalId(\"LINE-0412\");",
     notes:
-      "Pass `external_id` to find the record your own tracker already knows by (a spreadsheet batch number, for example). You don't need to keep a separate id mapping on your side.",
+      "Pass `externalId` to find the record your own tracker already knows by (a spreadsheet batch number, for example). You don't need to keep a separate id mapping on your side.",
   },
   "GET /api/v1/explants/{id}": {
     slug: "get-explant",
@@ -84,6 +84,31 @@ export const overlay = {
     path: { id: EXPLANT_ID },
     resultVar: "explant",
     sdk: `const explant = await client.explants.get("${EXPLANT_ID}");`,
+  },
+
+  "POST /api/v1/plants": {
+    title: "Create a plant",
+    resultVar: "plant",
+    idempotencyKey: "import-2026-09-25-row-0412",
+    sdk: null,
+  },
+  "PATCH /api/v1/plants/{id}": {
+    title: "Update a plant",
+    path: { id: PLANT_ID },
+    resultVar: "plant",
+    sdk: null,
+  },
+  "POST /api/v1/explants": {
+    title: "Create an explant",
+    resultVar: "explant",
+    idempotencyKey: "import-2026-09-25-line-0412",
+    sdk: null,
+  },
+  "PATCH /api/v1/explants/{id}": {
+    title: "Update an explant",
+    path: { id: EXPLANT_ID },
+    resultVar: "explant",
+    sdk: null,
   },
 
   // ── Transfers and stages ──────────────────────────────────────────────────
@@ -487,10 +512,29 @@ export const overlay = {
   },
 
   // ── Equipment ─────────────────────────────────────────────────────────────
+  "GET /api/v1/equipment": {
+    title: "List equipment",
+    resultVar: "equipment",
+    query: { category: "autoclave_pressure_cooker", status: "active" },
+    sdk: null,
+  },
+  "GET /api/v1/equipment/{id}": {
+    title: "Get a piece of equipment",
+    path: { id: EQUIPMENT_ID },
+    resultVar: "item",
+    sdk: null,
+  },
+  "GET /api/v1/equipment/{id}/events": {
+    title: "List equipment events",
+    path: { id: EQUIPMENT_ID },
+    resultVar: "events",
+    query: { kind: "calibration" },
+    sdk: null,
+  },
   "POST /api/v1/equipment/{id}/events": {
     slug: "create-equipment-event",
     title: "Record an equipment event",
-    description: "Records that a piece of equipment was used, calibrated, serviced, verified or faulted.",
+    description: "Records that a piece of equipment was used, calibrated or maintained.",
     path: { id: EQUIPMENT_ID },
     resultVar: "event",
     idempotencyKey: "autoclave-2-cycle-4411",
@@ -503,5 +547,31 @@ export const overlay = {
     sdk: `const event = await client.equipment.recordEvent(\n  "${EQUIPMENT_ID}",\n  $BODY,\n  { idempotencyKey: "autoclave-2-cycle-4411" },\n);`,
     notes:
       "`kind: \"used\"` records usage against a subject (how hard the equipment has been worked). `calibration`, `service`, `fault` and `verification` record maintenance (whether it is fit to use), with an `outcome` of `pass`, `fail`, `adjusted` or `inconclusive`. Events are append-only. See [Equipment events](/docs/guides/equipment-events).",
+  },
+
+  // ── Pricing and sell-through ──────────────────────────────────────────────
+  "GET /api/v1/pricing/culture-lines": {
+    title: "List culture line prices",
+    resultVar: "prices",
+    query: { plant_id: PLANT_ID },
+    sdk: null,
+  },
+  "GET /api/v1/pricing/events": {
+    title: "List price changes",
+    resultVar: "events",
+    query: { plant_id: PLANT_ID, from: "2026-09-01T00:00:00Z" },
+    sdk: null,
+  },
+  "GET /api/v1/commerce/order-lines": {
+    title: "List order lines",
+    resultVar: "lines",
+    query: { from: "2026-09-01T00:00:00Z", to: "2026-09-25T00:00:00Z" },
+    sdk: null,
+  },
+  "GET /api/v1/commerce/sell-through": {
+    title: "Get sell-through",
+    resultVar: "sellThrough",
+    query: { from: "2026-09-01T00:00:00Z", to: "2026-09-25T00:00:00Z" },
+    sdk: null,
   },
 };

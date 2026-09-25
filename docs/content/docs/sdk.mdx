@@ -135,7 +135,7 @@ The buffer stamps `recorded_at` and `external_id` on each reading, keeps reading
 | `client.sensorReadings` | `list`, `create`, `createBatch`, `buffer` |
 | `client.equipment` | `recordEvent` |
 
-Contaminations, comments, media files and media recipes aren't in the SDK yet; their reference pages show a plain `fetch` example instead.
+Some newer endpoints aren't in the SDK yet: creating and updating plants and explants, contaminations, comments, media files, media recipes, equipment reads, pricing and sell-through. Their reference pages show a plain `fetch` example instead.
 
 A device client can only call `sensorReadings.create`, `sensorReadings.createBatch`, `sensorReadings.buffer`, `devices.heartbeat` and `devices.recordEvent`, and only for its own device.
 

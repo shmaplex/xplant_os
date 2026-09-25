@@ -30,14 +30,18 @@ The machine-readable spec is [openapi.json](/openapi.json) (OpenAPI 3).
 | Endpoint | What it does | Scope |
 | --- | --- | --- |
 | [`GET /plants`](/docs/api/plants/list-plants) | List plants | `read:plants` |
+| [`POST /plants`](/docs/api/plants/create-plant) | Create a plant | `write:plants` |
 | [`GET /plants/{id}`](/docs/api/plants/get-plant) | Get a plant | `read:plants` |
+| [`PATCH /plants/{id}`](/docs/api/plants/update-plant) | Update a plant | `write:plants` |
 
 ## Explants
 
 | Endpoint | What it does | Scope |
 | --- | --- | --- |
 | [`GET /explants`](/docs/api/explants/list-explants) | List explants | `read:explants` |
+| [`POST /explants`](/docs/api/explants/create-explant) | Create an explant | `write:explants` |
 | [`GET /explants/{id}`](/docs/api/explants/get-explant) | Get an explant | `read:explants` |
+| [`PATCH /explants/{id}`](/docs/api/explants/update-explant) | Update an explant | `write:explants` |
 
 ## Transfers and stages
 
@@ -133,4 +137,16 @@ The machine-readable spec is [openapi.json](/openapi.json) (OpenAPI 3).
 
 | Endpoint | What it does | Scope |
 | --- | --- | --- |
+| [`GET /equipment`](/docs/api/equipment/list-equipment) | List equipment | `read:equipment` |
+| [`GET /equipment/{id}`](/docs/api/equipment/get-equipment) | Get a piece of equipment | `read:equipment` |
+| [`GET /equipment/{id}/events`](/docs/api/equipment/list-equipment-events) | List equipment events | `read:equipment` |
 | [`POST /equipment/{id}/events`](/docs/api/equipment/create-equipment-event) | Record an equipment event | `write:equipment_events` |
+
+## Pricing and sell-through
+
+| Endpoint | What it does | Scope |
+| --- | --- | --- |
+| [`GET /commerce/order-lines`](/docs/api/commerce/list-order-lines) | List order lines | `read:commerce` |
+| [`GET /commerce/sell-through`](/docs/api/commerce/get-sell-through) | Get sell-through | `read:commerce` |
+| [`GET /pricing/culture-lines`](/docs/api/commerce/list-culture-line-prices) | List culture line prices | `read:pricing` |
+| [`GET /pricing/events`](/docs/api/commerce/list-price-events) | List price changes | `read:pricing` |

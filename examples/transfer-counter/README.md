@@ -31,10 +31,10 @@ export XPLANT_API_KEY="xpk_live_YOUR_KEY_HERE"
 
 ## 1. Find the explant
 
-If your own tracker knows the line by its own code, look it up by `external_id`:
+If your own tracker knows the line by its own code, look it up with `externalId`:
 
 ```bash
-curl "https://app.xplantpro.com/api/v1/explants?external_id=LINE-0412" \
+curl "https://app.xplantpro.com/api/v1/explants?externalId=LINE-0412" \
   -H "Authorization: Bearer $XPLANT_API_KEY"
 ```
 
@@ -83,7 +83,7 @@ import requests
 BASE = "https://app.xplantpro.com/api/v1"
 HEADERS = {"Authorization": f"Bearer {os.environ['XPLANT_API_KEY']}"}
 
-matches = requests.get(f"{BASE}/explants", headers=HEADERS, params={"external_id": "LINE-0412"}, timeout=10).json()["data"]
+matches = requests.get(f"{BASE}/explants", headers=HEADERS, params={"externalId": "LINE-0412"}, timeout=10).json()["data"]
 if not matches:
     raise SystemExit("No explant with that code in this workspace")
 

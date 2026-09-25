@@ -2,6 +2,8 @@
   "title": "Explants",
   "pages": [
     "list-explants",
-    "get-explant"
+    "create-explant",
+    "get-explant",
+    "update-explant"
   ]
 }

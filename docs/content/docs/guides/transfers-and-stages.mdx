@@ -7,7 +7,7 @@ description: Log subcultures to fresh media and move plants and explants through
 
 ## Find the record first
 
-Transfers and stages belong to a plant or an explant. If your own system knows a batch by its own code, look it up by `external_id` rather than keeping a separate id mapping:
+Transfers and stages belong to a plant or an explant. If your own system knows a batch by its own code, look it up with `externalId` rather than keeping a separate id mapping:
 
 ```js tab="JavaScript" tab-group="lang"
 import { XPlantClient } from "@shmaplex/xplant-sdk";
@@ -18,7 +18,7 @@ const explant = await client.explants.findByExternalId("LINE-0412"); // record o
 ```
 
 ```bash tab="curl" tab-group="lang"
-curl "https://app.xplantpro.com/api/v1/explants?external_id=LINE-0412" \
+curl "https://app.xplantpro.com/api/v1/explants?externalId=LINE-0412" \
   -H "Authorization: Bearer $XPLANT_API_KEY"
 ```
 
@@ -29,7 +29,7 @@ import requests
 BASE = "https://app.xplantpro.com/api/v1"
 HEADERS = {"Authorization": f"Bearer {os.environ['XPLANT_API_KEY']}"}
 
-matches = requests.get(f"{BASE}/explants", headers=HEADERS, params={"external_id": "LINE-0412"}, timeout=10).json()["data"]
+matches = requests.get(f"{BASE}/explants", headers=HEADERS, params={"externalId": "LINE-0412"}, timeout=10).json()["data"]
 explant = matches[0] if matches else None
 ```
 

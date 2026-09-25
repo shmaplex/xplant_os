@@ -1,18 +1,20 @@
 ---
 title: Equipment events
-description: Let an autoclave, a balance or a pH meter report when it was used, calibrated, serviced, verified or faulted.
+description: Let an autoclave, a balance or a pH meter report when it was used, calibrated or maintained.
 ---
 
-**Scope:** `write:equipment_events`. **Endpoint:** [Record an equipment event](/docs/api/equipment/create-equipment-event).
+**Scopes:** `write:equipment_events` to record, `read:equipment` to look equipment up. **Endpoints:** [Record an equipment event](/docs/api/equipment/create-equipment-event), [List equipment](/docs/api/equipment/list-equipment), [List equipment events](/docs/api/equipment/list-equipment-events).
 
-Equipment that can call a webhook, or a small script beside it, can keep xPlant's equipment records current without anyone typing them in. You need the equipment's id from xPlant.
+Equipment that can call a webhook, or a small script beside it, can keep xPlant's equipment records current without anyone typing them in. You need the equipment's id: find it with [List equipment](/docs/api/equipment/list-equipment).
 
 ## Two kinds of event
 
 The two kinds answer different questions, and xPlant keeps them apart:
 
 - **Usage** (`kind: "used"`) answers *how hard has this been worked?* It records use against a subject, such as the batch or run it was used for.
-- **Maintenance** (`kind: "calibration"`, `"service"`, `"fault"` or `"verification"`) answers *is it fit to use?* It carries an `outcome`: `pass`, `fail`, `adjusted` or `inconclusive`.
+- **Maintenance** (`kind: "calibration"` or `"preventive_maintenance"`) answers *is it fit to use?* It carries an `outcome`: `pass`, `pass_after_adjustment`, `out_of_tolerance`, `fail` or `not_performed`. Calibration and maintenance records are part of equipment calibration, which not every plan includes.
+
+Recording an event doesn't move the equipment's calibration or maintenance due dates; those follow the lab's schedules in xPlant.
 
 ## Record a calibration
 
@@ -66,7 +68,7 @@ requests.post(
 ).raise_for_status()
 ```
 
-Maintenance fields: `outcome`, `performed_at`, `performed_by_name`, `result_summary`, `notes`.
+Maintenance fields: `outcome`, `performed_at`, `performed_by_name`, `result_summary`, `notes`. [List equipment events](/docs/api/equipment/list-equipment-events) reads the history back.
 
 ## Record a use
 

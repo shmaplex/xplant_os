@@ -15,6 +15,7 @@
     "labels",
     "devices",
     "sensor-readings",
-    "equipment"
+    "equipment",
+    "commerce"
   ]
 }
