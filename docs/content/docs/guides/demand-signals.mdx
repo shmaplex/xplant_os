@@ -1,0 +1,80 @@
+---
+title: Push demand signals
+description: Send xPlant a demand number per genus, from orders, sales or forecasts, so it can weigh the task queue toward what sells.
+---
+
+**Scopes:** `write:demand` to send, `read:tasks` to read back. **Endpoints:** [Record a demand signal](/docs/api/tasks/create-demand-signal), [List demand signals](/docs/api/tasks/list-demand-signals).
+
+A demand signal says how much demand there is for a genus right now: open orders, sales velocity, a forecast, whatever you measure. xPlant uses **the latest signal for each genus** when it scores the task queue. Send one whenever your number changes; history is kept.
+
+## Send a signal
+
+```bash tab="curl" tab-group="lang"
+curl -X POST https://app.xplantpro.com/api/v1/tasks/demand \
+  -H "Authorization: Bearer $XPLANT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "genus": "Alocasia",
+    "demand_score": 82,
+    "source": "Online store, last 30 days",
+    "source_type": "orders",
+    "observed_at": "2026-09-24T00:00:00Z"
+  }'
+```
+
+```js tab="JavaScript" tab-group="lang"
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+
+await client.taskDemand.record({
+  genus: "Alocasia",
+  demand_score: 82,
+  source: "Online store, last 30 days",
+  source_type: "orders",
+  observed_at: "2026-09-24T00:00:00Z",
+});
+```
+
+```python tab="Python" tab-group="lang"
+import os
+import requests
+
+requests.post(
+    "https://app.xplantpro.com/api/v1/tasks/demand",
+    headers={"Authorization": f"Bearer {os.environ['XPLANT_API_KEY']}"},
+    json={
+        "genus": "Alocasia",
+        "demand_score": 82,
+        "source": "Online store, last 30 days",
+        "source_type": "orders",
+        "observed_at": "2026-09-24T00:00:00Z",
+    },
+    timeout=10,
+).raise_for_status()
+```
+
+| Field | Required | Notes |
+| --- | --- | --- |
+| `genus` | Yes | The genus the number is about. |
+| `demand_score` | Yes | Zero or more. Use one consistent scale across genera (units on order, or a 0–100 index); what matters is the comparison. |
+| `source` | Yes | Where the number came from, in words people will recognise later. |
+| `source_type` | No | Your own short category, such as `orders` or `forecast`. |
+| `observed_at` | No | When the number was true, as an ISO 8601 timestamp. |
+
+## Read it back
+
+The history for one genus, newest first, or just its current value:
+
+```bash
+curl "https://app.xplantpro.com/api/v1/tasks/demand?genus=Alocasia&current=true" \
+  -H "Authorization: Bearer $XPLANT_API_KEY"
+```
+
+With `current=true` (and a `genus`), `data` is a single reading whose `id` is `current`.
+
+## Patterns that work
+
+- **Send on change, not on a timer.** A signal that hasn't changed adds history without adding information.
+- **One source per scale.** If you mix a store's order counts with a forecast index, send them under different `source` values so the history stays readable.
+- **Pair it with task sync.** Demand says what matters; [task sync](/docs/guides/sync-tasks) puts the work on the bench.

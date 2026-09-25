@@ -1,0 +1,40 @@
+{
+  "name": "xplant-docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npm run generate && next dev -p 3210",
+    "build": "npm run generate && next build && node scripts/postbuild.mjs",
+    "preview": "serve out -l 3211",
+    "generate": "node scripts/generate-api-pages.mjs",
+    "sync:openapi": "node scripts/sync-openapi.mjs",
+    "check": "node scripts/check-public.mjs && node scripts/generate-api-pages.mjs --check",
+    "types:check": "next typegen && tsc --noEmit"
+  },
+  "dependencies": {
+    "cn": "^0.3.0",
+    "fumadocs-core": "16.15.14",
+    "fumadocs-mdx": "15.4.5",
+    "fumadocs-ui": "16.15.14",
+    "lucide-react": "^1.48.0",
+    "next": "16.3.6",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/mdx": "^2.0.14",
+    "@types/node": "^22.20.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "postcss": "^8.5.28",
+    "serve": "^14.2.6",
+    "tailwindcss": "4.3.3",
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}

@@ -1,0 +1,82 @@
+---
+title: Requests and responses
+description: The base URL, headers, and the one response envelope every endpoint uses.
+---
+
+## Base URL
+
+```text
+https://app.xplantpro.com/api/v1
+```
+
+Always call `app.xplantpro.com`. `www.xplantpro.com` is the marketing site and answers `401` to every `/api` path.
+
+## Headers
+
+| Header | When | Value |
+| --- | --- | --- |
+| `Authorization` | Every request | `Bearer <workspace key or device token>` |
+| `Content-Type` | Requests with a body | `application/json` |
+| `Idempotency-Key` | Optional, on [writes that support it](/docs/idempotency) | A string you choose per logical write |
+
+Request bodies and responses are JSON. Timestamps are ISO 8601 in UTC, for example `2026-09-25T12:00:00Z`. Ids are UUIDs.
+
+## The envelope
+
+Every response, from every endpoint, has the same outer shape.
+
+**Success**
+
+```json
+{ "ok": true, "data": { "id": "5b0f6f3e-…", "title": "Transfer the Alocasia line onto fresh medium" } }
+```
+
+`data` holds the result: an object for a single record, an array for a list. Some endpoints add a `meta` object alongside `data` to explain something about the result; [Update a task](/docs/api/tasks/update-task) is one.
+
+**Failure**
+
+```json
+{ "ok": false, "data": null, "error": "Missing scope: write:tasks", "code": "FORBIDDEN" }
+```
+
+- `code` is stable. Write your error handling against it.
+- `error` is written for people. Log it and show it, but don't match on it: the wording can change.
+- The HTTP status matches the kind of failure (`401`, `403`, `404`, `422`, `429`…).
+
+See [Errors](/docs/errors) for every code.
+
+## Reading responses safely
+
+```js tab="JavaScript" tab-group="lang"
+import { XPlantClient, XPlantError } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+
+try {
+  const tasks = await client.tasks.list({ status: "todo" });
+} catch (err) {
+  if (err instanceof XPlantError) {
+    // err.status, err.code, err.message, err.retryAfter
+    if (err.code === "RATE_LIMIT_EXCEEDED") {
+      // wait err.retryAfter seconds, then try again
+    }
+  }
+  throw err;
+}
+```
+
+```python tab="Python" tab-group="lang"
+resp = requests.get(url, headers=headers, timeout=10)
+body = resp.json()
+if not body["ok"]:
+    if body["code"] == "RATE_LIMIT_EXCEEDED":
+        time.sleep(int(resp.headers.get("Retry-After", "5")))
+    raise RuntimeError(f"{resp.status_code} {body['code']}: {body['error']}")
+data = body["data"]
+```
+
+The SDK throws an `XPlantError` for every API failure, carrying `status`, `code`, `message` and `retryAfter`. Network failures (no response at all) reject with the underlying fetch error instead.
+
+## Workspace scoping
+
+Every request acts inside the workspace the key belongs to. There is no workspace id to pass and no way to reach another workspace. An id from another workspace answers `404`, exactly as if it didn't exist.

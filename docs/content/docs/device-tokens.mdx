@@ -1,0 +1,137 @@
+---
+title: Device tokens
+description: Give each device an xpd_ token that can post its own readings and nothing else. Never put a workspace key on a device.
+---
+
+A device token (`xpd_…`) is a credential for **one registered device**. It can post that device's sensor readings, events and heartbeats, and it is refused everywhere else. A workspace key (`xpk_…`) can read your plants, explants and tasks; a device token can't read anything.
+
+<Callout type="warn" title="Never put a workspace key on a device">
+  A Raspberry Pi on a bench or an ESP32 in a grow room can be unplugged and carried off, or its SD card copied. Whatever credential it holds should be worth as little as possible to whoever gets it.
+</Callout>
+
+## What a device token can do
+
+A device token is accepted on exactly these endpoints, and only for its own device:
+
+{/* generated:device-token-endpoints */}
+- [`POST /device-events`](/docs/api/devices/create-device-event): Record a device event
+- [`POST /devices/{deviceId}/heartbeat`](/docs/api/devices/send-heartbeat): Send a heartbeat
+- [`POST /sensor-readings`](/docs/api/sensor-readings/create-sensor-readings): Submit sensor readings
+{/* /generated:device-token-endpoints */}
+
+Anything else answers `403 DEVICE_TOKEN_NOT_ACCEPTED`. Writing about a different device (another `device_id`, even one entry inside a batch) answers `403 DEVICE_TOKEN_WRONG_DEVICE` and rejects the whole request.
+
+Device tokens don't carry scopes; what they can do is fixed. Each token is rate limited like a key (1,000 requests per minute), and its traffic also counts toward your workspace's shared limit. See [Rate limits](/docs/rate-limits).
+
+## Setting up a device
+
+Do this once, from a machine you control, with a workspace key that has `write:devices` (and `read:devices` if you want to list tokens later).
+
+### 1. Register the device
+
+```bash tab="curl" tab-group="lang"
+curl -X POST https://app.xplantpro.com/api/v1/devices \
+  -H "Authorization: Bearer $XPLANT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Grow room Pi", "type": "gateway", "hardware": "Raspberry Pi 4B"}'
+```
+
+```js tab="JavaScript" tab-group="lang"
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+
+const device = await client.devices.register({
+  name: "Grow room Pi",
+  type: "gateway",
+  hardware: "Raspberry Pi 4B",
+});
+```
+
+```python tab="Python" tab-group="lang"
+import os
+import requests
+
+resp = requests.post(
+    "https://app.xplantpro.com/api/v1/devices",
+    headers={"Authorization": f"Bearer {os.environ['XPLANT_API_KEY']}"},
+    json={"name": "Grow room Pi", "type": "gateway", "hardware": "Raspberry Pi 4B"},
+    timeout=10,
+)
+device = resp.json()["data"]
+```
+
+Keep the device's `id`.
+
+### 2. Create its token
+
+```bash tab="curl" tab-group="lang"
+curl -X POST "https://app.xplantpro.com/api/v1/devices/$DEVICE_ID/tokens" \
+  -H "Authorization: Bearer $XPLANT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Grow room Pi"}'
+```
+
+```js tab="JavaScript" tab-group="lang"
+const { token } = await client.devices.createToken(device.id, { name: "Grow room Pi" });
+```
+
+```python tab="Python" tab-group="lang"
+resp = requests.post(
+    f"https://app.xplantpro.com/api/v1/devices/{device['id']}/tokens",
+    headers={"Authorization": f"Bearer {os.environ['XPLANT_API_KEY']}"},
+    json={"name": "Grow room Pi"},
+    timeout=10,
+)
+token = resp.json()["data"]["token"]
+```
+
+```json
+{ "ok": true, "data": { "token": "xpd_live_…", "prefix": "xpd_live_9f3a" } }
+```
+
+**The token is returned once and never again.** Put it on the device now (in its config file or secrets store, not in code you commit). Listing a device's tokens later shows prefixes, status and last use, but never the secret.
+
+### 3. Use it on the device
+
+```bash tab="curl" tab-group="lang"
+curl -X POST https://app.xplantpro.com/api/v1/sensor-readings \
+  -H "Authorization: Bearer $XPLANT_DEVICE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"device_id": "'"$DEVICE_ID"'", "type": "temperature", "value": 23.4, "unit": "C"}'
+```
+
+```js tab="JavaScript" tab-group="lang"
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+// The SDK refuses a deviceToken that doesn't start with xpd_.
+const device = new XPlantClient({ deviceToken: process.env.XPLANT_DEVICE_TOKEN });
+
+await device.sensorReadings.create({
+  device_id: process.env.XPLANT_DEVICE_ID,
+  type: "temperature",
+  value: 23.4,
+  unit: "C",
+});
+await device.devices.heartbeat(process.env.XPLANT_DEVICE_ID);
+```
+
+```python tab="Python" tab-group="lang"
+resp = requests.post(
+    "https://app.xplantpro.com/api/v1/sensor-readings",
+    headers={"Authorization": f"Bearer {os.environ['XPLANT_DEVICE_TOKEN']}"},
+    json={"device_id": os.environ["XPLANT_DEVICE_ID"], "type": "temperature", "value": 23.4, "unit": "C"},
+    timeout=10,
+)
+```
+
+## One device or many?
+
+A gateway that reads several probes is usually **one device** posting several reading types (`temperature`, `humidity`, `co2`…) under its own `device_id`, with one token. That's the recommended setup.
+
+If you want each probe to appear as its own device in xPlant (probes in different rooms, for example), register each probe and create a token per probe. The gateway then holds one token per device and uses the matching one for each probe's readings.
+
+## Losing or retiring a token
+
+- **Lost a token?** Create a new one for the same device and switch the device over.
+- **Taking a device out of service** revokes all of its tokens in the same step, and so does deleting it. There's nothing extra to remember.

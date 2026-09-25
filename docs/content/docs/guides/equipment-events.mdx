@@ -1,0 +1,87 @@
+---
+title: Equipment events
+description: Let an autoclave, a balance or a pH meter report when it was used, calibrated, serviced, verified or faulted.
+---
+
+**Scope:** `write:equipment_events`. **Endpoint:** [Record an equipment event](/docs/api/equipment/create-equipment-event).
+
+Equipment that can call a webhook, or a small script beside it, can keep xPlant's equipment records current without anyone typing them in. You need the equipment's id from xPlant.
+
+## Two kinds of event
+
+The two kinds answer different questions, and xPlant keeps them apart:
+
+- **Usage** (`kind: "used"`) answers *how hard has this been worked?* It records use against a subject, such as the batch or run it was used for.
+- **Maintenance** (`kind: "calibration"`, `"service"`, `"fault"` or `"verification"`) answers *is it fit to use?* It carries an `outcome`: `pass`, `fail`, `adjusted` or `inconclusive`.
+
+## Record a calibration
+
+```bash tab="curl" tab-group="lang"
+curl -X POST "https://app.xplantpro.com/api/v1/equipment/$EQUIPMENT_ID/events" \
+  -H "Authorization: Bearer $XPLANT_API_KEY" \
+  -H "Idempotency-Key: ph-meter-2-cal-2026-09-25" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "kind": "calibration",
+    "outcome": "pass",
+    "performed_at": "2026-09-25T07:30:00Z",
+    "result_summary": "Two-point calibration, pH 4.01 and 7.00"
+  }'
+```
+
+```js tab="JavaScript" tab-group="lang"
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY, retry: true });
+
+await client.equipment.recordEvent(
+  equipmentId,
+  {
+    kind: "calibration",
+    outcome: "pass",
+    performed_at: "2026-09-25T07:30:00Z",
+    result_summary: "Two-point calibration, pH 4.01 and 7.00",
+  },
+  { idempotencyKey: "ph-meter-2-cal-2026-09-25" },
+);
+```
+
+```python tab="Python" tab-group="lang"
+import os
+import requests
+
+requests.post(
+    f"https://app.xplantpro.com/api/v1/equipment/{equipment_id}/events",
+    headers={
+        "Authorization": f"Bearer {os.environ['XPLANT_API_KEY']}",
+        "Idempotency-Key": "ph-meter-2-cal-2026-09-25",
+    },
+    json={
+        "kind": "calibration",
+        "outcome": "pass",
+        "performed_at": "2026-09-25T07:30:00Z",
+        "result_summary": "Two-point calibration, pH 4.01 and 7.00",
+    },
+    timeout=10,
+).raise_for_status()
+```
+
+Maintenance fields: `outcome`, `performed_at`, `performed_by_name`, `result_summary`, `notes`.
+
+## Record a use
+
+```bash
+curl -X POST "https://app.xplantpro.com/api/v1/equipment/$EQUIPMENT_ID/events" \
+  -H "Authorization: Bearer $XPLANT_API_KEY" \
+  -H "Idempotency-Key: autoclave-2-cycle-4411" \
+  -H "Content-Type: application/json" \
+  -d '{"kind": "used", "subject_type": "media_batch", "subject_id": "'"$MEDIA_BATCH_ID"'", "notes": "Media sterilisation cycle"}'
+```
+
+Usage fields: `subject_type`, `subject_id`, `subject_label`, `used_at`, `notes`. `subject_type` is one of `sop_log`, `media_batch`, `plant_transfer`, `explant_transfer` or `contamination_log`: what the equipment was used for.
+
+## Good to know
+
+- Events are append-only. A correction is another event.
+- Equipment in another workspace answers `404`, the same as equipment that doesn't exist.
+- The endpoint honours `Idempotency-Key`. Build it from something the equipment already numbers, like a cycle count or a calibration date, so a webhook that fires twice records once.

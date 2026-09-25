@@ -1,0 +1,14 @@
+{
+  "title": "Guides",
+  "pages": [
+    "index",
+    "sync-tasks",
+    "demand-signals",
+    "transfers-and-stages",
+    "sop-runs",
+    "label-scanning",
+    "sensors-and-devices",
+    "equipment-events",
+    "change-history"
+  ]
+}

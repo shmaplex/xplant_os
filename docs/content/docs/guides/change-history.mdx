@@ -1,0 +1,79 @@
+---
+title: Pull change history
+description: Mirror every plant and explant edit into your own database, incrementally.
+---
+
+**Scopes:** `read:events` (plus `read:plants` / `read:explants` to fetch full records). **Endpoint:** [List change history](/docs/api/change-history/list-change-events).
+
+Every edit to a plant or explant is kept as an event. Reading them incrementally is the cheapest way to keep a copy of your lab's records in a warehouse, a spreadsheet or another system.
+
+## How it works
+
+- `entity` is required: `plant` or `explant`. They're separate histories, so pull each one on its own.
+- Events come **oldest first**, and `since` is exclusive: you get events created strictly after it.
+- Save the `created_at` of the last event you processed, and pass it back as `since` next time. You only get what changed.
+- Page with `limit` and `offset` inside a pull if there's a lot to catch up on.
+
+```python tab="Python" tab-group="lang"
+import os
+import requests
+
+BASE = "https://app.xplantpro.com/api/v1"
+HEADERS = {"Authorization": f"Bearer {os.environ['XPLANT_API_KEY']}"}
+
+
+def pull(entity, since):
+    """Returns new events for one entity type, and the cursor to save."""
+    events, offset = [], 0
+    while True:
+        params = {"entity": entity, "limit": 200, "offset": offset}
+        if since:
+            params["since"] = since
+        body = requests.get(f"{BASE}/events", headers=HEADERS, params=params, timeout=10).json()
+        if not body["ok"]:
+            raise RuntimeError(f"{body['code']}: {body['error']}")
+        events.extend(body["data"])
+        if len(body["data"]) < 200:
+            break
+        offset += 200
+    cursor = events[-1]["created_at"] if events else since
+    return events, cursor
+
+
+# Load these from your own storage between runs.
+cursors = {"plant": None, "explant": None}
+for entity in ("plant", "explant"):
+    events, cursors[entity] = pull(entity, cursors[entity])
+    for event in events:
+        apply_to_my_copy(entity, event)  # your code
+# Save cursors for next time.
+```
+
+```js tab="JavaScript" tab-group="lang"
+import { XPlantClient, paginate } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY, retry: true });
+
+async function pull(entity, since) {
+  let cursor = since;
+  for await (const event of paginate((page) => client.events.list({ entity, since, ...page }))) {
+    await applyToMyCopy(entity, event); // your code
+    cursor = event.created_at;
+  }
+  return cursor; // save it for the next run
+}
+
+const plantCursor = await pull("plant", savedPlantCursor);
+const explantCursor = await pull("explant", savedExplantCursor);
+```
+
+```bash tab="curl" tab-group="lang"
+curl "https://app.xplantpro.com/api/v1/events?entity=plant&since=2026-09-24T00:00:00Z&limit=200" \
+  -H "Authorization: Bearer $XPLANT_API_KEY"
+```
+
+## Tips
+
+- **Store the cursor only after you've applied the events.** If your job crashes halfway, the next run picks up where the last successful one ended.
+- **Overlap slightly, then de-duplicate.** Several events can share a timestamp, and an exclusive `since` would skip any you hadn't reached yet. Pass a `since` a little earlier than your last `created_at` (a few seconds is plenty) and ignore events whose id you've already applied.
+- **Run it on a schedule** (every few minutes to hourly) rather than in a tight loop. It's well inside the [rate limits](/docs/rate-limits) either way.

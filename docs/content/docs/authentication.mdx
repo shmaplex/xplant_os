@@ -1,0 +1,61 @@
+---
+title: Authentication and API keys
+description: How to create a key, send it, keep it safe, and tell the two kinds of credential apart.
+---
+
+Every request carries a credential as a bearer token:
+
+```http
+Authorization: Bearer xpk_live_…
+```
+
+There are two kinds of credential, and they are not interchangeable.
+
+| | Workspace API key | Device token |
+| --- | --- | --- |
+| Prefix | `xpk_live_` or `xpk_dev_` | `xpd_live_` or `xpd_dev_` |
+| Can do | Whatever its [scopes](/docs/scopes) allow, across the workspace | Post readings, events and heartbeats for **one** device, nothing else |
+| Lives on | A server, a script, an integration you run | The device itself: a Raspberry Pi, a gateway, a microcontroller |
+| Created in | Settings → Integrations → API Keys | With the API, using a workspace key (see [Device tokens](/docs/device-tokens)) |
+
+## Creating a key
+
+1. Open **Settings → Integrations → [API Keys](https://app.xplantpro.com/settings/integrations/api-keys)** in xPlant.
+2. Name the key after what will use it ("Nightly task sync", "Grow room dashboard"). You'll thank yourself when you need to revoke one.
+3. Choose its scopes. A key gets exactly what you tick, and nothing by default. See [Scopes](/docs/scopes) for what each one allows and some common setups.
+4. Copy the key straight away. **It is shown once.** If you lose it, create a new one and revoke the old.
+
+**Scopes are fixed when a key is created.** To change what an integration can do, create a new key with the scopes it needs, move the integration to it, then revoke the old key. Rotating a key in xPlant issues a new secret with the same name, scopes and environment.
+
+A workspace can have up to 10 active keys at a time.
+
+## Live and dev keys
+
+The `xpk_live_` and `xpk_dev_` prefixes are labels for your own bookkeeping. **Both act on your real workspace, with the same data and the same limits. There is no sandbox.** Use a dev key to keep test traffic separate in your records, not to protect production data.
+
+## What a key can reach
+
+- **One workspace.** A key belongs to the workspace it was created in and can never read or write another workspace's records. If you belong to several labs, each needs its own key.
+- **Its scopes, and nothing more.** No scope implies another; `write:tasks` does not grant `read:tasks`.
+- **A record in another workspace looks the same as one that doesn't exist.** Both answer `404 NOT_FOUND`, so a key can't be used to probe for ids.
+
+Call [`GET /me`](/docs/api/account/get-me) to see which key you're using and every scope it holds. It needs no scope.
+
+## When a key stops working
+
+| You get | Because |
+| --- | --- |
+| `401 UNAUTHORIZED` | The key is missing, mistyped or revoked, or the person who created it has left the workspace. |
+| `402 PAID_PLAN_REQUIRED` | The workspace is no longer on a paid plan. The API is available on paid plans. |
+| `403 FORBIDDEN` | The key is valid but lacks the scope this endpoint needs. The `error` text names it, e.g. `Missing scope: write:tasks`. |
+| `403 DEVICE_TOKEN_NOT_ACCEPTED` | You sent a device token to an endpoint that needs a workspace key. |
+
+A key is tied to the member who created it. When someone leaves the workspace, their keys stop working, so create keys for long-running integrations from an account that will stay.
+
+## Keeping keys safe
+
+- Keep keys in environment variables or a secrets manager, never in source code or a repository.
+- **Never put a workspace key on a device.** A box on a shelf, in a room other people walk through, should carry a [device token](/docs/device-tokens) that can only post its own readings.
+- Never embed a key in a web page or a mobile app. Anyone who opens it can read it. Call the API from your own backend instead.
+- Give each integration its own key with only the scopes it needs, so you can revoke one without breaking the others.
+- If a key leaks, revoke it in **Settings → Integrations → API Keys** at once, then create a replacement.

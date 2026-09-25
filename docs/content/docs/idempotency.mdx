@@ -1,0 +1,50 @@
+---
+title: Idempotency
+description: Send an Idempotency-Key on a write so retrying it after a timeout can't create a duplicate.
+---
+
+A network can fail after the server has done the work but before you get the answer. Retrying then risks doing the work twice: two tasks, two scans, two runs started. An `Idempotency-Key` header makes the retry safe.
+
+```bash
+curl -X POST https://app.xplantpro.com/api/v1/tasks \
+  -H "Authorization: Bearer $XPLANT_API_KEY" \
+  -H "Idempotency-Key: bench-3-0f2a7c91" \
+  -H "Content-Type: application/json" \
+  -d '{"title": "Check jar 47"}'
+```
+
+A repeat with the same key returns **the first response**, with the same status and body, and the response header `Idempotent-Replay: true`. The write happens once.
+
+## Which endpoints honour it
+
+The header is honoured on these endpoints, and only these:
+
+{/* generated:idempotent-endpoints */}
+- [`POST /equipment/{id}/events`](/docs/api/equipment/create-equipment-event): Record an equipment event
+- [`POST /label-scans`](/docs/api/labels/create-label-scan): Record a label scan
+- [`POST /sop-runs`](/docs/api/sops/create-sop-run): Start an SOP run
+- [`POST /sop-runs/{id}/steps/{stepId}/events`](/docs/api/sops/create-sop-step-event): Record step evidence
+- [`POST /sop-runs/{id}/steps/{stepId}/measurements`](/docs/api/sops/create-sop-step-measurement): Record a step measurement
+- [`POST /tasks`](/docs/api/tasks/create-task): Create a task
+{/* /generated:idempotent-endpoints */}
+
+Everywhere else the header is ignored. For sensor readings, make retries safe with an `external_id` and `recorded_at` on every reading instead: readings are de-duplicated on the device, the `external_id` and the time.
+
+## The rules
+
+| | |
+| --- | --- |
+| Format | 8–255 characters from `A–Z a–z 0–9 . _ : ~ -`. A malformed key answers `400 VALIDATION_ERROR` rather than being silently ignored. |
+| Scope | Your key plus the endpoint. The same string on two endpoints is two different writes, and two keys never collide. |
+| How long | 24 hours. After that, the same key starts a fresh write. |
+| Still running | If the first request hasn't finished, a repeat answers `409 IDEMPOTENCY_IN_FLIGHT` with `Retry-After: 1`. Wait and send it again; don't assume it failed. |
+| Failed writes | Aren't replayed. If the first attempt failed, the next attempt runs for real, so a passing glitch isn't pinned to your key for a day. |
+| No header | The write runs unprotected. Idempotency is opt-in. |
+
+## Choosing keys
+
+Make one key per **intent**, not per attempt. Every retry of the same logical write sends the same value; a new write sends a new one.
+
+Good keys come from your own data: `station-3-run-wk38-start`, `scanner-3-<scan uuid>`, `nightly-sync-2026-09-25-task-8812`. A random UUID generated once, stored with the pending write and reused on each retry, also works.
+
+The JavaScript SDK takes `{ idempotencyKey }` as the last argument of any write, and with `retry: true` it generates a key for you and reuses it across its own retries.

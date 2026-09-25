@@ -1,0 +1,30 @@
+---
+title: Use with AI tools
+description: Every page is available as plain Markdown, and the whole API fits in one file for an assistant to read.
+---
+
+These docs are written to be read by people and by AI assistants alike.
+
+## On every page
+
+At the top of each page:
+
+- **Copy page as Markdown** puts the page on your clipboard as clean Markdown, ready to paste into a chat.
+- **Open in ChatGPT** and **Open in Claude** start a new conversation that already points at the page's Markdown.
+- **View .md** opens the raw Markdown.
+
+Any page's Markdown lives at its address plus `.md`. For example, [/docs/quickstart](/docs/quickstart) is also at `/docs/quickstart.md`.
+
+## The whole API at once
+
+| File | What it is |
+| --- | --- |
+| [/llms.txt](/llms.txt) | A map of the docs: every page with a one-line summary and a link to its Markdown. |
+| [/llms-full.txt](/llms-full.txt) | Every page, in order, in one Markdown file. Hand this to an assistant to give it the whole API. |
+| [/openapi.json](/openapi.json) | The OpenAPI 3 spec, for code generators and tools that read specs. |
+
+## Tips
+
+- Tell the assistant which language and library you're using ("Python with requests", "the @shmaplex/xplant-sdk JavaScript SDK").
+- Ask it to branch on `code`, not on the `error` message, and to send `Idempotency-Key` on writes that support it.
+- **Never paste an API key or device token into a chat.** Use a placeholder like `$XPLANT_API_KEY` and keep the real value in your environment.

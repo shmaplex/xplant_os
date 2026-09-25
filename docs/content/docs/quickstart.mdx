@@ -1,0 +1,124 @@
+---
+title: Quickstart
+description: Create an API key and make your first three calls, in about five minutes.
+---
+
+You need an xPlant workspace on a paid plan and permission to manage its integrations.
+
+## 1. Create a key
+
+1. In xPlant, open **Settings → Integrations → [API Keys](https://app.xplantpro.com/settings/integrations/api-keys)**.
+2. Create a key, give it a name you'll recognise later (for example "Quickstart"), and tick **Read workspace**, **Read plants** and **Read tasks**.
+3. Copy the key. It starts with `xpk_live_` or `xpk_dev_`, and **it's shown only once**.
+
+Store it in an environment variable rather than in code:
+
+```bash
+export XPLANT_API_KEY="xpk_live_…"
+```
+
+<Callout type="warn" title="There is no sandbox">
+  Keys labelled `xpk_dev_` and `xpk_live_` work identically and both act on your real workspace. Test writes against records you're happy to change.
+</Callout>
+
+## 2. Check the key
+
+`GET /me` tells you who the key is and which scopes it holds. It needs no scope, so it's the safest first call.
+
+```bash tab="curl" tab-group="lang"
+curl https://app.xplantpro.com/api/v1/me \
+  -H "Authorization: Bearer $XPLANT_API_KEY"
+```
+
+```js tab="JavaScript" tab-group="lang"
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+
+const me = await client.me.get();
+console.log(me.key.name, me.scopes);
+```
+
+```python tab="Python" tab-group="lang"
+import os
+import requests
+
+resp = requests.get(
+    "https://app.xplantpro.com/api/v1/me",
+    headers={"Authorization": f"Bearer {os.environ['XPLANT_API_KEY']}"},
+    timeout=10,
+)
+print(resp.json())
+```
+
+You should see:
+
+```json
+{
+  "ok": true,
+  "data": {
+    "key": { "name": "Quickstart", "prefix": "xpk_live_abcd", "status": "active" },
+    "scopes": ["read:workspace", "read:plants", "read:tasks"],
+    "workspace": { "id": "…" },
+    "user": { "id": "…" }
+  }
+}
+```
+
+If you get `401 UNAUTHORIZED`, the key is wrong or has been revoked. If you get `402 PAID_PLAN_REQUIRED`, the workspace isn't on a paid plan.
+
+## 3. Read some data
+
+List the first page of plants:
+
+```bash tab="curl" tab-group="lang"
+curl "https://app.xplantpro.com/api/v1/plants?limit=5" \
+  -H "Authorization: Bearer $XPLANT_API_KEY"
+```
+
+```js tab="JavaScript" tab-group="lang"
+const plants = await client.plants.list({ limit: 5 });
+for (const plant of plants) console.log(plant.id, plant.name);
+```
+
+```python tab="Python" tab-group="lang"
+resp = requests.get(
+    "https://app.xplantpro.com/api/v1/plants",
+    headers={"Authorization": f"Bearer {os.environ['XPLANT_API_KEY']}"},
+    params={"limit": 5},
+    timeout=10,
+)
+body = resp.json()
+if not body["ok"]:
+    raise RuntimeError(f"{body['code']}: {body['error']}")
+for plant in body["data"]:
+    print(plant["id"], plant["name"])
+```
+
+Every response has the same shape: `ok`, `data`, and on failure `error` and `code`. Read [Requests and responses](/docs/requests-and-responses) once and you know how every endpoint behaves.
+
+## 4. See a scope error on purpose
+
+Your key has no `write:tasks` scope, so creating a task fails, and the error tells you exactly what's missing:
+
+```bash
+curl -X POST https://app.xplantpro.com/api/v1/tasks \
+  -H "Authorization: Bearer $XPLANT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"title": "Check the Alocasia line"}'
+```
+
+```json
+{ "ok": false, "data": null, "error": "Missing scope: write:tasks", "code": "FORBIDDEN" }
+```
+
+Branch on `code` (`FORBIDDEN`), not on the message. A key's scopes are fixed when it's created, so when an integration needs another scope, create a key that has it, switch over, and revoke the old one.
+
+## Next steps
+
+<Cards>
+  <Card title="Scopes" href="/docs/scopes" description="Pick exactly the scopes your integration needs." />
+  <Card title="Device tokens" href="/docs/device-tokens" description="Connecting a Pi or an ESP32? Give it a device token, not a key." />
+  <Card title="Guides" href="/docs/guides" description="Worked examples for the common integrations." />
+  <Card title="API reference" href="/docs/api" description="Every endpoint, parameter and error code." />
+</Cards>

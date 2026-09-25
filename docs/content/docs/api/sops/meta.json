@@ -1,0 +1,11 @@
+{
+  "title": "SOPs and runs",
+  "pages": [
+    "create-sop-run",
+    "get-sop-run",
+    "create-sop-step-event",
+    "create-sop-step-measurement",
+    "list-sops",
+    "get-sop"
+  ]
+}

@@ -1,0 +1,209 @@
+{
+  "$comment": "The API key scopes, as the API Keys page lists them. Used only until the spec carries x-scopes; then delete this file.",
+  "scopes": [
+    {
+      "id": "read:workspace",
+      "label": "Read workspace",
+      "description": "Read workspace and lab settings",
+      "category": "Workspace"
+    },
+    {
+      "id": "read:plants",
+      "label": "Read plants",
+      "description": "Read plant records",
+      "category": "Plants"
+    },
+    {
+      "id": "write:plants",
+      "label": "Write plants",
+      "description": "Create and update plant records",
+      "category": "Plants"
+    },
+    {
+      "id": "read:explants",
+      "label": "Read explants",
+      "description": "Read explant records",
+      "category": "Explants"
+    },
+    {
+      "id": "write:explants",
+      "label": "Write explants",
+      "description": "Create and update explant records",
+      "category": "Explants"
+    },
+    {
+      "id": "read:contaminations",
+      "label": "Read contaminations",
+      "description": "Read contamination logs",
+      "category": "Contaminations"
+    },
+    {
+      "id": "write:contaminations",
+      "label": "Write contaminations",
+      "description": "Submit contamination observations",
+      "category": "Contaminations"
+    },
+    {
+      "id": "read:tasks",
+      "label": "Read tasks",
+      "description": "Read scheduled tasks and due work",
+      "category": "Tasks"
+    },
+    {
+      "id": "write:tasks",
+      "label": "Write tasks",
+      "description": "Create, update, complete, and reopen tasks",
+      "category": "Tasks"
+    },
+    {
+      "id": "write:demand",
+      "label": "Write demand signals",
+      "description": "Push sales/order demand numbers per genus for task prioritization",
+      "category": "Tasks"
+    },
+    {
+      "id": "read:comments",
+      "label": "Read comments",
+      "description": "Read notes and comments on lab records",
+      "category": "Comments"
+    },
+    {
+      "id": "write:comments",
+      "label": "Write comments",
+      "description": "Add notes and comments to lab records",
+      "category": "Comments"
+    },
+    {
+      "id": "read:assets",
+      "label": "Read media",
+      "description": "Read photos and media attached to lab records",
+      "category": "Media"
+    },
+    {
+      "id": "write:assets",
+      "label": "Write media",
+      "description": "Attach photos and media to lab records",
+      "category": "Media"
+    },
+    {
+      "id": "read:media_recipes",
+      "label": "Read media recipes",
+      "description": "Read media recipe data",
+      "category": "Media"
+    },
+    {
+      "id": "write:media_recipes",
+      "label": "Write media recipes",
+      "description": "Create and update media recipes",
+      "category": "Media"
+    },
+    {
+      "id": "read:transfers",
+      "label": "Read transfers",
+      "description": "Read transfer and stage history for plants and explants",
+      "category": "Transfers"
+    },
+    {
+      "id": "write:transfers",
+      "label": "Write transfers",
+      "description": "Record transfers and advance the stage of plants and explants",
+      "category": "Transfers"
+    },
+    {
+      "id": "read:sops",
+      "label": "Read SOPs",
+      "description": "Read SOP templates and steps",
+      "category": "SOPs"
+    },
+    {
+      "id": "read:sop_runs",
+      "label": "Read SOP run history",
+      "description": "Read SOP execution history: who ran which step, when",
+      "category": "SOPs"
+    },
+    {
+      "id": "write:sop_runs",
+      "label": "Write SOP runs",
+      "description": "Create and advance SOP run sessions",
+      "category": "SOPs"
+    },
+    {
+      "id": "write:sop_steps",
+      "label": "Write SOP step evidence",
+      "description": "Post confirmations, scans and measurements against a step of an SOP run",
+      "category": "SOPs"
+    },
+    {
+      "id": "read:labels",
+      "label": "Read labels",
+      "description": "Resolve QR/barcode label codes to entity records",
+      "category": "Labels"
+    },
+    {
+      "id": "write:label_scans",
+      "label": "Write label scans",
+      "description": "Submit label scan events",
+      "category": "Labels"
+    },
+    {
+      "id": "read:devices",
+      "label": "Read devices",
+      "description": "List registered devices and their status",
+      "category": "Devices"
+    },
+    {
+      "id": "write:devices",
+      "label": "Write devices",
+      "description": "Register devices, send heartbeats and manage device tokens",
+      "category": "Devices"
+    },
+    {
+      "id": "read:sensor_readings",
+      "label": "Read sensor readings",
+      "description": "Query historical sensor readings",
+      "category": "Devices"
+    },
+    {
+      "id": "write:sensor_readings",
+      "label": "Write sensor readings",
+      "description": "Submit environmental sensor readings (temperature, humidity, etc.)",
+      "category": "Devices"
+    },
+    {
+      "id": "write:device_events",
+      "label": "Write device events",
+      "description": "Submit device status events",
+      "category": "Devices"
+    },
+    {
+      "id": "read:equipment",
+      "label": "Read equipment",
+      "description": "Read the lab equipment library and its maintenance history",
+      "category": "Equipment"
+    },
+    {
+      "id": "write:equipment_events",
+      "label": "Write equipment events",
+      "description": "Record that a piece of equipment was used, calibrated, serviced or faulted",
+      "category": "Equipment"
+    },
+    {
+      "id": "read:pricing",
+      "label": "Read culture line pricing",
+      "description": "Read culture line prices, pricing tiers, and price history",
+      "category": "Commercial"
+    },
+    {
+      "id": "read:commerce",
+      "label": "Read sell-through",
+      "description": "Read store order lines and sell-through summaries",
+      "category": "Commercial"
+    },
+    {
+      "id": "read:events",
+      "label": "Read change history",
+      "description": "Read plant and explant edit history (audit events)",
+      "category": "History"
+    }
+  ]
+}

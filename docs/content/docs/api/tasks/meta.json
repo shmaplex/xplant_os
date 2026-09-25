@@ -1,0 +1,11 @@
+{
+  "title": "Tasks and demand",
+  "pages": [
+    "list-tasks",
+    "create-task",
+    "get-task",
+    "update-task",
+    "list-demand-signals",
+    "create-demand-signal"
+  ]
+}

@@ -1,0 +1,100 @@
+---
+title: JavaScript SDK
+description: "@shmaplex/xplant-sdk: a typed client for Node.js and modern browsers, with retries, idempotency and paging built in."
+---
+
+```bash
+npm install @shmaplex/xplant-sdk
+```
+
+The source, issues and full README live at [github.com/shmaplex/xplant_sdk](https://github.com/shmaplex/xplant_sdk). Every endpoint page in the [API reference](/docs/api) shows the SDK call next to curl and Python.
+
+## Create a client
+
+```js
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+// On a server or in a script: a workspace key.
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+
+// On a device: a device token.
+const device = new XPlantClient({ deviceToken: process.env.XPLANT_DEVICE_TOKEN });
+```
+
+| Option | |
+| --- | --- |
+| `apiKey` | A workspace key (`xpk_…`). |
+| `deviceToken` | A device token (`xpd_…`). Give exactly one of `apiKey` or `deviceToken`. The client refuses a `deviceToken` that doesn't start with `xpd_`, so a workspace key can't end up on a device by mistake. |
+| `baseUrl` | Defaults to `https://app.xplantpro.com`. You shouldn't need to change it. |
+| `retry` | `true`, or `{ maxRetries, baseDelayMs, maxDelayMs }`. Off unless set. |
+| `fetch` | Your own `fetch`, for older runtimes or testing. |
+
+## Errors
+
+Every API failure throws an `XPlantError`:
+
+```js
+import { XPlantError } from "@shmaplex/xplant-sdk";
+
+try {
+  await client.tasks.create({ title: "Check jar 47" });
+} catch (err) {
+  if (err instanceof XPlantError) {
+    console.log(err.status, err.code, err.message, err.retryAfter);
+  }
+}
+```
+
+Branch on `err.code`. `err.message` includes the API's `error` text, which may be reworded. A request that never got a response (a network failure) rejects with the underlying fetch error, not an `XPlantError`.
+
+## Retries
+
+With `retry` on, the client:
+
+- waits out `Retry-After` on `429 RATE_LIMIT_EXCEEDED` and `409 IDEMPOTENCY_IN_FLIGHT`, up to `maxDelayMs`;
+- backs off exponentially on `502`, `503`, `504` and network errors, for reads and for writes that are safe to replay;
+- on endpoints that honour [idempotency](/docs/idempotency), generates an `Idempotency-Key` if you didn't pass one, and reuses it across its own attempts.
+
+## Idempotency
+
+Pass `{ idempotencyKey }` as the last argument to any write:
+
+```js
+await client.sopRuns.start({ sop_id: sopId }, { idempotencyKey: "station-3-wk38-start" });
+```
+
+## Paging
+
+```js
+import { paginate } from "@shmaplex/xplant-sdk";
+
+for await (const plant of paginate((page) => client.plants.list(page))) {
+  console.log(plant.id);
+}
+```
+
+## Resources
+
+| Resource | Methods |
+| --- | --- |
+| `client.me` | `get` |
+| `client.workspaces` | `list` |
+| `client.plants` | `list`, `get`, `findByExternalId` |
+| `client.explants` | `list`, `get`, `findByExternalId` |
+| `client.transfers` | `list`, `create` |
+| `client.stages` | `list`, `advance` |
+| `client.events` | `list` |
+| `client.tasks` | `list`, `get`, `create`, `update` |
+| `client.taskDemand` | `list`, `record` |
+| `client.sops` | `list`, `get` |
+| `client.sopRuns` | `start`, `get`, `recordStepEvent`, `recordMeasurement` |
+| `client.labels` | `resolve`, `recordScan` |
+| `client.devices` | `list`, `get`, `register`, `heartbeat`, `listTokens`, `createToken`, `recordEvent` |
+| `client.sensorReadings` | `list`, `create`, `createBatch` |
+| `client.equipment` | `recordEvent` |
+
+A device client can only call `sensorReadings.create`, `sensorReadings.createBatch`, `devices.heartbeat` and `devices.recordEvent`, and only for its own device.
+
+## Other languages
+
+There's no official SDK for other languages yet. The API is plain HTTPS and JSON, and every reference page has a Python example using `requests`. For a generated client, use the [OpenAPI spec](/openapi.json).

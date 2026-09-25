@@ -1,0 +1,58 @@
+---
+title: Errors
+description: Every error code the API returns, what it means, and what your integration should do about it.
+---
+
+A failed request answers with a non-2xx status and this body:
+
+```json
+{ "ok": false, "data": null, "error": "Missing scope: write:tasks", "code": "FORBIDDEN" }
+```
+
+**Branch on `code`, never on `error`.** Codes are stable; the `error` text is written for people and may be reworded. Several different failures can share a status (a `403` can be a missing scope or the wrong kind of credential), so the status alone isn't enough either.
+
+## Error codes
+
+{/* generated:error-codes */}
+| Status | Code | Meaning |
+| --- | --- | --- |
+| `400` | `VALIDATION_ERROR` | The `Idempotency-Key` header is malformed. Or: The request body is not valid JSON. |
+| `401` | `UNAUTHORIZED` | The key is missing, malformed or revoked, or its owner is no longer a member of the workspace. |
+| `402` | `PAID_PLAN_REQUIRED` | The workspace is not on a paid plan. The API is available on paid plans. |
+| `403` | `DEVICE_TOKEN_NOT_ACCEPTED` | A device token was sent; this operation needs a workspace API key. |
+| `403` | `DEVICE_TOKEN_WRONG_DEVICE` | A device token was used to write about a device other than its own. |
+| `403` | `FORBIDDEN` | The key lacks a scope this operation requires; `error` names the scope. |
+| `404` | `NOT_FOUND` | No record with this id exists in the key's workspace. |
+| `409` | `IDEMPOTENCY_IN_FLIGHT` | A request with this `Idempotency-Key` is still being processed; retry after `Retry-After` seconds. |
+| `409` | `SOP_RUN_CLOSED` | The run is completed; its record can't change. |
+| `409` | `SOP_RUN_NOT_EFFECTIVE` | The SOP has no version in force, so it can't be run yet. |
+| `422` | `VALIDATION_ERROR` | A field failed validation. `error` names the first one, for example `title: title is required`. |
+| `429` | `RATE_LIMIT_EXCEEDED` | Too many requests for this key, device token or workspace. Wait `Retry-After` seconds. |
+| `5xx` | `…_FAILED` | Something failed on our side; each endpoint names its own code. Retry later; don't branch on the specific code. |
+{/* /generated:error-codes */}
+
+## What to do about each
+
+| Code | Retry? | What to do |
+| --- | --- | --- |
+| `VALIDATION_ERROR` | No | Fix the request. The `error` text names the first field that failed, e.g. `title: title is required`. |
+| `UNAUTHORIZED` | No | Check the key. It may be mistyped or revoked, or its creator may have left the workspace. |
+| `PAID_PLAN_REQUIRED` | No | The workspace needs a paid plan to use the API. |
+| `FORBIDDEN` | No | Give the integration a key with the scope named in `error`. |
+| `DEVICE_TOKEN_NOT_ACCEPTED` | No | This endpoint needs a workspace key. Device tokens only write readings, events and heartbeats. |
+| `DEVICE_TOKEN_WRONG_DEVICE` | No | The token belongs to a different device than the `device_id` you sent. |
+| `NOT_FOUND` | No | The id doesn't exist in this workspace (or belongs to another one; the two look the same on purpose). |
+| `IDEMPOTENCY_IN_FLIGHT` | Yes | The first request with this `Idempotency-Key` is still running. Wait `Retry-After` seconds (1) and send the same request again. |
+| `RATE_LIMIT_EXCEEDED` | Yes | Wait the `Retry-After` seconds, then continue. See [Rate limits](/docs/rate-limits). |
+| `…_FAILED` (5xx) | Yes, later | Something went wrong on our side. Retry with backoff; for a write, reuse the same `Idempotency-Key`. Don't branch on the specific code. |
+
+Each endpoint's page lists the errors it can return.
+
+## Retrying well
+
+- Retry only `429`, `409 IDEMPOTENCY_IN_FLIGHT`, `5xx` and network failures. Everything else fails the same way the second time.
+- Honour `Retry-After`: it's a whole number of seconds.
+- Back off exponentially on `5xx` and network errors, and cap the number of attempts.
+- Before retrying a write, make sure a repeat is harmless: send an [`Idempotency-Key`](/docs/idempotency), or for sensor readings an `external_id` with `recorded_at`.
+
+The JavaScript SDK does all of this when you pass `retry: true` to the client.

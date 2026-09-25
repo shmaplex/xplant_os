@@ -1,0 +1,39 @@
+---
+title: Overview
+description: What the xPlant API is for, how it's shaped, and where to start.
+---
+
+The xPlant API connects your lab's own systems to your xPlant workspace: schedulers and spreadsheets, bench stations and label scanners, sensors and gateways, and storefronts. Anything your integration can do, it does inside one workspace, with only the permissions you gave its key.
+
+## The shape of every call
+
+- **One host.** Everything lives under `https://app.xplantpro.com/api/v1`. (`www.xplantpro.com` is the marketing site; API calls there are refused.)
+- **One header.** `Authorization: Bearer <key>`. Workspace keys start with `xpk_`; device tokens start with `xpd_`.
+- **One envelope.** Success is `{ "ok": true, "data": … }`. Failure is `{ "ok": false, "data": null, "error": "…", "code": "STABLE_CODE" }`. Branch on `code`.
+- **Scopes you choose.** A key can do exactly what its scopes allow, and nothing else. There is no default set.
+
+## Start here
+
+<Cards>
+  <Card title="Quickstart" href="/docs/quickstart" description="Create a key and make your first call in five minutes." />
+  <Card title="Authentication and API keys" href="/docs/authentication" description="Keys, device tokens, and keeping them safe." />
+  <Card title="Scopes" href="/docs/scopes" description="All 34 scopes and what each one unlocks." />
+  <Card title="API reference" href="/docs/api" description="Every endpoint, generated from the OpenAPI spec." />
+</Cards>
+
+## What you can build
+
+<Cards>
+  <Card title="Sync tasks" href="/docs/guides/sync-tasks" description="Drive the bench queue from your own scheduler, without overriding people." />
+  <Card title="Push demand signals" href="/docs/guides/demand-signals" description="Tell xPlant what's selling so the right work rises to the top." />
+  <Card title="Record transfers and stages" href="/docs/guides/transfers-and-stages" description="Log subcultures and stage changes from a script or a scanner." />
+  <Card title="Run an SOP from a bench station" href="/docs/guides/sop-runs" description="Start runs, confirm steps, and post measurements with units." />
+  <Card title="Label scanning" href="/docs/guides/label-scanning" description="Resolve a QR or barcode to its record, and log the scan." />
+  <Card title="Sensors and devices" href="/docs/guides/sensors-and-devices" description="Stream readings from a Pi or an ESP32 with a device token." />
+  <Card title="Equipment events" href="/docs/guides/equipment-events" description="Let an autoclave or a pH meter report usage and calibration." />
+  <Card title="Pull change history" href="/docs/guides/change-history" description="Mirror plant and explant edits into your own system." />
+</Cards>
+
+## Help
+
+Email [support@xplantpro.com](mailto:support@xplantpro.com). For security issues, see the repository's [security policy](https://github.com/shmaplex/xplant_os/blob/main/SECURITY.md).
