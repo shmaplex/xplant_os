@@ -9532,7 +9532,7 @@
             }
           },
           "402": {
-            "description": "`PAID_PLAN_REQUIRED` — The workspace's plan does not include the API. The full API is included with xPlant+ Teams and Enterprise; on Hobby and Pro Lab, keys can connect devices only.\n\n`PLAN_LIMIT_REACHED` — The key's owner has created as many explants as their plan allows.",
+            "description": "`PAID_PLAN_REQUIRED` — The workspace's plan does not include the API. The full API is included with xPlant+ Teams and Enterprise; on Hobby and Pro Lab, keys can connect devices only.\n\n`PLAN_LIMIT_REACHED` — The key's owner is on the Free allowance and has created as many explants as it includes.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9563,7 +9563,7 @@
               },
               {
                 "code": "PLAN_LIMIT_REACHED",
-                "when": "The key's owner has created as many explants as their plan allows."
+                "when": "The key's owner is on the Free allowance and has created as many explants as it includes."
               }
             ],
             "headers": {
@@ -13949,7 +13949,7 @@
             }
           },
           "402": {
-            "description": "`PAID_PLAN_REQUIRED` — The workspace's plan does not include the API. The full API is included with xPlant+ Teams and Enterprise; on Hobby and Pro Lab, keys can connect devices only.\n\n`PLAN_LIMIT_REACHED` — The key's owner has created as many plants as their plan allows. `error` says which limit.",
+            "description": "`PAID_PLAN_REQUIRED` — The workspace's plan does not include the API. The full API is included with xPlant+ Teams and Enterprise; on Hobby and Pro Lab, keys can connect devices only.\n\n`PLAN_LIMIT_REACHED` — The workspace holds as many plants as its plan includes, or the key's owner is on the Free allowance and has used it. `error` says which limit.",
             "content": {
               "application/json": {
                 "schema": {
@@ -13980,7 +13980,7 @@
               },
               {
                 "code": "PLAN_LIMIT_REACHED",
-                "when": "The key's owner has created as many plants as their plan allows. `error` says which limit."
+                "when": "The workspace holds as many plants as its plan includes, or the key's owner is on the Free allowance and has used it. `error` says which limit."
               }
             ],
             "headers": {
@@ -26137,6 +26137,6 @@
   },
   "x-docs-source": {
     "ref": "origin/main",
-    "commit": "7b2641feb"
+    "commit": "69990b30f"
   }
 }
