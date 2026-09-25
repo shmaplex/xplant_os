@@ -148,7 +148,7 @@ The envelope can also carry `meta`:
 | `409` | `IDEMPOTENCY_IN_FLIGHT` | A request with this `Idempotency-Key` is still being processed; retry after `Retry-After` seconds. |
 | `409` | `SOP_RUN_NOT_EFFECTIVE` | The SOP has no version in force, so there is nothing approved to run. Put a version into force in xPlant, then start the run. |
 | `422` | `VALIDATION_ERROR` | The `Idempotency-Key` header is malformed. |
-| `422` | `VALIDATION_ERROR` | A field failed validation, for example `sop_id` is missing or is not an id. `error` gives the first problem but does not name the field. |
+| `422` | `VALIDATION_ERROR` | A field failed validation, for example `sop_id` is missing or is not an id. `error` names the field with the first problem, for example `sop_id: Invalid uuid`. |
 | `429` | `RATE_LIMIT_EXCEEDED` | Too many requests for this key, device token or workspace. Wait `Retry-After` seconds. |
 | `500` | `SOP_RUN_CREATE_FAILED` | The run could not be started. Retry with the same `Idempotency-Key`. |
 

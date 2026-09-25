@@ -129,7 +129,7 @@ scan = body["data"]
 | `404` | `NOT_FOUND` | The plant or explant named in the scan is not in this workspace. |
 | `409` | `IDEMPOTENCY_IN_FLIGHT` | A request with this `Idempotency-Key` is still being processed; retry after `Retry-After` seconds. |
 | `422` | `VALIDATION_ERROR` | The `Idempotency-Key` header is malformed. |
-| `422` | `VALIDATION_ERROR` | A field failed validation, for example a missing `barcode` or a `scanned_at` that is not a timestamp with a time zone. `error` gives the first problem but does not name the field. |
+| `422` | `VALIDATION_ERROR` | A field failed validation, for example a missing `barcode` or a `scanned_at` that is not a timestamp with a time zone. `error` names the field with the first problem, for example `scanned_at: Invalid datetime`. |
 | `429` | `RATE_LIMIT_EXCEEDED` | Too many requests for this key, device token or workspace. Wait `Retry-After` seconds. |
 | `500` | `LABEL_SCAN_CREATE_FAILED` | The scan could not be saved. Retry with the same `Idempotency-Key`. |
 
