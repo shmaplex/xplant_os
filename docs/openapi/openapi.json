@@ -20119,6 +20119,7 @@
                       "priority_rank": 1.5,
                       "priority_source": "auto",
                       "category": "transfer",
+                      "category_label": null,
                       "created_at": "2026-09-25T14:12:03.000Z"
                     }
                   ],
@@ -20359,7 +20360,7 @@
           "Tasks"
         ],
         "summary": "Create a task",
-        "description": "Adds a task to the workspace. Set `priority`, `priority_rank` and `assigned_to` in the same call so a scheduler can place work in one request. Order set this way counts as automatic, so a later hand-reorder in the app takes precedence over your next sync.\n\nLink the task to the plant or explant it is about with `entity_type` and `entity_id` — send both or neither.",
+        "description": "Adds a task to the workspace. Set `priority`, `priority_rank` and `assigned_to` in the same call so a scheduler can place work in one request. Order set this way counts as automatic, so a later hand-reorder in the app takes precedence over your next sync.\n\nLink the task to the plant or explant it is about with `entity_type` and `entity_id` — send both or neither.\n\n`category` is one of the preset categories. For a category of your own, send `category: \"other\"` and the name as `category_label`; the app shows it as \"Other · <name>\" and filters it under Other.",
         "security": [
           {
             "bearerAuth": []
@@ -20410,6 +20411,14 @@
                       "other"
                     ],
                     "default": "media_prep"
+                  },
+                  "category_label": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "minLength": 1,
+                    "maxLength": 60
                   },
                   "notes": {
                     "type": "string",
@@ -20511,6 +20520,7 @@
                     "priority_rank": 1.5,
                     "priority_source": "auto",
                     "category": "transfer",
+                    "category_label": null,
                     "created_at": "2026-09-25T14:12:03.000Z"
                   }
                 }
@@ -20887,6 +20897,7 @@
                     "priority_rank": 1.5,
                     "priority_source": "auto",
                     "category": "transfer",
+                    "category_label": null,
                     "created_at": "2026-09-25T14:12:03.000Z",
                     "entity_link": null
                   }
@@ -21119,7 +21130,7 @@
           "Tasks"
         ],
         "summary": "Update a task",
-        "description": "Changes only the fields you send. Move a task along the board with `workflow_status`; complete it with `\"done\"`.\n\nA task someone placed by hand keeps its position through automated writes. Send `release: true` to hand it back to automatic ordering. Send `clear_entity_link: true` to unlink it from its plant or explant.",
+        "description": "Changes only the fields you send. Move a task along the board with `workflow_status`; complete it with `\"done\"`.\n\nA task someone placed by hand keeps its position through automated writes. Send `release: true` to hand it back to automatic ordering. Send `clear_entity_link: true` to unlink it from its plant or explant.\n\nA `category_label` needs `category: \"other\"` in the same request, and `null` clears it. Moving a task to any other category clears its label.",
         "security": [
           {
             "bearerAuth": []
@@ -21176,6 +21187,14 @@
                       "monitoring",
                       "other"
                     ]
+                  },
+                  "category_label": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "minLength": 1,
+                    "maxLength": 60
                   },
                   "notes": {
                     "type": "string",
@@ -21319,6 +21338,7 @@
                     "priority_rank": 1.5,
                     "priority_source": "auto",
                     "category": "transfer",
+                    "category_label": null,
                     "created_at": "2026-09-25T14:12:03.000Z",
                     "entity_link": null
                   }
@@ -26103,6 +26123,13 @@
               "null"
             ]
           },
+          "category_label": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The workspace's own name for the category, kept beside `category: \"other\"`. Null when the task has none."
+          },
           "created_at": {
             "type": [
               "string",
@@ -26144,6 +26171,7 @@
           "priority_rank",
           "priority_source",
           "category",
+          "category_label",
           "created_at"
         ]
       },
@@ -26272,6 +26300,6 @@
   },
   "x-docs-source": {
     "ref": "origin/main",
-    "commit": "2c47cb1a5"
+    "commit": "6a960f2f3"
   }
 }
