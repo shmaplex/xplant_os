@@ -172,8 +172,8 @@ curl -X POST https://app.xplantpro.com/api/v1/device-events \
 From a dashboard or a script, with a workspace key holding `read:sensor_readings` (not the device token). Reading readings back through the API needs xPlant+ Teams or Enterprise; on Hobby and Pro Lab the data is visible in xPlant.
 
 ```bash
-curl "https://app.xplantpro.com/api/v1/sensor-readings?device_id=$DEVICE_ID&type=temperature&since=2026-09-24T00:00:00Z&limit=200" \
+curl "https://app.xplantpro.com/api/v1/sensor-readings?device_id=$DEVICE_ID&type=temperature&since=2026-09-24T00:00:00Z&until=2026-09-25T00:00:00Z&limit=1000" \
   -H "Authorization: Bearer $XPLANT_API_KEY"
 ```
 
-Readings come **newest first**. Filter by `device_id`, `room_id` and `type`; `since` sets the earliest reading you want, and `limit` goes up to 1,000. This endpoint has no `offset`: to read a longer window, narrow it with `since`.
+Readings come **newest first**. Filter by `device_id`, `room_id` and `type`, and set the window with `since` and `until` (both inclusive). A page holds 100 readings by default and up to 1,000; follow `meta.next_cursor` for the rest, as on every [list](/docs/pagination).

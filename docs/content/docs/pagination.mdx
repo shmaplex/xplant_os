@@ -1,51 +1,44 @@
 ---
 title: Pagination
-description: Page through lists with a cursor where it's offered, or with limit and offset.
+description: Every list pages by cursor. Pass meta.next_cursor back as cursor until it's null.
 ---
 
-List endpoints return one page at a time. `data` is a plain array, and there's no total count. Every list takes a `limit`:
+List endpoints return one page at a time. `data` is a plain array, and there's no total count.
 
-| Parameter | Default | Notes |
-| --- | --- | --- |
-| `limit` | 50 | Page size, 1–200. Values above 200 are capped at 200. A missing, zero, negative or non-numeric value falls back to 50. |
+## Page with the cursor
 
-How you ask for the next page depends on the list. Each list's reference page says which kind it is.
-
-## Cursor lists (preferred)
-
-Where a list offers a cursor, use it. The response carries `meta.next_cursor`: pass it back unchanged as `cursor`, with the same filters, to get the next page. It's `null` on the last page.
+Every list response carries `meta.next_cursor`. Pass it back unchanged as `cursor`, with the same filters, to get the next page. It's `null` on the last page.
 
 ```json
 { "ok": true, "data": [ … ], "meta": { "next_cursor": "eyJ…" } }
 ```
 
 ```bash
-curl "https://app.xplantpro.com/api/v1/…?limit=200&cursor=eyJ…" \
+curl "https://app.xplantpro.com/api/v1/plants?limit=200" \
   -H "Authorization: Bearer $XPLANT_API_KEY"
+# then the same request with &cursor=<meta.next_cursor>, until next_cursor is null
 ```
 
 - Treat the cursor as opaque: don't parse it, build it or store it for long.
 - Keep the same filters and `limit` for every page of one walk.
-- `cursor` can't be combined with an `offset` above 0; that answers `422`.
 - A cursor that has expired or no longer applies answers `422 INVALID_CURSOR`: start again from the first page.
+- `cursor` can't be combined with an `offset` above 0; that answers `422`.
 
 A cursor picks up exactly where the last page ended, so records created while you're paging don't shift what you see.
 
-## Offset lists
+## Page size
 
-Lists without a cursor take `offset`, the number of records to skip (rounded down; a negative value becomes 0). **Keep asking until a page comes back shorter than your `limit`.**
+| List | `limit` default | `limit` maximum |
+| --- | --- | --- |
+| Most lists | 50 | 200 |
+| [Sensor readings](/docs/api/sensor-readings/list-sensor-readings) | 100 | 1,000 |
+| [Devices](/docs/api/devices/list-devices) and [device tokens](/docs/api/devices/list-device-tokens) | 200 | 200 |
 
-```bash
-curl "https://app.xplantpro.com/api/v1/plants?limit=200&offset=0" \
-  -H "Authorization: Bearer $XPLANT_API_KEY"
-# then offset=200, offset=400, … until a page has fewer than 200 items
-```
-
-Offsets count records at the moment you ask. If a record is added or removed ahead of your position while you're paging, the next page shifts: you can see one twice or miss one. For a mirror that must stay exact, sync from [change history](/docs/guides/change-history) with `since` instead of re-paging everything.
+Values above the maximum are capped. A missing, zero, negative or non-numeric `limit` falls back to the default.
 
 ## In code
 
-The SDK's list methods handle both kinds, so your code doesn't change when a list moves to cursors. Awaiting a list gives you one page; iterating it gives you every row:
+The SDK's list methods follow the cursor for you. Awaiting a list gives you one page; iterating it gives you every row:
 
 ```js tab="JavaScript" tab-group="lang"
 import { XPlantClient } from "@shmaplex/xplant-sdk";
@@ -80,9 +73,8 @@ HEADERS = {"Authorization": f"Bearer {os.environ['XPLANT_API_KEY']}"}
 
 
 def all_items(path, params=None, limit=200):
-    """Walks a list with its cursor when it has one, or by offset otherwise."""
+    """Walks a list by its cursor."""
     params = {**(params or {}), "limit": limit}
-    offset = 0
     while True:
         body = requests.get(
             f"https://app.xplantpro.com/api/v1{path}", headers=HEADERS, params=params, timeout=10
@@ -90,16 +82,10 @@ def all_items(path, params=None, limit=200):
         if not body["ok"]:
             raise RuntimeError(f"{body['code']}: {body['error']}")
         yield from body["data"]
-        meta = body.get("meta") or {}
-        if "next_cursor" in meta:
-            if meta["next_cursor"] is None:
-                return
-            params["cursor"] = meta["next_cursor"]
-        else:
-            if len(body["data"]) < limit:
-                return
-            offset += limit
-            params["offset"] = offset
+        next_cursor = (body.get("meta") or {}).get("next_cursor")
+        if not next_cursor:
+            return
+        params["cursor"] = next_cursor
 
 
 for plant in all_items("/plants"):
@@ -108,4 +94,8 @@ for plant in all_items("/plants"):
 
 ## Sensor readings
 
-`GET /sensor-readings` returns readings newest first, takes a `limit` of up to 1,000, and has no `offset`: set the earliest reading you want with `since`. See [List sensor readings](/docs/api/sensor-readings/list-sensor-readings).
+`GET /sensor-readings` returns readings newest first. Narrow the window with `since` and `until` (both inclusive; a `since` later than `until` answers `422`), then page through it with the cursor like any other list.
+
+## Offset
+
+Lists still accept `offset` (records to skip) for older integrations, but offsets count records at the moment you ask: a record added ahead of your position shifts the next page, so you can see one twice or miss one. Use the cursor for anything new. To keep a mirror exact, sync from [change history](/docs/guides/change-history) with `since`.

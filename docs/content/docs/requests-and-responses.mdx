@@ -19,6 +19,8 @@ Always call `app.xplantpro.com`. `www.xplantpro.com` is the marketing site and a
 | `Content-Type` | Requests with a body | `application/json` |
 | `Idempotency-Key` | Optional, on [writes that support it](/docs/idempotency) | A string you choose per logical write |
 
+Every response carries an `X-Request-Id` header that identifies the request. Log it, and include it when you contact [support](mailto:support@xplantpro.com): it lets us find exactly that call.
+
 Request bodies and responses are JSON. Timestamps are ISO 8601 in UTC, for example `2026-09-25T12:00:00Z`. Ids are UUIDs.
 
 ## The envelope
@@ -56,7 +58,7 @@ try {
   const tasks = await client.tasks.list({ status: "todo" });
 } catch (err) {
   if (err instanceof XPlantError) {
-    // err.status, err.code, err.message, err.retryAfter
+    // err.status, err.code, err.message, err.retryAfter, err.requestId
     if (err.code === "RATE_LIMIT_EXCEEDED") {
       // wait err.retryAfter seconds, then try again
     }
@@ -71,7 +73,7 @@ body = resp.json()
 if not body["ok"]:
     if body["code"] == "RATE_LIMIT_EXCEEDED":
         time.sleep(int(resp.headers.get("Retry-After", "5")))
-    raise RuntimeError(f"{resp.status_code} {body['code']}: {body['error']}")
+    raise RuntimeError(f"{resp.status_code} {body['code']}: {body['error']} (request {resp.headers.get('X-Request-Id')})")
 data = body["data"]
 ```
 

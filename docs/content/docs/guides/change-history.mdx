@@ -12,7 +12,7 @@ Every edit to a plant or explant is kept as an event. Reading them incrementally
 - `entity` is required: `plant` or `explant`. They're separate histories, so pull each one on its own.
 - Events come **oldest first**, and `since` is exclusive: you get events created strictly after it.
 - Save the `created_at` of the last event you processed, and pass it back as `since` next time. You only get what changed.
-- Page with `limit` and `offset` inside a pull if there's a lot to catch up on.
+- Page through a big catch-up with the cursor: pass `meta.next_cursor` back as `cursor` until it's `null`.
 
 ```python tab="Python" tab-group="lang"
 import os
@@ -24,20 +24,21 @@ HEADERS = {"Authorization": f"Bearer {os.environ['XPLANT_API_KEY']}"}
 
 def pull(entity, since):
     """Returns new events for one entity type, and the cursor to save."""
-    events, offset = [], 0
+    events = []
+    params = {"entity": entity, "limit": 200}
+    if since:
+        params["since"] = since
     while True:
-        params = {"entity": entity, "limit": 200, "offset": offset}
-        if since:
-            params["since"] = since
         body = requests.get(f"{BASE}/events", headers=HEADERS, params=params, timeout=10).json()
         if not body["ok"]:
             raise RuntimeError(f"{body['code']}: {body['error']}")
         events.extend(body["data"])
-        if len(body["data"]) < 200:
+        next_cursor = (body.get("meta") or {}).get("next_cursor")
+        if not next_cursor:
             break
-        offset += 200
-    cursor = events[-1]["created_at"] if events else since
-    return events, cursor
+        params["cursor"] = next_cursor
+    newest = events[-1]["created_at"] if events else since
+    return events, newest
 
 
 # Load these from your own storage between runs.

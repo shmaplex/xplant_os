@@ -85,11 +85,11 @@ The xPlant application itself, user data and credentials are never part of this 
 |---|---|
 | Base URL | `https://app.xplantpro.com/api/v1` (`www.xplantpro.com` is the marketing site; it doesn't serve the API) |
 | Auth | `Authorization: Bearer <key or device token>`, see [Authentication](https://docs.xplantpro.com/docs/authentication) |
-| Responses | `{"ok": true, "data": …}` or `{"ok": false, "data": null, "error": "…", "code": "STABLE_CODE"}`. Branch on `code`, see [Errors](https://docs.xplantpro.com/docs/errors) |
+| Responses | `{"ok": true, "data": …}` or `{"ok": false, "data": null, "error": "…", "code": "STABLE_CODE"}`. Branch on `code`, see [Errors](https://docs.xplantpro.com/docs/errors). Every response has an `X-Request-Id` to quote to support |
 | Permissions | 34 scopes, `read:` / `write:` per resource, fixed when a key is created, see [Scopes](https://docs.xplantpro.com/docs/scopes) |
 | Rate limits | 1,000 requests/min per key or token, 3,000/min per workspace; `429` with `Retry-After`, see [Rate limits](https://docs.xplantpro.com/docs/rate-limits) |
 | Safe retries | `Idempotency-Key` on supported writes, see [Idempotency](https://docs.xplantpro.com/docs/idempotency) |
-| Paging | `limit` up to 200, with a cursor or `offset`, see [Pagination](https://docs.xplantpro.com/docs/pagination) |
+| Paging | Every list pages by cursor (`meta.next_cursor`), see [Pagination](https://docs.xplantpro.com/docs/pagination) |
 | Plans | Whole API on xPlant+ Teams and Enterprise; devices only on Hobby and Pro Lab, see [Plans and access](#plans-and-access) |
 | Spec | [OpenAPI 3](https://docs.xplantpro.com/openapi.json) |
 

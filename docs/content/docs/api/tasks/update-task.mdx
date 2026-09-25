@@ -125,6 +125,10 @@ The envelope can also carry `meta`:
 | `priority_write.priority_source` | `"default"` \| `"auto"` \| `"manual"` | Yes | Where the order stands now. |
 | `priority_write.message` | string | Yes | A plain-language explanation, safe to show in a sync log. |
 
+| Response header | Meaning |
+| --- | --- |
+| `X-Request-Id` | Identifies this request. Include it when you contact support. |
+
 ## Errors
 
 | Status | Code | When |
