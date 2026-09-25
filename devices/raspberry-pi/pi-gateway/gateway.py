@@ -99,7 +99,7 @@ def load_config(path: Path) -> dict[str, Any]:
     # reading would be a request per sensor per interval — at a 60s interval
     # that is ~43k requests per sensor per month, against an endpoint that
     # accepts 500 readings in a single call.
-    config.setdefault("batch_flush_interval_seconds", 300)
+    config.setdefault("batch_flush_interval_seconds", 60)
     config.setdefault("batch_max_readings", 100)
     # Cap the retry buffer so a long outage cannot exhaust memory. Oldest
     # readings are dropped first once this is exceeded.
@@ -236,19 +236,26 @@ def build_reading(
     """
     Build one reading, stamped with the time it was TAKEN.
 
-    The field is `recorded_at`, not `timestamp`. The API validates with a
-    schema that strips unknown keys, so a `timestamp` field is silently
-    discarded and the reading falls back to server-receive time. That is
+    The field is `recorded_at`, not `timestamp`. The API ignores fields it
+    doesn't know, so a `timestamp` field is silently dropped and the reading
+    falls back to the time the request arrives. That is
     invisible while readings post immediately, and wrong the moment one is
     buffered through an outage or a retry — exactly when the real
     observation time matters.
     """
+    # The API wants UTC ending in "Z"; isoformat() would end in "+00:00",
+    # which it rejects.
+    recorded_at = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
     return {
         "device_id":   config["device_id"],
         "type":        sensor["type"],
         "value":       value,
         "unit":        sensor["unit"],
-        "recorded_at": datetime.now(timezone.utc).isoformat(),
+        "recorded_at": recorded_at,
+        # Stable per device, channel and moment: if a batch is retried after
+        # the server stored it but the response was lost, the repeat is
+        # skipped instead of stored twice.
+        "external_id": f"{config['device_id']}-{sensor['type']}-{recorded_at}",
     }
 
 
