@@ -133,5 +133,5 @@ If you want each probe to appear as its own device in xPlant (probes in differen
 
 ## Losing or retiring a token
 
-- **Lost a token?** Create a new one for the same device and switch the device over.
+- **Lost or leaked a token?** Create a new one for the same device, switch the device over, then [revoke the old one](/docs/api/devices/revoke-device-token). A revoked token is refused from its next request. [List the device's tokens](/docs/api/devices/list-device-tokens) to find its id by prefix and last use.
 - **Taking a device out of service** revokes all of its tokens in the same step, and so does deleting it. There's nothing extra to remember.

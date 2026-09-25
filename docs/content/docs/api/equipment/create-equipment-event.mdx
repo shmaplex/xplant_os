@@ -92,13 +92,13 @@ event = body["data"]
 
 | Status | Code | When |
 | --- | --- | --- |
-| `400` | `VALIDATION_ERROR` | The `Idempotency-Key` header is malformed. |
 | `401` | `UNAUTHORIZED` | The key is missing, malformed or revoked, or its owner is no longer a member of the workspace. |
 | `402` | `PAID_PLAN_REQUIRED` | The workspace is not on a paid plan. The API is available on paid plans. |
 | `403` | `FORBIDDEN` | The key lacks a scope this operation requires; `error` names the scope. |
 | `403` | `DEVICE_TOKEN_NOT_ACCEPTED` | A device token was sent; this operation needs a workspace API key. |
 | `404` | `NOT_FOUND` | No record with this id exists in the key's workspace. |
 | `409` | `IDEMPOTENCY_IN_FLIGHT` | A request with this `Idempotency-Key` is still being processed; retry after `Retry-After` seconds. |
+| `422` | `VALIDATION_ERROR` | The `Idempotency-Key` header is malformed. |
 | `429` | `RATE_LIMIT_EXCEEDED` | Too many requests for this key, device token or workspace. Wait `Retry-After` seconds. |
 
 This endpoint can also answer a `5xx` with a `…_FAILED` code, which is safe to retry later. Branch on `code`, never on the `error` text. See [Errors](/docs/errors).

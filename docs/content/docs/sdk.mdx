@@ -111,7 +111,9 @@ buffer.add({ device_id: process.env.XPLANT_DEVICE_ID, type: "temperature", value
 await buffer.close();
 ```
 
-It stamps `recorded_at` and `external_id` on each reading, keeps readings through outages (up to 10,000), and drops and reports readings that are invalid. The queue is held in memory only, so readings still queued when the process dies are lost. See [Sensors and devices](/docs/guides/sensors-and-devices).
+`sensorReadings.create()` resolves to the stored reading, or to `null` when the reading duplicated one already stored (same device, `external_id` and `recorded_at`).
+
+The buffer stamps `recorded_at` and `external_id` on each reading, keeps readings through outages (up to 10,000), and drops and reports readings that are invalid. The queue is held in memory only, so readings still queued when the process dies are lost. See [Sensors and devices](/docs/guides/sensors-and-devices).
 
 ## Resources
 
@@ -129,7 +131,7 @@ It stamps `recorded_at` and `external_id` on each reading, keeps readings throug
 | `client.sops` | `list`, `get` |
 | `client.sopRuns` | `start`, `get`, `recordStepEvent`, `recordMeasurement` |
 | `client.labels` | `resolve`, `recordScan` |
-| `client.devices` | `list`, `get`, `register`, `heartbeat`, `listTokens`, `createToken`, `recordEvent` |
+| `client.devices` | `list`, `get`, `register`, `heartbeat`, `listTokens`, `createToken`, `revokeToken`, `recordEvent` |
 | `client.sensorReadings` | `list`, `create`, `createBatch`, `buffer` |
 | `client.equipment` | `recordEvent` |
 

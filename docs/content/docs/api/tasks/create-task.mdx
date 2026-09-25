@@ -110,7 +110,7 @@ task = body["data"]
 | `assigned_to` | string \| null | Yes | User id of the workspace member the task is assigned to. |
 | `priority` | string \| null | Yes | — |
 | `priority_rank` | number \| null | Yes | Queue position. Lower sorts first; null means the priority label decides. |
-| `priority_source` | string | Yes | Where the current order came from. `manual` means a person placed the task, and automated writes leave it where it is unless they send `release: true`. |
+| `priority_source` | string | Yes | Where the current order came from: `default`, `auto`, `manual`. `manual` means a person placed the task, and automated writes leave it where it is unless they send `release: true`. |
 | `category` | string \| null | Yes | — |
 | `created_at` | string \| null | Yes | — |
 | `entity_link` | object \| null | No | The plant or explant the task is about. Returned when you create, fetch or update one task; lists leave it out. |
@@ -128,7 +128,7 @@ task = body["data"]
     "assigned_to": "0d7e4b9a-6f21-4c3e-8a5b-2e9f1c7d4a60",
     "priority": "high",
     "priority_rank": 1.5,
-    "priority_source": "automatic",
+    "priority_source": "auto",
     "category": "transfer",
     "created_at": "2026-09-25T14:12:03.000Z"
   }
@@ -143,13 +143,13 @@ task = body["data"]
 
 | Status | Code | When |
 | --- | --- | --- |
-| `400` | `VALIDATION_ERROR` | The `Idempotency-Key` header is malformed. |
 | `400` | `VALIDATION_ERROR` | The request body is not valid JSON. |
 | `401` | `UNAUTHORIZED` | The key is missing, malformed or revoked, or its owner is no longer a member of the workspace. |
 | `402` | `PAID_PLAN_REQUIRED` | The workspace is not on a paid plan. The API is available on paid plans. |
 | `403` | `FORBIDDEN` | The key lacks a scope this operation requires; `error` names the scope. |
 | `403` | `DEVICE_TOKEN_NOT_ACCEPTED` | A device token was sent; this operation needs a workspace API key. |
 | `409` | `IDEMPOTENCY_IN_FLIGHT` | A request with this `Idempotency-Key` is still being processed; retry after `Retry-After` seconds. |
+| `422` | `VALIDATION_ERROR` | The `Idempotency-Key` header is malformed. |
 | `422` | `VALIDATION_ERROR` | A field failed validation. `error` names the first one, for example `title: title is required`. |
 | `422` | `VALIDATION_ERROR` | `assigned_to` is not an active member of the workspace, or the linked plant or explant is not in it. |
 | `429` | `RATE_LIMIT_EXCEEDED` | Too many requests for this key, device token or workspace. Wait `Retry-After` seconds. |

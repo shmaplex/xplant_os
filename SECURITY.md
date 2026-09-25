@@ -29,7 +29,7 @@ Rules to follow:
 
 ### What to do if you accidentally commit a key
 
-1. **Revoke the key immediately**: open [Settings > Integrations > API Keys](https://app.xplantpro.com/settings/integrations/api-keys) in xPlant and revoke the compromised key. For a leaked device token, taking the device out of service in xPlant revokes all of its tokens at once; then register it again and create a fresh token.
+1. **Revoke the key immediately**: open [Settings > Integrations > API Keys](https://app.xplantpro.com/settings/integrations/api-keys) in xPlant and revoke the compromised key. For a leaked device token, [revoke that token](https://docs.xplantpro.com/docs/api/devices/revoke-device-token) with a workspace key and create a fresh one for the device; taking the device out of service in xPlant also revokes all of its tokens at once.
 2. Generate a new key.
 3. Remove the key from git history using `git filter-repo` or BFG Repo Cleaner, then force-push. Treat the old key as permanently compromised regardless of history rewriting.
 

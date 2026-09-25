@@ -8,9 +8,7 @@ endpoint: {"method":"PATCH","path":"/api/v1/tasks/{id}","scopes":["write:tasks"]
 
 A task someone placed by hand keeps its position through automated writes. Send `release: true` to hand it back to automatic ordering. Send `clear_entity_link: true` to unlink it from its plant or explant.
 
-A partial update: send only the fields you want to change.
-
-A change made through the API never overrides an order someone set by hand. If a person has positioned the task, an ordering change (`priority`, `priority_rank`) is skipped rather than applied. The response is still `200`, the rest of the patch still applies, and `meta.priority_write` explains what happened. Send `release: true` with the change to hand the task back to automatic ordering. See [Sync tasks](/docs/guides/sync-tasks).
+See also: [Sync tasks](/docs/guides/sync-tasks).
 
 ## Path parameters
 
@@ -91,7 +89,7 @@ result = body["data"]
 | `assigned_to` | string \| null | Yes | User id of the workspace member the task is assigned to. |
 | `priority` | string \| null | Yes | — |
 | `priority_rank` | number \| null | Yes | Queue position. Lower sorts first; null means the priority label decides. |
-| `priority_source` | string | Yes | Where the current order came from. `manual` means a person placed the task, and automated writes leave it where it is unless they send `release: true`. |
+| `priority_source` | string | Yes | Where the current order came from: `default`, `auto`, `manual`. `manual` means a person placed the task, and automated writes leave it where it is unless they send `release: true`. |
 | `category` | string \| null | Yes | — |
 | `created_at` | string \| null | Yes | — |
 | `entity_link` | object \| null | No | The plant or explant the task is about. Returned when you create, fetch or update one task; lists leave it out. |
@@ -109,13 +107,23 @@ result = body["data"]
     "assigned_to": "0d7e4b9a-6f21-4c3e-8a5b-2e9f1c7d4a60",
     "priority": "high",
     "priority_rank": 1.5,
-    "priority_source": "automatic",
+    "priority_source": "auto",
     "category": "transfer",
     "created_at": "2026-09-25T14:12:03.000Z",
     "entity_link": null
   }
 }
 ```
+
+The envelope can also carry `meta`:
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `priority_write` | object | Yes | Sent when the update asked to change the task's order: whether it was applied, and why not if it was declined. Left out otherwise. |
+| `priority_write.applied` | boolean | Yes | Whether the requested ordering change was written. |
+| `priority_write.reason` | `"manual_override"` | No | Present only when the change was declined. |
+| `priority_write.priority_source` | `"default"` \| `"auto"` \| `"manual"` | Yes | Where the order stands now. |
+| `priority_write.message` | string | Yes | A plain-language explanation, safe to show in a sync log. |
 
 ## Errors
 

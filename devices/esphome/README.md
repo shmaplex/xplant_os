@@ -36,10 +36,20 @@ xplant_device_token: !secret xplant_device_token
 
 ## Supported sensor types
 
-The `type` field in the POST body is a free-form string. These are the common ones:
+The `type` field in the POST body must be one of these:
 
-| `type` | `unit` | Description |
+| `type` | `unit` (examples) | Description |
 |---|---|---|
+| `temperature` | `C` or `F` | Air or media temperature |
+| `humidity` | `%` | Relative humidity |
+| `co2` | `ppm` | CO2 concentration |
+| `light` | `lux` | Light level |
+| `ph` | `pH` | Media pH |
+| `other` | any | Anything else; say what in `notes` |
+
+`type` must be one of these values; anything else is rejected with `422 VALIDATION_ERROR`. `unit` is free text (1–20 characters).
+
+---|---|---|
 | `temperature` | `C` or `F` | Air or media temperature |
 | `humidity` | `%` | Relative humidity |
 | `co2` | `ppm` | CO2 concentration |

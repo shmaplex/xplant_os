@@ -93,6 +93,7 @@ The machine-readable spec is [openapi.json](/openapi.json) (OpenAPI 3).
 | [`POST /devices/{deviceId}/heartbeat`](/docs/api/devices/send-heartbeat) | Send a heartbeat | `write:devices` |
 | [`GET /devices/{deviceId}/tokens`](/docs/api/devices/list-device-tokens) | List device tokens | `read:devices` |
 | [`POST /devices/{deviceId}/tokens`](/docs/api/devices/create-device-token) | Create a device token | `write:devices` |
+| [`DELETE /devices/{deviceId}/tokens/{tokenId}`](/docs/api/devices/revoke-device-token) | Revoke a device token | `write:devices` |
 
 ## Sensor readings
 

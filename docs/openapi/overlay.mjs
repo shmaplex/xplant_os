@@ -338,7 +338,7 @@ export const overlay = {
     path: { deviceId: DEVICE_ID },
     resultVar: "tokens",
     sdk: `const tokens = await client.devices.listTokens("${DEVICE_ID}");`,
-    notes: "Use this to decide which token to revoke. Nothing here can be used to authenticate.",
+    notes: "Use this to decide which token to [revoke](/docs/api/devices/revoke-device-token). Nothing here can be used to authenticate.",
   },
   "POST /api/v1/devices/{deviceId}/tokens": {
     slug: "create-device-token",
@@ -351,6 +351,16 @@ export const overlay = {
     notes:
       "Run this once, from a machine you control, with a workspace key. **The token is returned once and never again.** If you lose it, create another and revoke the old one. See [Device tokens](/docs/device-tokens).",
     response: { token: "xpd_live_…", prefix: "xpd_live_9f3a" },
+  },
+  "DELETE /api/v1/devices/{deviceId}/tokens/{tokenId}": {
+    slug: "revoke-device-token",
+    title: "Revoke a device token",
+    description: "Stops one device token from working. The device's other tokens are unaffected.",
+    path: { deviceId: DEVICE_ID, tokenId: "3c5e7a9b-1d3f-4b5d-8f7a-9c1e3b5d7f9a" },
+    resultVar: "revoked",
+    sdk: `const revoked = await client.devices.revokeToken(\n  "${DEVICE_ID}",\n  "3c5e7a9b-1d3f-4b5d-8f7a-9c1e3b5d7f9a",\n);`,
+    notes:
+      "Needs a workspace key; a device token can't revoke tokens. The token is refused from its next request. Revoking a token that is already revoked answers `200` with its current state, so a retry is harmless. A token belonging to another device or workspace answers `404`.",
   },
   "POST /api/v1/device-events": {
     slug: "create-device-event",

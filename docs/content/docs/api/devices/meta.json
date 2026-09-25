@@ -6,6 +6,7 @@
     "create-device",
     "send-heartbeat",
     "list-device-tokens",
-    "create-device-token"
+    "create-device-token",
+    "revoke-device-token"
   ]
 }

@@ -20,12 +20,16 @@ A repeat with the same key returns **the first response**, with the same status 
 The header is honoured on these endpoints, and only these:
 
 {/* generated:idempotent-endpoints */}
+- [`POST /devices`](/docs/api/devices/create-device): Register a device
 - [`POST /equipment/{id}/events`](/docs/api/equipment/create-equipment-event): Record an equipment event
 - [`POST /label-scans`](/docs/api/labels/create-label-scan): Record a label scan
 - [`POST /sop-runs`](/docs/api/sops/create-sop-run): Start an SOP run
 - [`POST /sop-runs/{id}/steps/{stepId}/events`](/docs/api/sops/create-sop-step-event): Record step evidence
 - [`POST /sop-runs/{id}/steps/{stepId}/measurements`](/docs/api/sops/create-sop-step-measurement): Record a step measurement
+- [`POST /stages`](/docs/api/transfers-and-stages/create-stage): Advance a stage
 - [`POST /tasks`](/docs/api/tasks/create-task): Create a task
+- [`POST /tasks/demand`](/docs/api/tasks/create-demand-signal): Record a demand signal
+- [`POST /transfers`](/docs/api/transfers-and-stages/create-transfer): Record a transfer
 {/* /generated:idempotent-endpoints */}
 
 Everywhere else the header is ignored. For sensor readings, make retries safe with an `external_id` and `recorded_at` on every reading instead: readings are de-duplicated on the device, the `external_id` and the time.
@@ -34,7 +38,7 @@ Everywhere else the header is ignored. For sensor readings, make retries safe wi
 
 | | |
 | --- | --- |
-| Format | 8–255 characters from `A–Z a–z 0–9 . _ : ~ -`. A malformed key answers `400 VALIDATION_ERROR` rather than being silently ignored. |
+| Format | 8–255 characters from `A–Z a–z 0–9 . _ : ~ -`. A malformed key answers `422 VALIDATION_ERROR` rather than being silently ignored. |
 | Scope | Your key plus the endpoint. The same string on two endpoints is two different writes, and two keys never collide. |
 | How long | 24 hours. After that, the same key starts a fresh write. |
 | Still running | If the first request hasn't finished, a repeat answers `409 IDEMPOTENCY_IN_FLIGHT` with `Retry-After: 1`. Wait and send it again; don't assume it failed. |

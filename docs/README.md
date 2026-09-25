@@ -23,8 +23,7 @@ npm run types:check
 | --- | --- |
 | `content/docs/*.mdx`, `content/docs/guides/` | Hand-written pages. Edit these. |
 | `content/docs/api/`, `content/docs/scopes.mdx` | **Generated.** Don't edit by hand. |
-| `openapi/openapi.json` | The vendored OpenAPI spec: the source of truth for endpoints, parameters, schemas, scopes and errors. |
-| `openapi/scopes.json` | The 34 scopes, as the API Keys page lists them. |
+| `openapi/openapi.json` | The vendored OpenAPI spec: the source of truth for endpoints, parameters, schemas, errors and the scope catalogue (`x-scopes`). |
 | `openapi/overlay.mjs` | Per-endpoint additions the spec can't carry: page slug, example values, the SDK call, a short note. |
 | `scripts/sync-openapi.mjs` | Vendors a new spec and strips anything internal. |
 | `scripts/generate-api-pages.mjs` | Writes the API pages, the scopes page, and the `{/* generated:… */}` blocks inside hand-written pages. |
