@@ -38,7 +38,7 @@ The body is one of:
 | `subject_type` | `"sop_log"` \| `"media_batch"` \| `"plant_transfer"` \| `"explant_transfer"` \| `"contamination_log"` | Yes | What it was used on: `sop_log`, `media_batch`, `plant_transfer`, `explant_transfer`, `contamination_log`. |
 | `subject_id` | string (uuid) | Yes | The id of that record. It must belong to the key's workspace. |
 | `subject_label` | string | No | A readable name for the record, kept with the event. Up to 200 characters. |
-| `used_at` | string (date-time) | No | When it was used, as an ISO 8601 timestamp in UTC (ending in `Z`). Defaults to now. |
+| `used_at` | string (date-time) | No | When it was used, as an ISO 8601 timestamp in UTC (`2026-09-25T08:30:00Z`) or with an offset (`2026-09-25T10:30:00+02:00`). Defaults to now. |
 | `notes` | string | No | Up to 2000 characters. |
 
 ### A single object
@@ -47,7 +47,7 @@ The body is one of:
 | --- | --- | --- | --- |
 | `kind` | `"calibration"` \| `"preventive_maintenance"` | Yes | `calibration`, or `preventive_maintenance` for a service. |
 | `outcome` | `"pass"` \| `"pass_after_adjustment"` \| `"out_of_tolerance"` \| `"fail"` \| `"not_performed"` | No | How it went: `pass`, `pass_after_adjustment`, `out_of_tolerance`, `fail`, `not_performed`. `out_of_tolerance` means the instrument was found outside its specification before any adjustment. Default `"pass"`. |
-| `performed_at` | string (date-time) | No | When the work was done, as an ISO 8601 timestamp in UTC (ending in `Z`). Defaults to now. |
+| `performed_at` | string (date-time) | No | When the work was done, as an ISO 8601 timestamp in UTC (`2026-09-25T08:30:00Z`) or with an offset (`2026-09-25T10:30:00+02:00`). Defaults to now. |
 | `performed_by_name` | string | No | Who did the work — a person or a service company. Up to 200 characters. |
 | `result_summary` | string | No | Up to 2000 characters. |
 | `notes` | string | No | Up to 2000 characters. |

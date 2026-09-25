@@ -4479,7 +4479,7 @@
           "Devices"
         ],
         "summary": "Record a device event",
-        "description": "Records something that happened on a device — an alert, an error, a firmware update or a configuration change — with whatever detail you put in `payload`. Send it with the device's own token, which may only write about that device, or with a workspace key.\n\nEvents are not deduplicated: a request retried after a dropped response is recorded twice.",
+        "description": "Records something that happened on a device — an alert, an error, a firmware update or a configuration change — with whatever detail you put in `payload`. Send it with the device's own token, which may only write about that device, or with a workspace key.\n\nTo make a retry safe, send your own `external_id` for the event. An event that repeats one already stored for the same device, under the same `external_id`, is not recorded again: the answer is the stored event, still `201`, with `meta.duplicate: true`. Without `external_id` every request is recorded, so a request retried after a dropped response is recorded twice.",
         "security": [
           {
             "bearerAuth": []
@@ -4552,7 +4552,13 @@
                   "occurred_at": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "When it happened, as an ISO 8601 timestamp in UTC ending in `Z`. Defaults to the time the request arrives."
+                    "description": "When it happened, as an ISO 8601 timestamp in UTC (`2026-09-25T14:00:00Z`) or with an offset (`2026-09-25T16:00:00+02:00`). Defaults to the time the request arrives."
+                  },
+                  "external_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200,
+                    "description": "Your own id for the event. An event with the same device and `external_id` as one already stored is not recorded again: the stored event is returned instead, with `meta.duplicate: true`, so a retried request records the event once."
                   }
                 },
                 "required": [
@@ -4567,7 +4573,8 @@
                   "reason": "humidity_high",
                   "humidity_percent": 94
                 },
-                "occurred_at": "2026-09-25T13:58:00.000Z"
+                "occurred_at": "2026-09-25T13:58:00.000Z",
+                "external_id": "shelf3-alert-20260925T135800Z"
               }
             }
           }
@@ -4589,6 +4596,19 @@
                     },
                     "data": {
                       "$ref": "#/components/schemas/DeviceEvent"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "duplicate": {
+                          "type": "boolean",
+                          "const": true,
+                          "description": "Sent only when the request repeated an event already stored for the device under the same `external_id`. `data` is that stored event, and nothing new was recorded."
+                        }
+                      },
+                      "required": [
+                        "duplicate"
+                      ]
                     }
                   }
                 },
@@ -4864,7 +4884,7 @@
             }
           },
           "500": {
-            "description": "`DEVICE_EVENT_CREATE_FAILED` — The event could not be saved. Retry later.",
+            "description": "`DEVICE_EVENT_CREATE_FAILED` — The event could not be saved. Retry the same request — an event that carries `external_id` is not recorded twice.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4890,7 +4910,7 @@
             "x-error-codes": [
               {
                 "code": "DEVICE_EVENT_CREATE_FAILED",
-                "when": "The event could not be saved. Retry later."
+                "when": "The event could not be saved. Retry the same request — an event that carries `external_id` is not recorded twice."
               }
             ],
             "headers": {
@@ -6484,6 +6504,42 @@
                 }
               }
             },
+            "headers": {
+              "X-Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              }
+            }
+          },
+          "400": {
+            "description": "`VALIDATION_ERROR` — The body is not valid JSON, and no token was minted. An empty body is not an error: it mints a token with every default.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "VALIDATION_ERROR"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "x-error-codes": [
+              {
+                "code": "VALIDATION_ERROR",
+                "when": "The body is not valid JSON, and no token was minted. An empty body is not an error: it mints a token with every default."
+              }
+            ],
             "headers": {
               "X-Request-Id": {
                 "$ref": "#/components/headers/RequestId"
@@ -8186,7 +8242,7 @@
                       "used_at": {
                         "type": "string",
                         "format": "date-time",
-                        "description": "When it was used, as an ISO 8601 timestamp in UTC (ending in `Z`). Defaults to now."
+                        "description": "When it was used, as an ISO 8601 timestamp in UTC (`2026-09-25T08:30:00Z`) or with an offset (`2026-09-25T10:30:00+02:00`). Defaults to now."
                       },
                       "notes": {
                         "type": "string",
@@ -8225,7 +8281,7 @@
                       "performed_at": {
                         "type": "string",
                         "format": "date-time",
-                        "description": "When the work was done, as an ISO 8601 timestamp in UTC (ending in `Z`). Defaults to now."
+                        "description": "When the work was done, as an ISO 8601 timestamp in UTC (`2026-09-25T08:30:00Z`) or with an offset (`2026-09-25T10:30:00+02:00`). Defaults to now."
                       },
                       "performed_by_name": {
                         "type": "string",
@@ -10615,7 +10671,7 @@
                   "scanned_at": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "When the scan happened, in UTC with a trailing `Z`, such as `2026-09-25T08:30:00Z`. A timestamp with an offset is refused. Defaults to when xPlant receives it."
+                    "description": "When the scan happened, as an ISO 8601 timestamp in UTC (`2026-09-25T08:30:00Z`) or with an offset (`2026-09-25T10:30:00+02:00`). Defaults to when xPlant receives it."
                   }
                 },
                 "required": [
@@ -10893,7 +10949,7 @@
             }
           },
           "422": {
-            "description": "`VALIDATION_ERROR` — The `Idempotency-Key` header is malformed.\n\n`VALIDATION_ERROR` — A field failed validation, for example a missing `barcode` or a `scanned_at` that is not a UTC timestamp. `error` gives the first problem but does not name the field.",
+            "description": "`VALIDATION_ERROR` — The `Idempotency-Key` header is malformed.\n\n`VALIDATION_ERROR` — A field failed validation, for example a missing `barcode` or a `scanned_at` that is not a timestamp with a time zone. `error` gives the first problem but does not name the field.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10923,7 +10979,7 @@
               },
               {
                 "code": "VALIDATION_ERROR",
-                "when": "A field failed validation, for example a missing `barcode` or a `scanned_at` that is not a UTC timestamp. `error` gives the first problem but does not name the field."
+                "when": "A field failed validation, for example a missing `barcode` or a `scanned_at` that is not a timestamp with a time zone. `error` gives the first problem but does not name the field."
               }
             ],
             "headers": {
@@ -11030,7 +11086,8 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "minLength": 1
             },
             "description": "The code exactly as scanned or typed. A plant, explant or container label must match exactly; your own identifiers match ignoring case."
           }
@@ -11067,42 +11124,6 @@
                 }
               }
             },
-            "headers": {
-              "X-Request-Id": {
-                "$ref": "#/components/headers/RequestId"
-              }
-            }
-          },
-          "400": {
-            "description": "`VALIDATION_ERROR` — `barcode` is missing or blank.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/Error"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "code": {
-                          "type": "string",
-                          "enum": [
-                            "VALIDATION_ERROR"
-                          ]
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            },
-            "x-error-codes": [
-              {
-                "code": "VALIDATION_ERROR",
-                "when": "`barcode` is missing or blank."
-              }
-            ],
             "headers": {
               "X-Request-Id": {
                 "$ref": "#/components/headers/RequestId"
@@ -11244,6 +11265,42 @@
               {
                 "code": "NOT_FOUND",
                 "when": "Nothing in this workspace matches the code."
+              }
+            ],
+            "headers": {
+              "X-Request-Id": {
+                "$ref": "#/components/headers/RequestId"
+              }
+            }
+          },
+          "422": {
+            "description": "`VALIDATION_ERROR` — `barcode` is missing or blank. `error` names it: `barcode: barcode is required`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Error"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "VALIDATION_ERROR"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "x-error-codes": [
+              {
+                "code": "VALIDATION_ERROR",
+                "when": "`barcode` is missing or blank. `error` names it: `barcode: barcode is required`."
               }
             ],
             "headers": {
@@ -15839,7 +15896,7 @@
               "type": "string",
               "format": "date-time"
             },
-            "description": "Only readings taken at or after this time, as an ISO 8601 timestamp."
+            "description": "Only readings taken at or after this time, as an ISO 8601 timestamp in UTC or with an offset. Write an offset's `+` as `%2B`."
           },
           {
             "name": "until",
@@ -15849,7 +15906,7 @@
               "type": "string",
               "format": "date-time"
             },
-            "description": "Only readings taken at or before this time, as an ISO 8601 timestamp. Must not be earlier than `since`."
+            "description": "Only readings taken at or before this time, as an ISO 8601 timestamp in UTC or with an offset. Write an offset's `+` as `%2B`. Must not be earlier than `since`."
           },
           {
             "name": "limit",
@@ -16154,7 +16211,7 @@
           "Sensor readings"
         ],
         "summary": "Post sensor readings",
-        "description": "Stores readings from a device. Send one reading, or up to 500 at once as `{ \"readings\": [...] }`. **Batch them:** a gateway that buffers readings and posts every 30 to 60 seconds uses a small fraction of the requests of one that posts each reading as it is taken.\n\nThe response mirrors the request — one reading back for one reading sent, a list for a batch.\n\nTo make a retry safe, send `external_id` and `recorded_at` on every reading. A reading that repeats one already stored for the same device is skipped rather than stored twice, and is left out of the response — so a skipped single reading returns `ok: true` with no `data`.\n\nOne bad reading refuses the whole batch: if any reading fails validation, names a device or room outside the workspace, or comes from a device that is paused or retired, nothing in the request is stored.\n\nReadings have a budget of their own on top of the request limit: 5,000 per key or device token and 10,000 per workspace in any five minutes. Over it, the answer is `429 RATE_LIMIT_EXCEEDED` with a `Retry-After` header.",
+        "description": "Stores readings from a device. Send one reading, or up to 500 at once as `{ \"readings\": [...] }`. **Batch them:** a gateway that buffers readings and posts every 30 to 60 seconds uses a small fraction of the requests of one that posts each reading as it is taken.\n\nThe response mirrors the request — one reading back for one reading sent, a list for a batch.\n\nTo make a retry safe, send `external_id` and `recorded_at` on every reading. A reading that repeats one already stored for the same device is skipped rather than stored twice. In a batch, a skipped reading is left out of the list, so the list can be shorter than the batch. A single reading that is skipped answers with the reading already stored, still `201`, with `meta.duplicate: true`.\n\nOne bad reading refuses the whole batch: if any reading fails validation, names a device or room outside the workspace, or comes from a device that is paused or retired, nothing in the request is stored.\n\nReadings have a budget of their own on top of the request limit: 5,000 per key or device token and 10,000 per workspace in any five minutes. Over it, the answer is `429 RATE_LIMIT_EXCEEDED` with a `Retry-After` header.",
         "security": [
           {
             "bearerAuth": []
@@ -16215,7 +16272,7 @@
                       "recorded_at": {
                         "type": "string",
                         "format": "date-time",
-                        "description": "When the reading was taken, as an ISO 8601 timestamp in UTC ending in `Z`. Defaults to the time the request arrives. Required when you send `external_id`."
+                        "description": "When the reading was taken, as an ISO 8601 timestamp in UTC (`2026-09-25T14:00:00Z`) or with an offset (`2026-09-25T16:00:00+02:00`). Defaults to the time the request arrives. Required when you send `external_id`."
                       },
                       "notes": {
                         "type": "string",
@@ -16226,7 +16283,7 @@
                         "type": "string",
                         "minLength": 1,
                         "maxLength": 200,
-                        "description": "Your own id for the reading. A reading with the same device, `external_id` and `recorded_at` as one already stored is skipped, so a retried batch is not stored twice."
+                        "description": "Your own id for the reading. A reading with the same device, `external_id` and `recorded_at` as one already stored is skipped, so a retried batch is not stored twice. `recorded_at` is compared as a moment in time, so `2026-09-25T14:00:00Z` and `2026-09-25T16:00:00+02:00` count as the same."
                       }
                     },
                     "required": [
@@ -16279,7 +16336,7 @@
                             "recorded_at": {
                               "type": "string",
                               "format": "date-time",
-                              "description": "When the reading was taken, as an ISO 8601 timestamp in UTC ending in `Z`. Defaults to the time the request arrives. Required when you send `external_id`."
+                              "description": "When the reading was taken, as an ISO 8601 timestamp in UTC (`2026-09-25T14:00:00Z`) or with an offset (`2026-09-25T16:00:00+02:00`). Defaults to the time the request arrives. Required when you send `external_id`."
                             },
                             "notes": {
                               "type": "string",
@@ -16290,7 +16347,7 @@
                               "type": "string",
                               "minLength": 1,
                               "maxLength": 200,
-                              "description": "Your own id for the reading. A reading with the same device, `external_id` and `recorded_at` as one already stored is skipped, so a retried batch is not stored twice."
+                              "description": "Your own id for the reading. A reading with the same device, `external_id` and `recorded_at` as one already stored is skipped, so a retried batch is not stored twice. `recorded_at` is compared as a moment in time, so `2026-09-25T14:00:00Z` and `2026-09-25T16:00:00+02:00` count as the same."
                             }
                           },
                           "required": [
@@ -16362,6 +16419,19 @@
                             "$ref": "#/components/schemas/SensorReading"
                           }
                         }
+                      ]
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "duplicate": {
+                          "type": "boolean",
+                          "const": true,
+                          "description": "Sent only when one reading was sent and it repeated a reading already stored for the device under the same `external_id` and `recorded_at`. `data` is that stored reading, and nothing new was stored. Never sent for a batch."
+                        }
+                      },
+                      "required": [
+                        "duplicate"
                       ]
                     }
                   }
@@ -16733,7 +16803,7 @@
           "SOP runs"
         ],
         "summary": "Start an SOP run",
-        "description": "Starts a run of an SOP: the record that a procedure was carried out, step by step, against the version the lab had in force.\n\nA bench station typically:\n\n1. Reads the SOP with Get an SOP and shows the steps of the version in force.\n2. Starts a run here, naming the batch or line it is for in `batch_code`.\n3. Posts evidence against each step as the work happens — a confirmation, a scanned vessel label, a reading from a balance or pH meter — with Record a step event and Record a step measurement.\n\nThe run follows the version in force when it starts, and you cannot choose another. Send an `Idempotency-Key` so a retried start does not open a second run.",
+        "description": "Starts a run of an SOP: the record that a procedure was carried out, step by step, against the version the lab had in force.\n\nA bench station typically:\n\n1. Reads the SOP with Get an SOP and shows the steps of the version in force.\n2. Starts a run here, naming the batch or line it is for in `batch_code`.\n3. Posts evidence against each step as the work happens — a confirmation, a scanned vessel label, a reading from a balance or pH meter — with Record a step event and Record a step measurement.\n\nThe run follows the version in force when it starts, and you cannot choose another. Send an `Idempotency-Key` so a retried start does not open a second run.\n\nThe run is recorded as the key's owner, and your lab's training rule applies to them exactly as it does in xPlant. Where the lab requires current training before an SOP is run, a key whose owner has none on this SOP is refused. Where the lab only asks for a warning, the run starts and `meta.training_warning` says what is missing, so the station can tell the person running it.",
         "security": [
           {
             "bearerAuth": []
@@ -16802,6 +16872,41 @@
                     },
                     "data": {
                       "$ref": "#/components/schemas/SopRun"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "training_warning": {
+                          "type": "object",
+                          "properties": {
+                            "qualification": {
+                              "type": "string",
+                              "enum": [
+                                "untrained",
+                                "expired",
+                                "revoked",
+                                "expiring"
+                              ],
+                              "description": "Where the key's owner stands on this SOP: `untrained` when no training is recorded, `expired` when it has lapsed, `revoked` when it was withdrawn, `expiring` when it is current but lapses within 30 days."
+                            },
+                            "expires_on": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "description": "The day that training lapsed or lapses, as `YYYY-MM-DD`, for `expired` and `expiring`. Null otherwise."
+                            }
+                          },
+                          "required": [
+                            "qualification",
+                            "expires_on"
+                          ],
+                          "description": "Sent when your lab enforces training and the key's owner's training on this SOP needs their attention: it is missing, expired or revoked and the lab warns rather than refuses, or it is current but lapses within 30 days. The run has started either way. Left out otherwise."
+                        }
+                      },
+                      "required": [
+                        "training_warning"
+                      ]
                     }
                   }
                 },
@@ -16934,7 +17039,7 @@
             }
           },
           "403": {
-            "description": "`FORBIDDEN` — The key lacks a scope this operation requires, or its owner's current role in the workspace cannot use it — a key never does more than its owner can in xPlant. `error` names the scope, and for a role, the role it needs.\n\n`DEVICE_TOKEN_NOT_ACCEPTED` — A device token was sent; this operation needs a workspace API key.",
+            "description": "`FORBIDDEN` — The key lacks a scope this operation requires, or its owner's current role in the workspace cannot use it — a key never does more than its owner can in xPlant. `error` names the scope, and for a role, the role it needs.\n\n`DEVICE_TOKEN_NOT_ACCEPTED` — A device token was sent; this operation needs a workspace API key.\n\n`TRAINING_REQUIRED` — Your lab requires current training before an SOP is run, and the key's owner has none on this one: it was never recorded, has expired, or was revoked. Nothing is started. Once their training is recorded in xPlant, start the run again.",
             "content": {
               "application/json": {
                 "schema": {
@@ -16949,7 +17054,8 @@
                           "type": "string",
                           "enum": [
                             "FORBIDDEN",
-                            "DEVICE_TOKEN_NOT_ACCEPTED"
+                            "DEVICE_TOKEN_NOT_ACCEPTED",
+                            "TRAINING_REQUIRED"
                           ]
                         }
                       }
@@ -16966,6 +17072,10 @@
               {
                 "code": "DEVICE_TOKEN_NOT_ACCEPTED",
                 "when": "A device token was sent; this operation needs a workspace API key."
+              },
+              {
+                "code": "TRAINING_REQUIRED",
+                "when": "Your lab requires current training before an SOP is run, and the key's owner has none on this one: it was never recorded, has expired, or was revoked. Nothing is started. Once their training is recorded in xPlant, start the run again."
               }
             ],
             "headers": {
@@ -17519,7 +17629,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The step's `id` in the version the run follows, as Get an SOP lists it in `version.steps`. It is recorded as sent and not checked against the procedure."
+            "description": "The `id` of one of the steps in the version the run follows — the version in force when the run started, whose steps Get an SOP lists in `version.steps` while it is still in force. Any other `stepId` is refused and nothing is recorded."
           },
           {
             "$ref": "#/components/parameters/IdempotencyKey"
@@ -17552,7 +17662,7 @@
                   "recorded_at": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "When it happened, in UTC with a trailing `Z`, such as `2026-09-25T08:30:00Z`. A timestamp with an offset is refused. Defaults to when xPlant receives it."
+                    "description": "When it happened, as an ISO 8601 timestamp in UTC (`2026-09-25T08:30:00Z`) or with an offset (`2026-09-25T10:30:00+02:00`). Defaults to when xPlant receives it."
                   }
                 },
                 "required": [
@@ -17757,7 +17867,7 @@
             }
           },
           "404": {
-            "description": "`NOT_FOUND` — No run with this id exists in the key's workspace, or the run id is not a well-formed id.",
+            "description": "`NOT_FOUND` — No run with this id exists in the key's workspace, or the run id is not a well-formed id.\n\n`NOT_FOUND` — `stepId` is not the `id` of a step in the version the run follows, or the run follows no recorded version of its SOP and so has no steps to record against. Nothing is recorded.",
             "content": {
               "application/json": {
                 "schema": {
@@ -17784,6 +17894,10 @@
               {
                 "code": "NOT_FOUND",
                 "when": "No run with this id exists in the key's workspace, or the run id is not a well-formed id."
+              },
+              {
+                "code": "NOT_FOUND",
+                "when": "`stepId` is not the `id` of a step in the version the run follows, or the run follows no recorded version of its SOP and so has no steps to record against. Nothing is recorded."
               }
             ],
             "headers": {
@@ -17793,7 +17907,7 @@
             }
           },
           "409": {
-            "description": "`IDEMPOTENCY_IN_FLIGHT` — A request with this `Idempotency-Key` is still being processed; retry after `Retry-After` seconds.\n\n`SOP_RUN_CLOSED` — The run is complete. A completed run's record is final and takes no more evidence.",
+            "description": "`IDEMPOTENCY_IN_FLIGHT` — A request with this `Idempotency-Key` is still being processed; retry after `Retry-After` seconds.\n\n`SOP_RUN_CLOSED` — The run has ended: its status is one of `completed`, `failed`, `cancelled`, `archived`. An ended run's record is final and takes no more evidence.",
             "content": {
               "application/json": {
                 "schema": {
@@ -17824,7 +17938,7 @@
               },
               {
                 "code": "SOP_RUN_CLOSED",
-                "when": "The run is complete. A completed run's record is final and takes no more evidence."
+                "when": "The run has ended: its status is one of `completed`, `failed`, `cancelled`, `archived`. An ended run's record is final and takes no more evidence."
               }
             ],
             "headers": {
@@ -17837,7 +17951,7 @@
             }
           },
           "422": {
-            "description": "`VALIDATION_ERROR` — The `Idempotency-Key` header is malformed.\n\n`VALIDATION_ERROR` — A field failed validation — an `event_type` outside the list, or a `recorded_at` that is not a UTC timestamp. `error` gives the first problem but does not name the field.",
+            "description": "`VALIDATION_ERROR` — The `Idempotency-Key` header is malformed.\n\n`VALIDATION_ERROR` — A field failed validation — an `event_type` outside the list, or a `recorded_at` that is not a timestamp with a time zone. `error` gives the first problem but does not name the field.",
             "content": {
               "application/json": {
                 "schema": {
@@ -17867,7 +17981,7 @@
               },
               {
                 "code": "VALIDATION_ERROR",
-                "when": "A field failed validation — an `event_type` outside the list, or a `recorded_at` that is not a UTC timestamp. `error` gives the first problem but does not name the field."
+                "when": "A field failed validation — an `event_type` outside the list, or a `recorded_at` that is not a timestamp with a time zone. `error` gives the first problem but does not name the field."
               }
             ],
             "headers": {
@@ -17986,7 +18100,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The step's `id` in the version the run follows, as Get an SOP lists it in `version.steps`. It is recorded as sent and not checked against the procedure."
+            "description": "The `id` of one of the steps in the version the run follows — the version in force when the run started, whose steps Get an SOP lists in `version.steps` while it is still in force. Any other `stepId` is refused and nothing is recorded."
           },
           {
             "$ref": "#/components/parameters/IdempotencyKey"
@@ -18018,7 +18132,7 @@
                   "recorded_at": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "When it happened, in UTC with a trailing `Z`, such as `2026-09-25T08:30:00Z`. A timestamp with an offset is refused. Defaults to when xPlant receives it."
+                    "description": "When it happened, as an ISO 8601 timestamp in UTC (`2026-09-25T08:30:00Z`) or with an offset (`2026-09-25T10:30:00+02:00`). Defaults to when xPlant receives it."
                   },
                   "notes": {
                     "type": "string",
@@ -18233,7 +18347,7 @@
             }
           },
           "404": {
-            "description": "`NOT_FOUND` — No run with this id exists in the key's workspace, or the run id is not a well-formed id.",
+            "description": "`NOT_FOUND` — No run with this id exists in the key's workspace, or the run id is not a well-formed id.\n\n`NOT_FOUND` — `stepId` is not the `id` of a step in the version the run follows, or the run follows no recorded version of its SOP and so has no steps to record against. Nothing is recorded.",
             "content": {
               "application/json": {
                 "schema": {
@@ -18260,6 +18374,10 @@
               {
                 "code": "NOT_FOUND",
                 "when": "No run with this id exists in the key's workspace, or the run id is not a well-formed id."
+              },
+              {
+                "code": "NOT_FOUND",
+                "when": "`stepId` is not the `id` of a step in the version the run follows, or the run follows no recorded version of its SOP and so has no steps to record against. Nothing is recorded."
               }
             ],
             "headers": {
@@ -18269,7 +18387,7 @@
             }
           },
           "409": {
-            "description": "`IDEMPOTENCY_IN_FLIGHT` — A request with this `Idempotency-Key` is still being processed; retry after `Retry-After` seconds.\n\n`SOP_RUN_CLOSED` — The run is complete. A completed run's record is final and takes no more evidence.",
+            "description": "`IDEMPOTENCY_IN_FLIGHT` — A request with this `Idempotency-Key` is still being processed; retry after `Retry-After` seconds.\n\n`SOP_RUN_CLOSED` — The run has ended: its status is one of `completed`, `failed`, `cancelled`, `archived`. An ended run's record is final and takes no more evidence.",
             "content": {
               "application/json": {
                 "schema": {
@@ -18300,7 +18418,7 @@
               },
               {
                 "code": "SOP_RUN_CLOSED",
-                "when": "The run is complete. A completed run's record is final and takes no more evidence."
+                "when": "The run has ended: its status is one of `completed`, `failed`, `cancelled`, `archived`. An ended run's record is final and takes no more evidence."
               }
             ],
             "headers": {
@@ -18313,7 +18431,7 @@
             }
           },
           "422": {
-            "description": "`VALIDATION_ERROR` — The `Idempotency-Key` header is malformed.\n\n`VALIDATION_ERROR` — A field failed validation — a missing `unit`, a `value` that is not a number, or a `recorded_at` that is not a UTC timestamp. `error` gives the first problem but does not name the field.",
+            "description": "`VALIDATION_ERROR` — The `Idempotency-Key` header is malformed.\n\n`VALIDATION_ERROR` — A field failed validation — a missing `unit`, a `value` that is not a number, or a `recorded_at` that is not a timestamp with a time zone. `error` gives the first problem but does not name the field.",
             "content": {
               "application/json": {
                 "schema": {
@@ -18343,7 +18461,7 @@
               },
               {
                 "code": "VALIDATION_ERROR",
-                "when": "A field failed validation — a missing `unit`, a `value` that is not a number, or a `recorded_at` that is not a UTC timestamp. `error` gives the first problem but does not name the field."
+                "when": "A field failed validation — a missing `unit`, a `value` that is not a number, or a `recorded_at` that is not a timestamp with a time zone. `error` gives the first problem but does not name the field."
               }
             ],
             "headers": {
@@ -19433,7 +19551,7 @@
           "Stages"
         ],
         "summary": "Move to a new stage",
-        "description": "Moves a plant or explant into a new stage in one call: the stage it is in now is marked `completed`, the new one is recorded, and it becomes the current stage. Send exactly one of `plant_id` or `explant_id`.\n\nEvery successful move answers with `meta` beside the stage: `meta.previous_stage_id` names the stage that was closed, so your system can mirror the change without reading the history back. Send an `Idempotency-Key` when you might retry: a repeated move would otherwise close the stage the first attempt opened.",
+        "description": "Moves a plant or explant into a new stage in one call: the stage it is in now is marked `completed`, the new one is recorded, and it becomes the current stage. Send exactly one of `plant_id` or `explant_id`.\n\n`stage` is checked against your lab's own stage list for plants or for explants, whichever you are moving, the same way xPlant checks it. A stage's older display name is saved as its key, so the response carries the key you should send next time. A name your lab does not use is refused before anything changes.\n\nA key can move the plants and explants its owner created. Moving a teammate's needs the key's owner to be a manager or owner of the lab, as it does in xPlant.\n\nThe move is added to the plant's or explant's history: `GET /api/v1/events` returns it as a `stage_change` event.\n\nEvery successful move answers with `meta` beside the stage: `meta.previous_stage_id` names the stage that was closed, so your system can mirror the change without reading the history back. Send an `Idempotency-Key` when you might retry: a repeated move would otherwise close the stage the first attempt opened.",
         "security": [
           {
             "bearerAuth": []
@@ -19472,7 +19590,7 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 50,
-                    "description": "The stage to move into, as a key from your lab's stage list — for example `multiplication` or `root_induction`. It is stored as sent and not checked against the list, so send a key your lab already uses."
+                    "description": "The stage to move into, as a key from your lab's stage list. Plants and explants have separate lists — for example `multiplication` or `root_induction` for an explant, `production` for a plant. A stage's older display name, such as `Multiplication`, is accepted and saved as its key. A name your lab does not use is refused."
                   },
                   "entered_on": {
                     "type": "string",
@@ -19667,7 +19785,7 @@
             }
           },
           "403": {
-            "description": "`FORBIDDEN` — The key lacks a scope this operation requires, or its owner's current role in the workspace cannot use it — a key never does more than its owner can in xPlant. `error` names the scope, and for a role, the role it needs.\n\n`DEVICE_TOKEN_NOT_ACCEPTED` — A device token was sent; this operation needs a workspace API key.",
+            "description": "`FORBIDDEN` — The key lacks a scope this operation requires, or its owner's current role in the workspace cannot use it — a key never does more than its owner can in xPlant. `error` names the scope, and for a role, the role it needs.\n\n`DEVICE_TOKEN_NOT_ACCEPTED` — A device token was sent; this operation needs a workspace API key.\n\n`STAGE_WRITE_FORBIDDEN` — The plant or explant was created by someone else, and the key's owner is not a manager or owner of the lab. Nothing was changed.",
             "content": {
               "application/json": {
                 "schema": {
@@ -19682,7 +19800,8 @@
                           "type": "string",
                           "enum": [
                             "FORBIDDEN",
-                            "DEVICE_TOKEN_NOT_ACCEPTED"
+                            "DEVICE_TOKEN_NOT_ACCEPTED",
+                            "STAGE_WRITE_FORBIDDEN"
                           ]
                         }
                       }
@@ -19699,6 +19818,10 @@
               {
                 "code": "DEVICE_TOKEN_NOT_ACCEPTED",
                 "when": "A device token was sent; this operation needs a workspace API key."
+              },
+              {
+                "code": "STAGE_WRITE_FORBIDDEN",
+                "when": "The plant or explant was created by someone else, and the key's owner is not a manager or owner of the lab. Nothing was changed."
               }
             ],
             "headers": {
@@ -19783,7 +19906,7 @@
             }
           },
           "422": {
-            "description": "`VALIDATION_ERROR` — The `Idempotency-Key` header is malformed.\n\n`VALIDATION_ERROR` — A field failed validation, or neither or both of `plant_id` and `explant_id` were sent. `error` names the first problem, for example `stage: stage is required`.",
+            "description": "`VALIDATION_ERROR` — The `Idempotency-Key` header is malformed.\n\n`VALIDATION_ERROR` — A field failed validation, or neither or both of `plant_id` and `explant_id` were sent. `error` names the first problem, for example `stage: stage is required`.\n\n`VALIDATION_ERROR` — `stage` is not in your lab's stage list for a plant, or for an explant — whichever you sent. `error` starts `stage:` and names the list. Nothing was changed.",
             "content": {
               "application/json": {
                 "schema": {
@@ -19814,6 +19937,10 @@
               {
                 "code": "VALIDATION_ERROR",
                 "when": "A field failed validation, or neither or both of `plant_id` and `explant_id` were sent. `error` names the first problem, for example `stage: stage is required`."
+              },
+              {
+                "code": "VALIDATION_ERROR",
+                "when": "`stage` is not in your lab's stage list for a plant, or for an explant — whichever you sent. `error` starts `stage:` and names the list. Nothing was changed."
               }
             ],
             "headers": {
@@ -22314,7 +22441,7 @@
                       "transfer_cycle": 5,
                       "from_location": "Growth room 1, shelf B2",
                       "to_location": "Growth room 1, shelf C1",
-                      "status": "active",
+                      "status": "completed",
                       "notes": "LINE-0412 onto fresh multiplication medium. Two jars browning at the base, set aside.",
                       "created_at": "2026-09-24T09:12:44.000Z",
                       "custom_fields": {
@@ -22600,7 +22727,7 @@
           "Transfers"
         ],
         "summary": "Record a transfer",
-        "description": "Records a transfer — a subculture onto fresh media — for one plant or explant. Send exactly one of `plant_id` or `explant_id`. Everything else is optional: the date defaults to today and the cycle to the next one in the record's history.\n\nFill in the fields your lab has added to transfers with `custom_fields`. They are checked against your lab's field list exactly as the transfer form in xPlant checks them, so a key the lab has not defined, or a value of the wrong kind, is refused before anything is saved.\n\nSend an `Idempotency-Key` when you might retry: a repeated transfer would also advance the cycle twice.",
+        "description": "Records a transfer — a subculture onto fresh media — for one plant or explant. Send exactly one of `plant_id` or `explant_id`. Everything else is optional: the date defaults to today and the cycle to the next one in the record's history.\n\nA transfer is recorded as `completed`: work that has been done, which xPlant counts when it works out when a culture was last transferred and which cultures are due. Send `status: \"pending\"` to record one that is planned instead.\n\nThe transfer is added to the plant's or explant's history, as one recorded in xPlant is: `GET /api/v1/events` returns it as a `transfer` event.\n\nFill in the fields your lab has added to transfers with `custom_fields`. They are checked against your lab's field list exactly as the transfer form in xPlant checks them, so a key the lab has not defined, or a value of the wrong kind, is refused before anything is saved.\n\nSend an `Idempotency-Key` when you might retry: a repeated transfer would also advance the cycle twice.",
         "security": [
           {
             "bearerAuth": []
@@ -22657,6 +22784,14 @@
                   "notes": {
                     "type": "string",
                     "maxLength": 5000
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "completed",
+                      "pending"
+                    ],
+                    "description": "`completed`, the default, records a transfer that has been done. `pending` records one planned for `transfer_date`; it is not counted as done until someone marks it completed in xPlant."
                   },
                   "custom_fields": {
                     "type": [
@@ -22727,7 +22862,7 @@
                     "transfer_cycle": 5,
                     "from_location": "Growth room 1, shelf B2",
                     "to_location": "Growth room 1, shelf C1",
-                    "status": "active",
+                    "status": "completed",
                     "notes": "LINE-0412 onto fresh multiplication medium. Two jars browning at the base, set aside.",
                     "created_at": "2026-09-24T09:12:44.000Z",
                     "custom_fields": {
@@ -25863,7 +25998,7 @@
           },
           "stage": {
             "type": "string",
-            "description": "The stage, usually as a key from your lab's stage list such as `multiplication`. Records made by older tools can carry the stage's display name instead, such as `Multiplication`."
+            "description": "The stage, as a key from your lab's stage list such as `multiplication`. Records made by older tools can carry the stage's display name instead, such as `Multiplication`."
           },
           "status": {
             "type": "string",
@@ -26062,7 +26197,7 @@
           },
           "status": {
             "type": "string",
-            "description": "`active` for a transfer recorded through the API. Transfers scheduled in xPlant read `pending` until someone marks them `completed` or `cancelled`."
+            "description": "`completed` for a transfer that has been done, `pending` for one planned but not done yet, `cancelled` for one that was called off. A transfer recorded through the API is `completed` unless it was sent as `pending`. Transfers recorded through the API before `status` could be sent may read `active`, which means `completed`."
           },
           "notes": {
             "type": [
@@ -26137,6 +26272,6 @@
   },
   "x-docs-source": {
     "ref": "origin/main",
-    "commit": "69990b30f"
+    "commit": "741aebc86"
   }
 }

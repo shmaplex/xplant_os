@@ -64,7 +64,7 @@ transfers = body["data"]
 | `transfer_cycle` | integer \| null | Yes | Which subculture this was for the plant or explant — 1 for the first. |
 | `from_location` | string \| null | Yes | Where the culture was before the transfer. |
 | `to_location` | string \| null | Yes | Where the culture went. |
-| `status` | string | Yes | `active` for a transfer recorded through the API. Transfers scheduled in xPlant read `pending` until someone marks them `completed` or `cancelled`. |
+| `status` | string | Yes | `completed` for a transfer that has been done, `pending` for one planned but not done yet, `cancelled` for one that was called off. A transfer recorded through the API is `completed` unless it was sent as `pending`. Transfers recorded through the API before `status` could be sent may read `active`, which means `completed`. |
 | `notes` | string \| null | Yes | — |
 | `created_at` | string \| null | Yes | — |
 | `custom_fields` | object | Yes | Your lab's own fields on this transfer, keyed by field key. Always an object: `{}` when none were filled in, and always `{}` on a plant transfer. |
@@ -81,7 +81,7 @@ transfers = body["data"]
       "transfer_cycle": 5,
       "from_location": "Growth room 1, shelf B2",
       "to_location": "Growth room 1, shelf C1",
-      "status": "active",
+      "status": "completed",
       "notes": "LINE-0412 onto fresh multiplication medium. Two jars browning at the base, set aside.",
       "created_at": "2026-09-24T09:12:44.000Z",
       "custom_fields": {

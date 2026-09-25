@@ -38,7 +38,7 @@ The header is honoured on these endpoints, and only these:
 - [`POST /transfers`](/docs/api/transfers-and-stages/create-transfer): Record a transfer
 {/* /generated:idempotent-endpoints */}
 
-Everywhere else the header is ignored. For sensor readings, make retries safe with an `external_id` and `recorded_at` on every reading instead: readings are de-duplicated on the device, the `external_id` and the time.
+Everywhere else the header is ignored. **Sensor readings and device events** make retries safe with your own `external_id` instead (plus `recorded_at` for readings): a repeat of one already stored for the same device is skipped, and a single repeat answers `201` with the stored record and `meta.duplicate: true`.
 
 ## The rules
 
