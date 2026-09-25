@@ -1,14 +1,22 @@
 #!/usr/bin/env node
 /**
  * Vendors the xPlant OpenAPI spec into this repo, stripped of anything that
- * only makes sense inside the app's codebase.
+ * only makes sense inside the app's codebase, and records where it came from.
  *
- *   npm run sync:openapi -- path/to/openapi.json
- *   cat openapi.json | npm run sync:openapi -- -
+ *   npm run sync:openapi -- --from <app repo dir>                  # production branch (origin/main)
+ *   npm run sync:openapi -- --from <app repo dir> --ref origin/develop   # preview only
+ *   npm run sync:openapi -- --file path/to/openapi.json            # preview only
+ *
+ * --from reads the spec at `--ref` (default origin/main) from the app
+ * repository, at the path in the XPLANT_SPEC_PATH environment variable.
+ * The ref and commit are written to `x-docs-source`; a production build
+ * refuses any spec that didn't come from the production branch (see
+ * check-source.mjs), so the docs can never describe more than the live API.
  *
  * Writes openapi/openapi.json, prints what changed, and refuses to write if
  * anything private survives sanitising (see public-rules.mjs).
  */
+import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -17,12 +25,36 @@ import { scan } from "./public-rules.mjs";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const target = path.join(here, "..", "openapi", "openapi.json");
 
-const input = process.argv[2];
-if (!input) {
-  console.error("usage: npm run sync:openapi -- <path/to/openapi.json | ->");
+const args = process.argv.slice(2);
+const flag = (name) => {
+  const i = args.indexOf(name);
+  return i === -1 ? undefined : args[i + 1];
+};
+const usage = () => {
+  console.error("usage: npm run sync:openapi -- --from <app repo dir> [--ref origin/main]\n       npm run sync:openapi -- --file <openapi.json>   (preview only)");
   process.exit(2);
+};
+
+let raw;
+let source;
+if (flag("--from")) {
+  const repo = flag("--from");
+  const ref = flag("--ref") ?? "origin/main";
+  const specPath = process.env.XPLANT_SPEC_PATH;
+  if (!specPath) {
+    console.error("Set XPLANT_SPEC_PATH to the spec's path inside the app repository.");
+    process.exit(2);
+  }
+  execFileSync("git", ["-C", repo, "fetch", "--quiet", "origin"], { stdio: "inherit" });
+  const commit = execFileSync("git", ["-C", repo, "rev-parse", "--short=9", ref], { encoding: "utf8" }).trim();
+  raw = execFileSync("git", ["-C", repo, "show", `${ref}:${specPath}`], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+  source = { ref, commit };
+} else if (flag("--file")) {
+  raw = readFileSync(flag("--file"), "utf8");
+  source = { ref: "file", commit: null };
+} else {
+  usage();
 }
-const raw = readFileSync(input === "-" ? 0 : input, "utf8");
 const spec = JSON.parse(raw);
 
 const PUBLIC_DESCRIPTION =
@@ -73,6 +105,7 @@ sanitized.info = {
   description: PUBLIC_DESCRIPTION,
 };
 sanitized.servers = [{ url: "https://app.xplantpro.com" }];
+sanitized["x-docs-source"] = source;
 
 const text = `${JSON.stringify(sanitized, null, 2)}\n`;
 const findings = scan(text, "docs/openapi/openapi.json");
@@ -96,7 +129,10 @@ const after = opsOf(sanitized);
 writeFileSync(target, text);
 const added = [...after].filter((op) => !before.has(op));
 const removed = [...before].filter((op) => !after.has(op));
-console.log(`✓ wrote openapi/openapi.json: ${after.size} operations`);
+console.log(`✓ wrote openapi/openapi.json: ${after.size} operations, from ${source.ref}${source.commit ? ` @ ${source.commit}` : ""}`);
+if (!["origin/main", "main"].includes(source.ref)) {
+  console.log("  (not the production branch: fine for a preview, but a production build will refuse this spec)");
+}
 for (const op of added) console.log(`  + ${op}`);
 for (const op of removed) console.log(`  - ${op}`);
 if (added.length > 0) console.log("\nAdd an overlay entry (openapi/overlay.mjs) for each new operation, then run npm run generate.");

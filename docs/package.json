@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "npm run generate && next dev -p 3210",
-    "build": "npm run generate && next build && node scripts/postbuild.mjs",
+    "build": "node scripts/check-source.mjs && npm run generate && next build && node scripts/postbuild.mjs",
     "preview": "serve out -l 3211",
     "generate": "node scripts/generate-api-pages.mjs",
     "sync:openapi": "node scripts/sync-openapi.mjs",

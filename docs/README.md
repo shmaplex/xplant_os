@@ -25,18 +25,29 @@ npm run types:check
 | `content/docs/api/`, `content/docs/scopes.mdx` | **Generated.** Don't edit by hand. |
 | `openapi/openapi.json` | The vendored OpenAPI spec: the source of truth for endpoints, parameters, schemas, errors and the scope catalogue (`x-scopes`). |
 | `openapi/overlay.mjs` | Per-endpoint additions the spec can't carry: page slug, example values, the SDK call, a short note. |
-| `scripts/sync-openapi.mjs` | Vendors a new spec and strips anything internal. |
+| `scripts/sync-openapi.mjs` | Vendors the spec from a git ref of the app repo, strips anything internal, and records the source. |
+| `scripts/check-source.mjs` | Refuses a production build whose spec didn't come from the production branch. |
 | `scripts/generate-api-pages.mjs` | Writes the API pages, the scopes page, and the `{/* generated:… */}` blocks inside hand-written pages. |
 | `scripts/check-public.mjs` | Fails if anything private would be published (see `scripts/public-rules.mjs`). |
 
 ## When the API changes
 
+**The published docs never describe more than the live API.** Production is built only from the spec on the app's production branch (`origin/main`), which is what `app.xplantpro.com` serves.
+
 ```bash
-npm run sync:openapi -- /path/to/openapi.json   # vendor + sanitise; prints added/removed operations
-# add an entry to openapi/overlay.mjs for each new operation
+# Production: once a release has reached the app's production branch.
+XPLANT_SPEC_PATH=<spec path in the app repo> npm run sync:openapi -- --from <app repo dir>
+# (--ref defaults to origin/main)
+
+# Previews only: stage upcoming content from develop.
+XPLANT_SPEC_PATH=<spec path in the app repo> npm run sync:openapi -- --from <app repo dir> --ref origin/develop
+
+# add an entry to openapi/overlay.mjs for each new operation (sdk: null if the SDK doesn't cover it yet)
 npm run generate
 npm run check
 ```
+
+The sync records the ref and commit in `openapi.json` (`x-docs-source`). `npm run build` runs `scripts/check-source.mjs` first, and **a production build (`VERCEL_ENV=production`, which includes promoting a preview) refuses any spec that didn't come from the production branch.** A preview built from develop can be reviewed, but it can't be published until the release lands and the spec is re-synced from `origin/main`.
 
 `npm run generate` fails if an operation has no overlay entry, or an overlay entry has no operation.
 

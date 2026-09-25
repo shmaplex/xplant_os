@@ -30,6 +30,8 @@ export const rules = [
     id: "vendor-internals",
     pattern: /\bsupabase\b|\bvercel\b|\bprisma\b|\bpostgres(ql)?\b/gi,
     why: "names the stack behind the API; describe observable behaviour instead",
+    // The docs site's own build tooling may name its own host.
+    files: /^(?!docs\/(scripts\/|README\.md$|vercel\.json$))/,
   },
   {
     id: "storage-internals",
@@ -39,6 +41,7 @@ export const rules = [
   {
     id: "app-env-var",
     pattern: /\b(NEXT_PUBLIC_[A-Z0-9_]+|SUPABASE_[A-Z0-9_]+|DATABASE_URL|SERVICE_ROLE_KEY|STRIPE_[A-Z0-9_]+|VERCEL_[A-Z0-9_]+)\b/g,
+    allow: ["vercel_env"], // the hosting platform's standard build variable, used by the docs build
     why: "app environment variable names",
   },
   {
