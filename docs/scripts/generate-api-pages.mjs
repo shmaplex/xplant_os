@@ -159,16 +159,32 @@ function schemaRows(raw, prefix = "", depth = 0, rows = []) {
 
 // ── Text helpers ────────────────────────────────────────────────────────────
 
-/** Escape MDX-significant characters outside inline code. */
+/**
+ * Escape MDX-significant characters outside inline code: backslashes first,
+ * so an escape already in the text can't swallow the ones added here.
+ * Inline code is left alone; its contents render literally.
+ */
 function mdx(text = "") {
   return String(text)
     .split(/(`[^`]*`)/)
-    .map((part) => (part.startsWith("`") ? part : part.replace(/[{}]/g, (c) => `\\${c}`).replace(/</g, "&lt;")))
+    .map((part) =>
+      part.startsWith("`") ? part : part.replace(/[\\{}]/g, (c) => `\\${c}`).replace(/</g, "&lt;"),
+    )
     .join("");
 }
 
+/**
+ * One Markdown table cell. `mdx()` has already escaped backslashes outside
+ * code, so escaping `|` here is complete there; inside code, GFM tables still
+ * need `\|`, and backslashes stay literal.
+ */
 function cell(text = "") {
-  return mdx(text).replace(/\|/g, "\\|").replace(/\n+/g, " ").trim() || "—";
+  return (
+    mdx(text)
+      .replace(/\|/g, () => "\\|")
+      .replace(/\n+/g, " ")
+      .trim() || "—"
+  );
 }
 
 function table(headers, rows) {
