@@ -536,6 +536,8 @@ function renderOperation(o) {
   );
 
   for (const paragraph of moreDescription) lines.push(mdx(paragraph.trim()), "");
+  // SDK-specific facts the spec can't carry; shown whether or not the endpoint is documented.
+  if (o.extra.sdkNote) lines.push(o.extra.sdkNote, "");
   if (o.extra.notes) {
     if (!o.documented) {
       lines.push(o.extra.notes, "");

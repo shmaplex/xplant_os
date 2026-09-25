@@ -14,7 +14,9 @@
  *        replaced with the `query` / `body` examples as JS literals; or pass a
  *        function ({ js, body, query }) => string for anything else.
  * path:  example values for path parameters (also used as variable names).
- * notes: Markdown shown under the description.
+ * notes: Markdown shown under the description (for documented endpoints, only
+ *        its links to guides are kept).
+ * sdkNote: Markdown about the SDK call, always shown.
  */
 
 const PLANT_ID = "0b8e2f4c-6a1d-4c3e-9f7a-2d5b8c1e4a90";
@@ -54,6 +56,7 @@ export const overlay = {
   "GET /api/v1/plants": {
     slug: "list-plants",
     title: "List plants",
+    sdkNote: "The SDK takes `external_id`; the query parameter is `externalId`.",
     description: "Plant records for the key's workspace.",
     resultVar: "plants",
     query: { limit: 50 },
@@ -70,6 +73,7 @@ export const overlay = {
   "GET /api/v1/explants": {
     slug: "list-explants",
     title: "List explants",
+    sdkNote: "The SDK takes `external_id`; the query parameter is `externalId`.",
     description: "Explant records for the key's workspace, optionally matched by your own identifier.",
     resultVar: "explants",
     query: { externalId: "LINE-0412" },
