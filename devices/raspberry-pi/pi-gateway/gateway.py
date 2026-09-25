@@ -9,7 +9,7 @@ Supports:
   - Simulated readings (for testing without hardware)
 
 Configuration: copy config.example.json to config.json and fill in
-your API key, device ID, and sensor pin. Never commit config.json.
+your device token (xpd_...), device ID, and sensor pin. Never commit config.json.
 
 Usage:
   python3 gateway.py [--config /path/to/config.json]
@@ -62,18 +62,30 @@ def load_config(path: Path) -> dict[str, Any]:
     with path.open() as f:
         config = json.load(f)
 
-    required = ("api_key", "device_id", "xplant_base_url")
+    # A device carries a device token (xpd_...), never a workspace API key.
+    # Older configs named the credential "api_key"; accept it, but say so.
+    if not config.get("device_token") and config.get("api_key"):
+        log.warning("Config key 'api_key' is deprecated: rename it to 'device_token'.")
+        config["device_token"] = config["api_key"]
+
+    required = ("device_token", "device_id", "xplant_base_url")
     for key in required:
         if not config.get(key):
             log.error("Missing required config key: %s", key)
             sys.exit(1)
 
-    if config.get("api_key", "").startswith("xpk_live_YOUR"):
+    if "YOUR" in config["device_token"]:
         log.error(
-            "api_key is still a placeholder. "
-            "Get your key at https://xplant.shmaplex.com/settings/integrations"
+            "device_token is still a placeholder. Create a device token for this device: "
+            "https://docs.xplantpro.com/docs/device-tokens"
         )
         sys.exit(1)
+
+    if config["device_token"].startswith("xpk_"):
+        log.warning(
+            "device_token holds a workspace API key (xpk_). Put a device token (xpd_) on "
+            "the device instead: https://docs.xplantpro.com/docs/device-tokens"
+        )
 
     config.setdefault("sensors", [
         {"type": "temperature", "unit": "C",  "gpio_pin": 4},
@@ -211,7 +223,7 @@ def post_sensor_reading(
     """POST a single sensor reading to /api/v1/sensor-readings."""
     url = config["xplant_base_url"].rstrip("/") + "/api/v1/sensor-readings"
     headers = {
-        "Authorization": f"Bearer {config['api_key']}",
+        "Authorization": f"Bearer {config['device_token']}",
         "Content-Type": "application/json",
     }
     payload = {
@@ -237,7 +249,7 @@ def send_heartbeat(config: dict[str, Any]) -> None:
         + f"/api/v1/devices/{device_id}/heartbeat"
     )
     headers = {
-        "Authorization": f"Bearer {config['api_key']}",
+        "Authorization": f"Bearer {config['device_token']}",
         "Content-Type": "application/json",
     }
     payload: dict[str, Any] = {}
