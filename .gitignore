@@ -14,7 +14,6 @@ devices/raspberry-pi/**/config.json
 # Node.js
 # ---------------------------------------------------------------------------
 node_modules/
-packages/js-sdk/dist/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

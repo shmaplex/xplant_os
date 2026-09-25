@@ -1,0 +1,12 @@
+{
+  "title": "Media",
+  "pages": [
+    "list-assets",
+    "create-asset",
+    "get-asset",
+    "list-media-recipes",
+    "create-media-recipe",
+    "get-media-recipe",
+    "update-media-recipe"
+  ]
+}

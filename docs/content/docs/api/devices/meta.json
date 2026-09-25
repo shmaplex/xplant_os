@@ -1,0 +1,12 @@
+{
+  "title": "Devices",
+  "pages": [
+    "create-device-event",
+    "list-devices",
+    "create-device",
+    "send-heartbeat",
+    "list-device-tokens",
+    "create-device-token",
+    "revoke-device-token"
+  ]
+}

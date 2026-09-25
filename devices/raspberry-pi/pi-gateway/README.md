@@ -66,11 +66,14 @@ cp config.example.json config.json
 nano config.json
 ```
 
-Fill in your `api_key` and `device_id`. Set `"simulate": true` if you don't have a sensor yet.
+Fill in `device_token` and `device_id`. Set `"simulate": true` if you don't have a sensor yet.
 
-**Get your API key** at [xplant.shmaplex.com/settings/integrations](https://xplant.shmaplex.com/settings/integrations).
+The Pi carries a **device token** (`xpd_…`), never a workspace API key. To get one, from your own computer:
 
-**Register your device** at **Settings > Integrations > Devices** and copy the UUID.
+1. Create a workspace API key with `write:devices` at [app.xplantpro.com/settings/integrations/api-keys](https://app.xplantpro.com/settings/integrations/api-keys). It stays on your computer.
+2. Register the Pi as a device and create its token: [Device tokens: setting up a device](https://docs.xplantpro.com/docs/device-tokens#setting-up-a-device). The token is shown once.
+
+One Pi reading several sensors is one device: all its reading types post under the same `device_id` with the same token.
 
 ### 4. Run manually (to test)
 
@@ -110,7 +113,7 @@ sudo journalctl -u xplant-gateway -f
 
 ## Simulate mode
 
-Set `"simulate": true` in `config.json` to generate fake sensor data without any GPIO hardware. Useful for testing your API key and device ID before hooking up hardware.
+Set `"simulate": true` in `config.json` to generate fake sensor data without any GPIO hardware. Useful for testing your device token and device ID before hooking up hardware.
 
 ---
 
@@ -119,8 +122,9 @@ Set `"simulate": true` in `config.json` to generate fake sensor data without any
 | Symptom | Likely cause |
 |---|---|
 | "Config file not found" | You haven't copied `config.example.json` to `config.json` yet |
-| "api_key is still a placeholder" | Edit `config.json` with your real key |
-| HTTP 401 | Invalid API key |
-| HTTP 404 | Device UUID not registered in xPlant |
+| "device_token is still a placeholder" | Edit `config.json` with the device's real `xpd_` token |
+| HTTP 401 `UNAUTHORIZED` | Missing, mistyped or revoked device token |
+| HTTP 403 `DEVICE_TOKEN_WRONG_DEVICE` | `device_id` isn't the device this token was created for |
+| HTTP 429 `RATE_LIMIT_EXCEEDED` | Posting too often; batch readings (see the [sensors guide](https://docs.xplantpro.com/docs/guides/sensors-and-devices)) |
 | "DHT22 read failed" | Wrong GPIO pin, loose wire, or need `adafruit-circuitpython-dht` installed |
 | Service won't start | Check path in `.service` file matches your actual install location |

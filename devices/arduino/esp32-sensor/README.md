@@ -62,24 +62,31 @@ Also install the **ESP32 board package** if you have not already:
 
 ## Setup
 
-1. **Copy and configure `config.h`**
+1. **Register the device and create its token**
 
-   Edit `config.h` with your credentials. Do not commit this file — it is in `.gitignore` by default.
+   From your own computer, with a workspace API key that has `write:devices`, register the device and create a device token for it. Follow [Device tokens: setting up a device](https://docs.xplantpro.com/docs/device-tokens#setting-up-a-device). You get the device's id and an `xpd_` token, which is shown once.
+
+   The ESP32 carries only the device token. **Never put a workspace key (`xpk_`) on a device.**
+
+2. **Create `config.h`**
+
+   Create `config.h` next to the sketch. Do not commit it: `devices/arduino/**/config.h` is in `.gitignore`.
 
    ```c
-   #define WIFI_SSID     "MyLabWiFi"
-   #define WIFI_PASSWORD "mysecretpassword"
-   #define XPLANT_API_KEY    "xpk_live_YOUR_KEY_HERE"
-   #define XPLANT_DEVICE_ID  "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+   #define WIFI_SSID             "MyLabWiFi"
+   #define WIFI_PASSWORD         "mysecretpassword"
+   #define XPLANT_BASE_URL       "https://app.xplantpro.com"
+   #define XPLANT_DEVICE_TOKEN   "xpd_live_YOUR_TOKEN_HERE"
+   #define XPLANT_DEVICE_ID      "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+   #define SENSOR_PIN            4
+   #define READING_INTERVAL_MS   60000UL   // one reading per minute
+   #define HEARTBEAT_INTERVAL_MS 300000UL  // one heartbeat every five minutes
+   #define USE_DHT22                       // comment out to use a BME280
    ```
 
-2. **Get your API key**
+3. **Check the values**
 
-   Log in to [xplant.shmaplex.com/settings/integrations](https://xplant.shmaplex.com/settings/integrations), generate a key, and paste it into `config.h`.
-
-3. **Register your device in xPlant**
-
-   Go to **Settings > Integrations > Devices** and register a new device. Copy the UUID it assigns into `XPLANT_DEVICE_ID` in `config.h`.
+   `XPLANT_DEVICE_ID` must be the id of the device the token was created for; a token can only write its own device's readings.
 
 4. **Select your sensor**
 
@@ -105,8 +112,8 @@ Connecting to Wi-Fi: MyLabWiFi
 ......
 Connected. IP address: 192.168.1.42
 Reading: temperature=24.50°C  humidity=72.1%
-  Posted temperature reading (24.5 C) — HTTP 201
-  Posted humidity reading (72.1 %) — HTTP 201
+  Posted temperature reading (24.5 C) — HTTP 200
+  Posted humidity reading (72.1 %) — HTTP 200
 Heartbeat sent (RSSI: -65 dBm) — HTTP 200
 ```
 
@@ -118,9 +125,10 @@ Heartbeat sent (RSSI: -65 dBm) — HTTP 200
 |---|---|
 | "Sensor returned NaN" | Wiring error, wrong GPIO pin, or defective sensor |
 | "Could not connect to Wi-Fi" | Wrong SSID/password, or 5 GHz network |
-| HTTP 401 | Invalid or missing API key |
-| HTTP 404 | Device UUID not registered in xPlant |
-| HTTP 429 | Posting too fast — increase `READING_INTERVAL_MS` |
+| HTTP 401 `UNAUTHORIZED` | Missing, mistyped or revoked device token |
+| HTTP 403 `DEVICE_TOKEN_WRONG_DEVICE` | `XPLANT_DEVICE_ID` isn't the device this token was created for |
+| HTTP 402 `PAID_PLAN_REQUIRED` | The workspace isn't on a paid plan |
+| HTTP 429 `RATE_LIMIT_EXCEEDED` | Posting too fast — increase `READING_INTERVAL_MS` |
 
 ---
 
@@ -132,4 +140,4 @@ Edit `config.h`:
 #define READING_INTERVAL_MS 30000  // post every 30 seconds
 ```
 
-Values under 10 seconds may hit rate limits. See [docs/api-reference.md](../../../docs/api-reference.md).
+Short intervals use up the rate limit quickly; see [Rate limits](https://docs.xplantpro.com/docs/rate-limits).

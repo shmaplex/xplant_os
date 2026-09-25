@@ -1,0 +1,83 @@
+---
+title: Label scanning
+description: Resolve a scanned QR code or barcode to the plant or explant it labels, and record that the scan happened.
+---
+
+**Scopes:** `read:labels` to resolve, `write:label_scans` to record. **Endpoints:** [Resolve a label](/docs/api/labels/resolve-label), [Record a label scan](/docs/api/labels/create-label-scan).
+
+Scanning a label is two separate questions, and the API answers them separately:
+
+1. **What is this?** Resolving turns the scanned value into a record. It leaves no trace.
+2. **Who scanned it, where, when?** Recording a scan adds it to the history. Resolving alone would let a scanner find a jar without anything saying anyone had been at the shelf.
+
+## Resolve
+
+```bash tab="curl" tab-group="lang"
+curl "https://app.xplantpro.com/api/v1/labels/resolve?barcode=LINE-0412" \
+  -H "Authorization: Bearer $XPLANT_API_KEY"
+```
+
+```js tab="JavaScript" tab-group="lang"
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+
+const match = await client.labels.resolve("LINE-0412");
+// { record_type: "explant", record_id: "…", display_name: "…", url: "https://app.xplantpro.com/…" }
+```
+
+```python tab="Python" tab-group="lang"
+import os
+import requests
+
+BASE = "https://app.xplantpro.com/api/v1"
+HEADERS = {"Authorization": f"Bearer {os.environ['XPLANT_API_KEY']}"}
+
+match = requests.get(f"{BASE}/labels/resolve", headers=HEADERS, params={"barcode": "LINE-0412"}, timeout=10).json()["data"]
+```
+
+Plant labels are matched first, then explant labels, within your workspace. You get `record_type` (`plant` or `explant`), `record_id`, `display_name`, and a `url` that opens the record in xPlant. A code that matches no label answers `404 NOT_FOUND`: show the technician "unknown label" rather than retrying.
+
+## Record the scan
+
+```bash tab="curl" tab-group="lang"
+curl -X POST https://app.xplantpro.com/api/v1/label-scans \
+  -H "Authorization: Bearer $XPLANT_API_KEY" \
+  -H "Idempotency-Key: scanner-3-0f2a7c91" \
+  -H "Content-Type: application/json" \
+  -d '{"barcode": "LINE-0412", "explant_id": "7c1d9e2a-3b4f-4a5c-8d6e-1f2a3b4c5d6e", "context": "Shelf 3"}'
+```
+
+```js tab="JavaScript" tab-group="lang"
+await client.labels.recordScan(
+  {
+    barcode: "LINE-0412",
+    [match.record_type === "plant" ? "plant_id" : "explant_id"]: match.record_id,
+    context: "Shelf 3",
+  },
+  { idempotencyKey: `scanner-3-${crypto.randomUUID()}` },
+);
+```
+
+```python tab="Python" tab-group="lang"
+import uuid
+
+field = "plant_id" if match["record_type"] == "plant" else "explant_id"
+requests.post(
+    f"{BASE}/label-scans",
+    headers={**HEADERS, "Idempotency-Key": f"scanner-3-{uuid.uuid4()}"},
+    json={"barcode": "LINE-0412", field: match["record_id"], "context": "Shelf 3"},
+    timeout=10,
+).raise_for_status()
+```
+
+- `context` is free text: where the scan happened, or why.
+- `scanned_at` is optional; send it if the scanner queued the scan while offline.
+- You don't send `resolved`. It's true when the body names a record.
+- Scans are history: they can't be edited or deleted. A correction is another scan.
+
+Generate the `Idempotency-Key` once per physical scan and reuse it if you retry, so a flaky network can't record one scan twice.
+
+## Hardware
+
+Most USB and Bluetooth scanners act as keyboards: they "type" the code and press Enter. Read a line from standard input (or a focused text field) and you have the value. The [ESP32 scan station](https://github.com/shmaplex/xplant_os/tree/main/devices/arduino/esp32-scan-station) in this repository is a starting point for a standalone scanner.

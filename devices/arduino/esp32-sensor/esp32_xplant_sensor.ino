@@ -12,7 +12,8 @@
  *   - Adafruit Unified Sensor
  *   - ArduinoJson by Benoit Blanchon
  *
- * Configuration: edit config.h with your Wi-Fi credentials, API key, and device ID.
+ * Configuration: edit config.h with your Wi-Fi credentials, device token, and device ID.
+ * The device carries a device token (xpd_...), never a workspace API key (xpk_...).
  *
  * Copyright (C) 2025 Shmaplex
  * Licensed under the Common Sense License (CSL) v1.1
@@ -182,13 +183,13 @@ void postSensorReading(const char* type, float value, const char* unit) {
   HTTPClient http;
   http.begin(url);
   http.addHeader("Content-Type", "application/json");
-  http.addHeader("Authorization", "Bearer " + String(XPLANT_API_KEY));
+  http.addHeader("Authorization", "Bearer " + String(XPLANT_DEVICE_TOKEN));
 
   int statusCode = http.POST(body);
 
-  if (statusCode == 201) {
-    Serial.printf("  Posted %s reading (%s %s) — HTTP 201\n", type,
-                  String(value).c_str(), unit);
+  if (statusCode >= 200 && statusCode < 300) {
+    Serial.printf("  Posted %s reading (%s %s) — HTTP %d\n", type,
+                  String(value).c_str(), unit, statusCode);
   } else {
     Serial.printf("  ERROR posting %s reading — HTTP %d: %s\n",
                   type, statusCode, http.getString().c_str());
@@ -214,12 +215,12 @@ void sendHeartbeat() {
   HTTPClient http;
   http.begin(url);
   http.addHeader("Content-Type", "application/json");
-  http.addHeader("Authorization", "Bearer " + String(XPLANT_API_KEY));
+  http.addHeader("Authorization", "Bearer " + String(XPLANT_DEVICE_TOKEN));
 
   int statusCode = http.POST(body);
 
-  if (statusCode == 200) {
-    Serial.printf("Heartbeat sent (RSSI: %d dBm) — HTTP 200\n", WiFi.RSSI());
+  if (statusCode >= 200 && statusCode < 300) {
+    Serial.printf("Heartbeat sent (RSSI: %d dBm) — HTTP %d\n", WiFi.RSSI(), statusCode);
   } else {
     Serial.printf("ERROR sending heartbeat — HTTP %d: %s\n",
                   statusCode, http.getString().c_str());

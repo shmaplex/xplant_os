@@ -1,0 +1,179 @@
+---
+title: Sensors and devices
+description: Register a device, give it a device token, and post batched sensor readings, heartbeats and events from a Raspberry Pi or an ESP32.
+---
+
+**Credential:** a [device token](/docs/device-tokens) on the device; a workspace key with `write:devices` to set it up, and `read:sensor_readings` to read data back. **Endpoints:** [Submit sensor readings](/docs/api/sensor-readings/create-sensor-readings), [Send a heartbeat](/docs/api/devices/send-heartbeat), [Record a device event](/docs/api/devices/create-device-event), [List sensor readings](/docs/api/sensor-readings/list-sensor-readings).
+
+## 1. Set the device up
+
+From your own computer, with a workspace key: [register the device and create its token](/docs/device-tokens#setting-up-a-device). Put the device id and the `xpd_` token on the device. The device never sees a workspace key.
+
+How many devices you can register depends on your [plan](https://www.xplantpro.com/en/subscriptions); registering past the allowance answers `402 DEVICE_LIMIT_REACHED`.
+
+A gateway that reads several probes is usually one device posting several reading types. If you'd rather see each probe as its own device, register each one and give the gateway a token per device.
+
+## 2. Post readings, in batches
+
+A reading is `device_id`, `type`, `value` and `unit`, plus optional `recorded_at`, `external_id`, `room_id` and `notes`. Send up to 500 in one request as `{"readings": [...]}`.
+
+```bash tab="curl" tab-group="lang"
+curl -X POST https://app.xplantpro.com/api/v1/sensor-readings \
+  -H "Authorization: Bearer $XPLANT_DEVICE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "readings": [
+      {
+        "device_id": "5f7a9c1e-3b5d-4f7a-9c1e-3b5d7f9a1c3e",
+        "type": "temperature", "value": 23.4, "unit": "C",
+        "recorded_at": "2026-09-25T12:00:00Z",
+        "external_id": "gw1-temperature-20260925T120000"
+      },
+      {
+        "device_id": "5f7a9c1e-3b5d-4f7a-9c1e-3b5d7f9a1c3e",
+        "type": "humidity", "value": 71.2, "unit": "%",
+        "recorded_at": "2026-09-25T12:00:00Z",
+        "external_id": "gw1-humidity-20260925T120000"
+      }
+    ]
+  }'
+```
+
+```js tab="JavaScript" tab-group="lang"
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+const device = new XPlantClient({ deviceToken: process.env.XPLANT_DEVICE_TOKEN, retry: true });
+const deviceId = process.env.XPLANT_DEVICE_ID;
+
+const at = new Date().toISOString();
+await device.sensorReadings.createBatch([
+  { device_id: deviceId, type: "temperature", value: 23.4, unit: "C", recorded_at: at, external_id: `gw1-temperature-${at}` },
+  { device_id: deviceId, type: "humidity", value: 71.2, unit: "%", recorded_at: at, external_id: `gw1-humidity-${at}` },
+]);
+```
+
+```python tab="Python" tab-group="lang"
+import os
+import requests
+from datetime import datetime, timezone
+
+at = datetime.now(timezone.utc).isoformat()
+device_id = os.environ["XPLANT_DEVICE_ID"]
+requests.post(
+    "https://app.xplantpro.com/api/v1/sensor-readings",
+    headers={"Authorization": f"Bearer {os.environ['XPLANT_DEVICE_TOKEN']}"},
+    json={"readings": [
+        {"device_id": device_id, "type": "temperature", "value": 23.4, "unit": "C",
+         "recorded_at": at, "external_id": f"gw1-temperature-{at}"},
+        {"device_id": device_id, "type": "humidity", "value": 71.2, "unit": "%",
+         "recorded_at": at, "external_id": f"gw1-humidity-{at}"},
+    ]},
+    timeout=10,
+).raise_for_status()
+```
+
+<Callout title="Batch your posts">
+  One request per reading multiplies your request count for the same data and reaches the [rate limits](/docs/rate-limits) far sooner. A lab with four devices, five channels each, sampling once a minute would send about 864,000 requests a month unbatched, against a few thousand batched.
+</Callout>
+
+**Buffer locally and flush** on whichever comes first:
+
+- every 30–60 seconds, for sensors that sample about once a minute, or
+- once 500 readings are queued (the per-request maximum).
+
+A single reading without the `readings` wrapper also works. Treat it as the fallback for a device that can only ever hold one pending reading, not as the default.
+
+**Make retries harmless.** Put `external_id` and `recorded_at` on every reading. Readings are de-duplicated on the device, `external_id` and `recorded_at`, so re-sending a batch after a network failure doesn't store anything twice. (`Idempotency-Key` isn't used on this endpoint.) Build `external_id` from something stable: the device, the channel and the sample time.
+
+### A buffering gateway in Python
+
+```python
+import os
+import time
+from datetime import datetime, timezone
+
+import requests
+
+URL = "https://app.xplantpro.com/api/v1/sensor-readings"
+HEADERS = {"Authorization": f"Bearer {os.environ['XPLANT_DEVICE_TOKEN']}"}
+DEVICE_ID = os.environ["XPLANT_DEVICE_ID"]
+FLUSH_EVERY_SECONDS = 30
+MAX_BATCH = 500  # the per-request maximum
+
+buffer = []
+
+
+def queue(reading_type, value, unit):
+    now = datetime.now(timezone.utc)
+    buffer.append({
+        "device_id": DEVICE_ID,
+        "type": reading_type,
+        "value": value,
+        "unit": unit,
+        "recorded_at": now.isoformat(),
+        # Stable per device, channel and second: re-sending it is a no-op.
+        "external_id": f"{DEVICE_ID}-{reading_type}-{int(now.timestamp())}",
+    })
+    if len(buffer) >= MAX_BATCH:
+        flush()
+
+
+def flush():
+    if not buffer:
+        return
+    batch = buffer[:MAX_BATCH]
+    for _ in range(3):
+        try:
+            resp = requests.post(URL, headers=HEADERS, json={"readings": batch}, timeout=10)
+        except requests.RequestException:
+            time.sleep(5)
+            continue
+        if resp.status_code == 429:
+            time.sleep(int(resp.headers.get("Retry-After", "5")))
+            continue
+        if resp.ok:
+            del buffer[: len(batch)]
+        return
+    # Still failing: keep the readings and try again on the next flush.
+
+
+last_flush = time.monotonic()
+while True:
+    for reading_type, value, unit in read_sensors():  # your sensor code
+        queue(reading_type, value, unit)
+    if time.monotonic() - last_flush >= FLUSH_EVERY_SECONDS:
+        flush()
+        last_flush = time.monotonic()
+    time.sleep(1)
+```
+
+The [Raspberry Pi gateway](https://github.com/shmaplex/xplant_os/tree/main/devices/raspberry-pi/pi-gateway) in this repository is a complete, installable version. In JavaScript, the SDK's [`sensorReadings.buffer()`](/docs/sdk#buffering-sensor-readings-on-a-device) does all of this for you.
+
+## 3. Heartbeats and events
+
+A heartbeat tells xPlant the device is alive and updates its last-seen time. Send one every few minutes, or with each flush.
+
+```bash
+curl -X POST "https://app.xplantpro.com/api/v1/devices/$XPLANT_DEVICE_ID/heartbeat" \
+  -H "Authorization: Bearer $XPLANT_DEVICE_TOKEN"
+```
+
+A device event records something the device noticed or did: a door opening, a relay switching, a status change.
+
+```bash
+curl -X POST https://app.xplantpro.com/api/v1/device-events \
+  -H "Authorization: Bearer $XPLANT_DEVICE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"device_id": "'"$XPLANT_DEVICE_ID"'", "event_type": "door_opened", "payload": {"door": "Grow room 2"}}'
+```
+
+## 4. Read readings back
+
+From a dashboard or a script, with a workspace key holding `read:sensor_readings` (not the device token). Reading readings back through the API needs xPlant+ Teams or Enterprise; on Hobby and Pro Lab the data is visible in xPlant.
+
+```bash
+curl "https://app.xplantpro.com/api/v1/sensor-readings?device_id=$DEVICE_ID&type=temperature&since=2026-09-24T00:00:00Z&limit=200" \
+  -H "Authorization: Bearer $XPLANT_API_KEY"
+```
+
+Readings come **newest first**. Filter by `device_id`, `room_id` and `type`; `since` sets the earliest reading you want, and `limit` goes up to 1,000. This endpoint has no `offset`: to read a longer window, narrow it with `since`.

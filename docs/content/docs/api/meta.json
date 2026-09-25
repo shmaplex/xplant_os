@@ -1,0 +1,21 @@
+{
+  "title": "API reference",
+  "pages": [
+    "index",
+    "account",
+    "plants",
+    "explants",
+    "transfers-and-stages",
+    "change-history",
+    "contaminations",
+    "tasks",
+    "comments",
+    "media",
+    "sops",
+    "labels",
+    "devices",
+    "sensor-readings",
+    "equipment",
+    "commerce"
+  ]
+}

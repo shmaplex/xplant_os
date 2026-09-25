@@ -1,0 +1,9 @@
+{
+  "title": "Plants",
+  "pages": [
+    "list-plants",
+    "create-plant",
+    "get-plant",
+    "update-plant"
+  ]
+}

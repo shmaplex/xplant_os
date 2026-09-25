@@ -56,7 +56,7 @@ node dashboard-poll.mjs
 For a web-based dashboard, you could use:
 
 - **Next.js** with server-side rendering — fetch from xPlant API server-side, render to HTML
-- **Plain HTML + JS** — fetch from `/api/v1/sensor-readings` in the browser using your API key (only use a key with `sensor_readings:read` scope and treat it as semi-public if embedded in client-side code)
+- **Plain HTML + JS** — served by a small local backend that calls `/api/v1/sensor-readings` with a key that holds only `read:sensor_readings`. Never embed an API key in browser code: anyone who opens the page can read it.
 - **Grafana** — if you're already running a time-series database, bridge xPlant sensor data into InfluxDB or Prometheus and visualise with Grafana
 
 ---

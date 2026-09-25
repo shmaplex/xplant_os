@@ -1,0 +1,156 @@
+---
+title: Sync tasks
+description: Create, prioritise and complete bench work from your own scheduler, without overriding the order people set by hand.
+---
+
+**Scopes:** `read:tasks`, `write:tasks`. **Endpoints:** [List tasks](/docs/api/tasks/list-tasks), [Create a task](/docs/api/tasks/create-task), [Get a task](/docs/api/tasks/get-task), [Update a task](/docs/api/tasks/update-task).
+
+The task endpoints let a lab plan production from its own data (sales demand, pipeline time, success rates) instead of by hand, while people at the bench keep the final say.
+
+## Create work
+
+Set the priority, the queue position and the assignee in the same call, so a scheduler places work in one request. Link the task to the plant or explant it's about with `entity_type` and `entity_id` (send both or neither).
+
+```bash tab="curl" tab-group="lang"
+curl -X POST https://app.xplantpro.com/api/v1/tasks \
+  -H "Authorization: Bearer $XPLANT_API_KEY" \
+  -H "Idempotency-Key: sync-2026-09-25-line-0412-transfer" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Transfer the Alocasia line onto fresh medium",
+    "category": "transfer",
+    "priority": "high",
+    "priority_rank": 1.5,
+    "due_date": "2026-10-02T09:00:00Z",
+    "assigned_to": "0d7e4b9a-6f21-4c3e-8a5b-2e9f1c7d4a60",
+    "genus": "Alocasia"
+  }'
+```
+
+```js tab="JavaScript" tab-group="lang"
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY, retry: true });
+
+const task = await client.tasks.create(
+  {
+    title: "Transfer the Alocasia line onto fresh medium",
+    category: "transfer",
+    priority: "high",
+    priority_rank: 1.5,
+    due_date: "2026-10-02T09:00:00Z",
+    assigned_to: "0d7e4b9a-6f21-4c3e-8a5b-2e9f1c7d4a60",
+    genus: "Alocasia",
+  },
+  { idempotencyKey: "sync-2026-09-25-line-0412-transfer" },
+);
+```
+
+```python tab="Python" tab-group="lang"
+import os
+import requests
+
+BASE = "https://app.xplantpro.com/api/v1"
+HEADERS = {"Authorization": f"Bearer {os.environ['XPLANT_API_KEY']}"}
+
+resp = requests.post(
+    f"{BASE}/tasks",
+    headers={**HEADERS, "Idempotency-Key": "sync-2026-09-25-line-0412-transfer"},
+    json={
+        "title": "Transfer the Alocasia line onto fresh medium",
+        "category": "transfer",
+        "priority": "high",
+        "priority_rank": 1.5,
+        "due_date": "2026-10-02T09:00:00Z",
+        "assigned_to": "0d7e4b9a-6f21-4c3e-8a5b-2e9f1c7d4a60",
+        "genus": "Alocasia",
+    },
+    timeout=10,
+)
+task = resp.json()["data"]
+```
+
+An `Idempotency-Key` built from your own data (the sync run, the line, the job) means a nightly sync that retries after a timeout can't create the same task twice. See [Idempotency](/docs/idempotency).
+
+`assigned_to` must be an active member of the workspace. Anything else is rejected with `422 VALIDATION_ERROR` rather than silently dropped.
+
+## Ordering: labels, ranks and the hand-placed rule
+
+Two fields position work:
+
+- `priority` is the label: `low`, `medium`, `high`, `urgent`.
+- `priority_rank` is the actual place in the queue. Lower sorts first, and it's a decimal, so a scheduler can drop a task between two neighbours (between `1` and `2`, send `1.5`) without renumbering everything. Send `null` to clear it and let the label decide.
+
+**Anything written through the API counts as automatic ordering, and automatic ordering never overrides a person.** If someone has placed a task by hand in xPlant, an ordering change from the API is skipped instead of applied. `priority_source` on every task tells you who owns its order; `manual` means a person placed it.
+
+A skip is not an error. A nightly sync that failed on every hand-placed task would be unusable, so the response is still `200` and the rest of your change still applies:
+
+```js tab="JavaScript" tab-group="lang"
+const { task, skipped } = await client.tasks.update(taskId, { priority: "urgent", priority_rank: 0.5 });
+if (skipped) {
+  console.log(`Left "${task.title}" where someone put it by hand.`);
+}
+```
+
+```python tab="Python" tab-group="lang"
+resp = requests.patch(
+    f"{BASE}/tasks/{task_id}",
+    headers=HEADERS,
+    json={"priority": "urgent", "priority_rank": 0.5},
+    timeout=10,
+)
+body = resp.json()
+report = (body.get("meta") or {}).get("priority_write")
+if report and not report["applied"]:
+    print(report["message"])
+```
+
+When a change touches ordering, the response carries `meta.priority_write`: `applied` (true or false), `reason` (`manual_override` when skipped), the task's `priority_source` (`default`, `auto` or `manual`), and a plain-language `message` that's safe to put in a sync log. When a change doesn't touch ordering, `meta` is left out.
+
+To take a hand-placed task back under automatic control, send `release: true` with the change. The ordering then applies and the task's order becomes automatic again.
+
+```bash
+curl -X PATCH "https://app.xplantpro.com/api/v1/tasks/$TASK_ID" \
+  -H "Authorization: Bearer $XPLANT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"priority": "high", "priority_rank": 1500, "release": true}'
+```
+
+Only release a task when a person has asked for it. The rule exists so that the bench can overrule a model.
+
+## Move work along the board
+
+`workflow_status` is the board column: `backlog`, `todo`, `in_progress`, `waiting_blocked`, `review`, `done`. Complete a task by setting it to `done`:
+
+```bash
+curl -X PATCH "https://app.xplantpro.com/api/v1/tasks/$TASK_ID" \
+  -H "Authorization: Bearer $XPLANT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"workflow_status": "done"}'
+```
+
+## Read the queue
+
+List tasks earliest-due first, optionally by column or assignee:
+
+```js tab="JavaScript" tab-group="lang"
+for await (const task of client.tasks.list({ status: "todo" })) {
+  console.log(task.due_date, task.priority, task.title);
+}
+```
+
+```python tab="Python" tab-group="lang"
+resp = requests.get(f"{BASE}/tasks", headers=HEADERS, params={"status": "todo", "limit": 200}, timeout=10)
+for task in resp.json()["data"]:
+    print(task["due_date"], task["priority"], task["title"])
+```
+
+Lists leave out `entity_link` to stay small. Fetch a single task to see which plant or explant it's about.
+
+## A nightly sync, in outline
+
+1. Pull your own plan (orders, forecasts, pipeline) and work out what should be on the bench.
+2. Read the open tasks (`status=todo`, `backlog`, `in_progress`) and match them to your plan. Keep your own mapping from your job ids to xPlant task ids.
+3. Create what's missing, with an `Idempotency-Key` derived from your job id.
+4. Update priorities for the rest. Expect some `skipped` results; those are tasks a person has placed, and that's working as intended.
+5. If you also push demand numbers, send them as [demand signals](/docs/guides/demand-signals) and let xPlant weigh them.

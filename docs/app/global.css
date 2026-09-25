@@ -1,0 +1,123 @@
+@import "tailwindcss";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
+
+/*
+ * xPlant brand, mapped onto Fumadocs' colour slots.
+ * Values come from the app's styles/tokens.css (semantic + surface layers).
+ * Brand colours that fail text contrast on light (future-lime, amber,
+ * lichen-blue) appear here only as fills, rings and markers — never as text.
+ */
+@theme {
+  --color-fd-background: #f8f6ef; /* --surface-base: warm greenhouse white */
+  --color-fd-foreground: #171717;
+  --color-fd-card: #ffffff; /* --surface-raised */
+  --color-fd-card-foreground: #171717;
+  --color-fd-popover: #ffffff;
+  --color-fd-popover-foreground: #171717;
+  --color-fd-muted: #eef2e7; /* --surface-sunken */
+  --color-fd-muted-foreground: #42564a;
+  --color-fd-border: #dad7d2;
+  --color-fd-primary: #2f7d46; /* canopy green */
+  --color-fd-primary-foreground: #ffffff;
+  --color-fd-secondary: #eef4e8;
+  --color-fd-secondary-foreground: #1a1a1a;
+  --color-fd-accent: #e6f1dd;
+  --color-fd-accent-foreground: #1a1a1a;
+  --color-fd-ring: #74a75d;
+  --color-fd-overlay: rgb(15 28 19 / 0.25);
+
+  --color-fd-info: #437aa8;
+  --color-fd-warning: #d9a441;
+  --color-fd-error: #a84343;
+  --color-fd-success: #3f7f4f;
+
+  /* xPlant extras used by the site's own components */
+  --color-future-lime: #b7ef48;
+  --color-moss-shadow: #42594d;
+  /* HTTP method badges: solid token fills, label contrast >= 4.5:1 in both themes */
+  --color-method-get: #2f7d46; /* primary, white 5.07:1 */
+  --color-method-post: #437aa8; /* lichen-blue-dark, white 4.58:1 */
+  --color-method-patch: #42594d; /* moss-shadow, white 7.59:1 */
+  --color-method-delete: #a84343; /* bio-red-dark, white 5.92:1 */
+  --color-method-fg: #ffffff;
+
+  --font-sans: "Switzer", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: "Clash Display", "Switzer", ui-sans-serif, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark {
+  --color-fd-background: #0f1c13; /* deep greenhouse canvas */
+  --color-fd-foreground: #edf5e8;
+  --color-fd-card: #192d1e;
+  --color-fd-card-foreground: #edf5e8;
+  --color-fd-popover: #192d1e;
+  --color-fd-popover-foreground: #edf5e8;
+  --color-fd-muted: #1e3324;
+  --color-fd-muted-foreground: #8ea890;
+  --color-fd-border: #284034;
+  --color-fd-primary: #b7ef48; /* future-lime: where lime belongs */
+  --color-fd-primary-foreground: #0c1a0f;
+  --color-fd-secondary: #1e3324;
+  --color-fd-secondary-foreground: #edf5e8;
+  --color-fd-accent: #213825;
+  --color-fd-accent-foreground: #edf5e8;
+  --color-fd-ring: #b7ef48;
+  --color-fd-overlay: rgb(8 16 11 / 0.6);
+
+  --color-fd-info: #7ab6df;
+  --color-fd-warning: #fbbf24;
+  --color-fd-error: #ff6b6b;
+  --color-fd-success: #77c87c;
+
+  --color-method-get: #77c87c;
+  --color-method-post: #7ab6df;
+  --color-method-patch: #8ea890;
+  --color-method-delete: #ff6b6b;
+  --color-method-fg: #0c1a0f;
+}
+
+.dark #nd-sidebar {
+  --color-fd-muted: #192d1e;
+  --color-fd-secondary: #1e3324;
+  --color-fd-muted-foreground: #8ea890;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+html > body[data-scroll-locked] {
+  margin-right: 0px !important;
+  --removed-body-scroll-bar-size: 0px !important;
+}
+
+/* Long inline code in running text may break, but only when it can't fit on a line of its own. */
+.prose :where(p, li) :where(code):not(:where(pre code)) {
+  overflow-wrap: break-word;
+}
+
+/* Field names, codes and enum values in tables never break mid-word; a wide table scrolls sideways instead. */
+.prose :where(table) :where(code) {
+  white-space: nowrap;
+}
+
+.prose :where(h1, h2, h3, h4) {
+  text-wrap: balance;
+}
+
+.prose :where(p, li) {
+  text-wrap: pretty;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

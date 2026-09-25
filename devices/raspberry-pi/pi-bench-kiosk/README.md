@@ -14,7 +14,7 @@ A touchscreen kiosk mounted at a lab bench, running a Raspberry Pi with a 7" tou
 - Scan barcodes using a USB scanner
 - See live sensor readings from the bench's ESP32/DHT22
 
-The kiosk would run a local lightweight web app (likely a Next.js static export) that communicates with the xPlant API using a device-scoped API key.
+The kiosk would run a local lightweight web app (likely a Next.js static export) that talks to the xPlant API through a small local backend. Tasks, transfers and SOP runs need a workspace key, so the kiosk would hold its own key with only the scopes it uses (see [bench stations and keys](https://docs.xplantpro.com/docs/guides/sop-runs#bench-stations-and-keys)), while the bench's sensors post with their own device tokens.
 
 ---
 

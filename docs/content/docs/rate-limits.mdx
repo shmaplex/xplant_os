@@ -1,0 +1,44 @@
+---
+title: Rate limits
+description: 1,000 requests a minute per key, 3,000 per workspace, and what happens when you go over.
+---
+
+Every `/api/v1` request counts against two budgets, per minute:
+
+| Budget | Limit |
+| --- | --- |
+| Per API key or device token | 1,000 requests per minute |
+| Per workspace, across all its keys and tokens | 3,000 requests per minute |
+
+Going over either answers:
+
+```http
+HTTP/1.1 429 Too Many Requests
+Retry-After: 12
+
+{ "ok": false, "data": null, "error": "…", "code": "RATE_LIMIT_EXCEEDED" }
+```
+
+`Retry-After` is the number of whole seconds until the window resets. Wait that long, then carry on. Retrying immediately just spends more of the budget. The `error` text says which budget ran out, so one runaway integration is easy to tell apart from a busy lab.
+
+These are ceilings to stop abuse and runaway loops, set well above normal use. Polling fifteen endpoints every five seconds is 180 requests a minute.
+
+## Sensor readings have their own budget
+
+`POST /sensor-readings` also counts **readings**, separately from requests, per five minutes:
+
+| Budget | Limit |
+| --- | --- |
+| Per API key or device token | 5,000 readings per 5 minutes |
+| Per workspace | 10,000 readings per 5 minutes |
+
+One request can carry up to 500 readings, so a batching gateway can reach the readings budget while barely touching the request one. Both answer the same `429 RATE_LIMIT_EXCEEDED` with `Retry-After`.
+
+## Staying well inside
+
+- **Batch sensor readings.** Buffer locally and post every 30–60 seconds, or whenever 500 are queued. One request per reading uses your budget hundreds of times faster for the same data. See [Sensors and devices](/docs/guides/sensors-and-devices).
+- **Sync incrementally.** Use `since` on [change history](/docs/guides/change-history) rather than re-reading everything.
+- **Page with the maximum `limit`** (200) when you really do need everything.
+- **Give each integration its own key**, so one busy job can't starve the others of their per-key budget.
+
+The only rate-limit header is `Retry-After`, sent with a `429` (and with `409 IDEMPOTENCY_IN_FLIGHT`). There are no remaining-quota headers.

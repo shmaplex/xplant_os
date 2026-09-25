@@ -1,0 +1,9 @@
+{
+  "title": "Explants",
+  "pages": [
+    "list-explants",
+    "create-explant",
+    "get-explant",
+    "update-explant"
+  ]
+}

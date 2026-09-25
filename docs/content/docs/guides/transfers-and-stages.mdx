@@ -1,0 +1,113 @@
+---
+title: Record transfers and stages
+description: Log subcultures to fresh media and move plants and explants through tissue-culture stages from a script or a scanner.
+---
+
+**Scopes:** `read:transfers`, `write:transfers` (and `read:plants` / `read:explants` to look records up). **Endpoints:** [Record a transfer](/docs/api/transfers-and-stages/create-transfer), [List transfers](/docs/api/transfers-and-stages/list-transfers), [Advance a stage](/docs/api/transfers-and-stages/create-stage), [List stages](/docs/api/transfers-and-stages/list-stages).
+
+## Find the record first
+
+Transfers and stages belong to a plant or an explant. If your own system knows a batch by its own code, look it up with `externalId` rather than keeping a separate id mapping:
+
+```js tab="JavaScript" tab-group="lang"
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+
+const explant = await client.explants.findByExternalId("LINE-0412"); // record or null
+```
+
+```bash tab="curl" tab-group="lang"
+curl "https://app.xplantpro.com/api/v1/explants?externalId=LINE-0412" \
+  -H "Authorization: Bearer $XPLANT_API_KEY"
+```
+
+```python tab="Python" tab-group="lang"
+import os
+import requests
+
+BASE = "https://app.xplantpro.com/api/v1"
+HEADERS = {"Authorization": f"Bearer {os.environ['XPLANT_API_KEY']}"}
+
+matches = requests.get(f"{BASE}/explants", headers=HEADERS, params={"externalId": "LINE-0412"}, timeout=10).json()["data"]
+explant = matches[0] if matches else None
+```
+
+A scanner can also [resolve a label](/docs/guides/label-scanning) straight to the record.
+
+## Record a transfer
+
+A transfer is a subculture onto fresh media. Give exactly one of `plant_id` or `explant_id`. The transfer cycle counts up from the record's history unless you set `transfer_cycle` yourself.
+
+```bash tab="curl" tab-group="lang"
+curl -X POST https://app.xplantpro.com/api/v1/transfers \
+  -H "Authorization: Bearer $XPLANT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "explant_id": "7c1d9e2a-3b4f-4a5c-8d6e-1f2a3b4c5d6e",
+    "from_location": "Shelf A2",
+    "to_location": "Shelf B1",
+    "notes": "Routine subculture"
+  }'
+```
+
+```js tab="JavaScript" tab-group="lang"
+const transfer = await client.transfers.create({
+  explant_id: explant.id,
+  from_location: "Shelf A2",
+  to_location: "Shelf B1",
+  notes: "Routine subculture",
+});
+```
+
+```python tab="Python" tab-group="lang"
+transfer = requests.post(
+    f"{BASE}/transfers",
+    headers=HEADERS,
+    json={"explant_id": explant["id"], "from_location": "Shelf A2", "to_location": "Shelf B1"},
+    timeout=10,
+).json()["data"]
+```
+
+Optional fields: `transfer_date`, `from_location`, `to_location`, `transfer_cycle`, `notes`.
+
+## Advance a stage
+
+One call completes the current stage and makes the new one current. `stage` is required; give exactly one of `plant_id` or `explant_id`.
+
+```bash tab="curl" tab-group="lang"
+curl -X POST https://app.xplantpro.com/api/v1/stages \
+  -H "Authorization: Bearer $XPLANT_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"plant_id": "0b8e2f4c-6a1d-4c3e-9f7a-2d5b8c1e4a90", "stage": "Multiplication"}'
+```
+
+```js tab="JavaScript" tab-group="lang"
+await client.stages.advance({ plant_id: plant.id, stage: "Multiplication" });
+```
+
+```python tab="Python" tab-group="lang"
+requests.post(
+    f"{BASE}/stages",
+    headers=HEADERS,
+    json={"plant_id": plant["id"], "stage": "Multiplication"},
+    timeout=10,
+).raise_for_status()
+```
+
+Optional fields: `entered_on`, `room_id`, `notes`.
+
+## Read the history
+
+Both lists take one of `plant_id` or `explant_id` and return the most recent first:
+
+```bash
+curl "https://app.xplantpro.com/api/v1/transfers?explant_id=$EXPLANT_ID" -H "Authorization: Bearer $XPLANT_API_KEY"
+curl "https://app.xplantpro.com/api/v1/stages?plant_id=$PLANT_ID" -H "Authorization: Bearer $XPLANT_API_KEY"
+```
+
+## A transfer counter at the bench
+
+A common build is a scanner plus a button: scan the vessel, press "transferred". The scanner [resolves the label](/docs/guides/label-scanning) to a record, and the button posts a transfer for it.
+
+Device tokens can't record transfers, so a station like this needs a workspace key. Give the station its own key holding only `read:labels`, `write:label_scans` and `write:transfers`, so that a lost station exposes as little as possible and can be revoked on its own. See [Bench stations and keys](/docs/guides/sop-runs#bench-stations-and-keys).
