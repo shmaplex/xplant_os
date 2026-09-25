@@ -243,8 +243,8 @@ def build_reading(
     buffered through an outage or a retry — exactly when the real
     observation time matters.
     """
-    # The API wants UTC ending in "Z"; isoformat() would end in "+00:00",
-    # which it rejects.
+    # An ISO 8601 timestamp in UTC. The API accepts "Z" or an offset; "Z"
+    # keeps external_id identical across retries of the same reading.
     recorded_at = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
     return {
         "device_id":   config["device_id"],

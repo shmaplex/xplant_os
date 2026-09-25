@@ -57,7 +57,7 @@ import os
 import requests
 from datetime import datetime, timezone
 
-# UTC ending in "Z": isoformat()'s "+00:00" is rejected.
+# An ISO 8601 timestamp in UTC; "Z" and "+00:00" are both accepted.
 at = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
 device_id = os.environ["XPLANT_DEVICE_ID"]
 requests.post(
@@ -84,9 +84,9 @@ requests.post(
 
 A single reading without the `readings` wrapper also works. Treat it as the fallback for a device that can only ever hold one pending reading, not as the default.
 
-**Send `recorded_at` in UTC ending in `Z`**, for example `2026-09-25T12:00:00.000Z`. A timestamp with an offset such as `+00:00` is rejected with `422 VALIDATION_ERROR`. In Python, `datetime.now(timezone.utc).isoformat()` ends in `+00:00`, so swap it for `Z` as the examples do.
+**Send `recorded_at` as an ISO 8601 timestamp** with `Z` or an offset, for example `2026-09-25T12:00:00.000Z` or `2026-09-25T14:00:00+02:00`: the time the reading was taken, not the time you send it.
 
-**Make retries harmless.** Put `external_id` and `recorded_at` on every reading. Readings are de-duplicated on the device, `external_id` and `recorded_at`, so re-sending a batch after a network failure doesn't store anything twice. (`Idempotency-Key` isn't used on this endpoint.) Build `external_id` from something stable: the device, the channel and the sample time.
+**Make retries harmless.** Put `external_id` and `recorded_at` on every reading. A reading that repeats one already stored for the same device (same `external_id` and `recorded_at`) is skipped rather than stored twice: in a batch it's left out of the response list, and a single reading answers `201` with the reading already stored and `meta.duplicate: true`. (`Idempotency-Key` isn't used on this endpoint.) Build `external_id` from something stable: the device, the channel and the sample time.
 
 ### A buffering gateway in Python
 
@@ -161,13 +161,13 @@ curl -X POST "https://app.xplantpro.com/api/v1/devices/$XPLANT_DEVICE_ID/heartbe
   -H "Authorization: Bearer $XPLANT_DEVICE_TOKEN"
 ```
 
-A device event records something the device noticed or did: a door opening, a relay switching, a status change.
+A device event records something the device noticed or did: a door opening, a relay switching, a status change. Send an `external_id` so a retry is harmless: a repeat under the same `external_id` answers `201` with the event already stored and `meta.duplicate: true`. Without one, a retried request is recorded twice.
 
 ```bash
 curl -X POST https://app.xplantpro.com/api/v1/device-events \
   -H "Authorization: Bearer $XPLANT_DEVICE_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"device_id": "'"$XPLANT_DEVICE_ID"'", "event_type": "door_opened", "payload": {"door": "Grow room 2"}}'
+  -d '{"device_id": "'"$XPLANT_DEVICE_ID"'", "event_type": "door_opened", "payload": {"door": "Grow room 2"}, "external_id": "pi-3-door-2-20260925T081500Z"}'
 ```
 
 ## 4. Read readings back

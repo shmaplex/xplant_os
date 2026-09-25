@@ -26,7 +26,7 @@ Send an `Idempotency-Key` header to make retries safe: a repeat with the same ke
 | `plant_id` | string (uuid) | No | The plant the code belongs to, when you already know it — for example from resolving the label first. It must be in this workspace. |
 | `explant_id` | string (uuid) | No | The explant the code belongs to, when you already know it. It must be in this workspace. |
 | `context` | string | No | Where the scan happened, in your own words — a bench, a shelf, a growth room door. Up to 120 characters. |
-| `scanned_at` | string (date-time) | No | When the scan happened, in UTC with a trailing `Z`, such as `2026-09-25T08:30:00Z`. A timestamp with an offset is refused. Defaults to when xPlant receives it. |
+| `scanned_at` | string (date-time) | No | When the scan happened, as an ISO 8601 timestamp in UTC (`2026-09-25T08:30:00Z`) or with an offset (`2026-09-25T10:30:00+02:00`). Defaults to when xPlant receives it. |
 
 ## Example
 
@@ -129,7 +129,7 @@ scan = body["data"]
 | `404` | `NOT_FOUND` | The plant or explant named in the scan is not in this workspace. |
 | `409` | `IDEMPOTENCY_IN_FLIGHT` | A request with this `Idempotency-Key` is still being processed; retry after `Retry-After` seconds. |
 | `422` | `VALIDATION_ERROR` | The `Idempotency-Key` header is malformed. |
-| `422` | `VALIDATION_ERROR` | A field failed validation, for example a missing `barcode` or a `scanned_at` that is not a UTC timestamp. `error` gives the first problem but does not name the field. |
+| `422` | `VALIDATION_ERROR` | A field failed validation, for example a missing `barcode` or a `scanned_at` that is not a timestamp with a time zone. `error` gives the first problem but does not name the field. |
 | `429` | `RATE_LIMIT_EXCEEDED` | Too many requests for this key, device token or workspace. Wait `Retry-After` seconds. |
 | `500` | `LABEL_SCAN_CREATE_FAILED` | The scan could not be saved. Retry with the same `Idempotency-Key`. |
 

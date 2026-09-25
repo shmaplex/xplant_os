@@ -15,8 +15,8 @@ Pages are larger here than on other lists: 100 readings by default and up to 1,0
 | `device_id` | string (uuid) | No | Only readings from this device. |
 | `room_id` | string (uuid) | No | Only readings for this growing room. |
 | `type` | `"temperature"` \| `"humidity"` \| `"ph"` \| `"co2"` \| `"light"` \| `"other"` | No | Only this kind of reading. |
-| `since` | string (date-time) | No | Only readings taken at or after this time, as an ISO 8601 timestamp. |
-| `until` | string (date-time) | No | Only readings taken at or before this time, as an ISO 8601 timestamp. Must not be earlier than `since`. |
+| `since` | string (date-time) | No | Only readings taken at or after this time, as an ISO 8601 timestamp in UTC or with an offset. Write an offset's `+` as `%2B`. |
+| `until` | string (date-time) | No | Only readings taken at or before this time, as an ISO 8601 timestamp in UTC or with an offset. Write an offset's `+` as `%2B`. Must not be earlier than `since`. |
 | `limit` | integer | No | Page size. Values above 1,000 are capped at 1,000. Default `100`. From 1 to 1000. |
 | `offset` | integer | No | Number of records to skip. Prefer `cursor` where a list offers it: an offset shifts when records are added ahead of it. Default `0`. At least 0. |
 | `cursor` | string | No | Continue from the previous page: pass its `meta.next_cursor` unchanged, with the same filters. Treat it as opaque. Not combinable with `offset`. Up to 2048 characters. |

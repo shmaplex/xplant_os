@@ -60,7 +60,7 @@ stages = body["data"]
 | `id` | string (uuid) | Yes | — |
 | `entity_type` | `"plant"` \| `"explant"` | Yes | Whether the stage belongs to a plant or an explant. |
 | `entity_id` | string (uuid) | Yes | The plant's or explant's id. |
-| `stage` | string | Yes | The stage, usually as a key from your lab's stage list such as `multiplication`. Records made by older tools can carry the stage's display name instead, such as `Multiplication`. |
+| `stage` | string | Yes | The stage, as a key from your lab's stage list such as `multiplication`. Records made by older tools can carry the stage's display name instead, such as `Multiplication`. |
 | `status` | string | Yes | `active` for the stage the plant or explant is in now, `completed` for one it has moved on from. Stages can also be `failed` or `archived`. |
 | `entered_on` | string \| null | Yes | When it entered this stage, as an ISO 8601 timestamp. |
 | `completed_at` | string \| null | Yes | When it moved on from this stage. Null while the stage is current. |

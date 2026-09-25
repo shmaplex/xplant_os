@@ -8,7 +8,7 @@ endpoint: {"method":"POST","path":"/api/v1/sensor-readings","scopes":["write:sen
 
 The response mirrors the request — one reading back for one reading sent, a list for a batch.
 
-To make a retry safe, send `external_id` and `recorded_at` on every reading. A reading that repeats one already stored for the same device is skipped rather than stored twice, and is left out of the response — so a skipped single reading returns `ok: true` with no `data`.
+To make a retry safe, send `external_id` and `recorded_at` on every reading. A reading that repeats one already stored for the same device is skipped rather than stored twice. In a batch, a skipped reading is left out of the list, so the list can be shorter than the batch. A single reading that is skipped answers with the reading already stored, still `201`, with `meta.duplicate: true`.
 
 One bad reading refuses the whole batch: if any reading fails validation, names a device or room outside the workspace, or comes from a device that is paused or retired, nothing in the request is stored.
 
@@ -29,9 +29,9 @@ The body is one of:
 | `value` | number | Yes | The measured value. |
 | `unit` | string | Yes | The unit the value is in, for example `celsius` or `%`. 1–20 characters. |
 | `room_id` | string (uuid) | No | The growing room the reading describes. Must be a room in the workspace. |
-| `recorded_at` | string (date-time) | No | When the reading was taken, as an ISO 8601 timestamp in UTC ending in `Z`. Defaults to the time the request arrives. Required when you send `external_id`. |
+| `recorded_at` | string (date-time) | No | When the reading was taken, as an ISO 8601 timestamp in UTC (`2026-09-25T14:00:00Z`) or with an offset (`2026-09-25T16:00:00+02:00`). Defaults to the time the request arrives. Required when you send `external_id`. |
 | `notes` | string | No | A free-text note. Up to 500 characters. |
-| `external_id` | string | No | Your own id for the reading. A reading with the same device, `external_id` and `recorded_at` as one already stored is skipped, so a retried batch is not stored twice. 1–200 characters. |
+| `external_id` | string | No | Your own id for the reading. A reading with the same device, `external_id` and `recorded_at` as one already stored is skipped, so a retried batch is not stored twice. `recorded_at` is compared as a moment in time, so `2026-09-25T14:00:00Z` and `2026-09-25T16:00:00+02:00` count as the same. 1–200 characters. |
 
 ### A batch: `readings`
 
@@ -43,9 +43,9 @@ The body is one of:
 | `readings[].value` | number | Yes | The measured value. |
 | `readings[].unit` | string | Yes | The unit the value is in, for example `celsius` or `%`. 1–20 characters. |
 | `readings[].room_id` | string (uuid) | No | The growing room the reading describes. Must be a room in the workspace. |
-| `readings[].recorded_at` | string (date-time) | No | When the reading was taken, as an ISO 8601 timestamp in UTC ending in `Z`. Defaults to the time the request arrives. Required when you send `external_id`. |
+| `readings[].recorded_at` | string (date-time) | No | When the reading was taken, as an ISO 8601 timestamp in UTC (`2026-09-25T14:00:00Z`) or with an offset (`2026-09-25T16:00:00+02:00`). Defaults to the time the request arrives. Required when you send `external_id`. |
 | `readings[].notes` | string | No | A free-text note. Up to 500 characters. |
-| `readings[].external_id` | string | No | Your own id for the reading. A reading with the same device, `external_id` and `recorded_at` as one already stored is skipped, so a retried batch is not stored twice. 1–200 characters. |
+| `readings[].external_id` | string | No | Your own id for the reading. A reading with the same device, `external_id` and `recorded_at` as one already stored is skipped, so a retried batch is not stored twice. `recorded_at` is compared as a moment in time, so `2026-09-25T14:00:00Z` and `2026-09-25T16:00:00+02:00` count as the same. 1–200 characters. |
 
 ## Example
 
@@ -176,6 +176,12 @@ stored = body["data"]
   ]
 }
 ```
+
+The envelope can also carry `meta`:
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `duplicate` | `true` | Yes | Sent only when one reading was sent and it repeated a reading already stored for the device under the same `external_id` and `recorded_at`. `data` is that stored reading, and nothing new was stored. Never sent for a batch. |
 
 | Response header | Meaning |
 | --- | --- |

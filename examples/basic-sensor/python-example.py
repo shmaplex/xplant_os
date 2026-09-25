@@ -51,7 +51,7 @@ def post_sensor_reading(reading_type: str, value: float, unit: str) -> dict:
         # The field is `recorded_at`, not `timestamp`: the API ignores fields
         # it doesn't know, so a `timestamp` would be dropped and the reading
         # would get the time the request arrived. Send the time the reading
-        # was taken, in UTC ending in "Z" (isoformat()'s "+00:00" is rejected).
+        # was taken, as an ISO 8601 timestamp ("Z" and "+00:00" both work).
         "recorded_at": datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z"),
     }
 

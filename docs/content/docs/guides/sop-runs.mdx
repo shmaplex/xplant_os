@@ -68,6 +68,8 @@ run = requests.post(
 ).json()["data"]
 ```
 
+If your lab enforces SOP training, starting a run checks the key owner's training for this SOP. With enforcement set to **block**, an untrained owner gets `403 TRAINING_REQUIRED` and no run starts. Set to **warn**, the run starts (`201`) and the response carries `meta.training_warning` with the `qualification` and its `expires_on` date; show it to the technician.
+
 There is deliberately no version argument. **A run always follows the version in force**, because a run is a record of what someone did, and what they did was follow the lab's current procedure. An SOP with no version in force answers `409 SOP_RUN_NOT_EFFECTIVE` (not `404`: the SOP exists, it just can't be run yet).
 
 ## 3. Record evidence against steps
@@ -134,7 +136,7 @@ Measurements appear on the run's timeline as `measured` events, alongside the co
 
 ## Runs are append-only
 
-Nothing on a run can be edited or deleted. To correct a mistake, record another event that says so. Once a run is **completed**, further writes answer `409 SOP_RUN_CLOSED`: its record is what happened.
+Nothing on a run can be edited or deleted. To correct a mistake, record another event that says so. Once a run has **ended** (completed, failed, cancelled or archived), further writes answer `409 SOP_RUN_CLOSED`: its record is what happened. A step that isn't part of the run's version answers `404 NOT_FOUND`.
 
 Use an `Idempotency-Key` on every write from a station. Bench networks are flaky, and a retried scan must not count twice.
 

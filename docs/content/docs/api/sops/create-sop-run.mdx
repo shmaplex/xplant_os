@@ -14,6 +14,8 @@ A bench station typically:
 
 The run follows the version in force when it starts, and you cannot choose another. Send an `Idempotency-Key` so a retried start does not open a second run.
 
+The run is recorded as the key's owner, and your lab's training rule applies to them exactly as it does in xPlant. Where the lab requires current training before an SOP is run, a key whose owner has none on this SOP is refused. Where the lab only asks for a warning, the run starts and `meta.training_warning` says what is missing, so the station can tell the person running it.
+
 See also: [Run an SOP from a bench station](/docs/guides/sop-runs).
 
 Send an `Idempotency-Key` header to make retries safe: a repeat with the same key within 24 hours returns the first response instead of writing twice. See [Idempotency](/docs/idempotency).
@@ -116,6 +118,14 @@ run = body["data"]
 }
 ```
 
+The envelope can also carry `meta`:
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `training_warning` | object | Yes | Sent when your lab enforces training and the key's owner's training on this SOP needs their attention: it is missing, expired or revoked and the lab warns rather than refuses, or it is current but lapses within 30 days. The run has started either way. Left out otherwise. |
+| `training_warning.qualification` | `"untrained"` \| `"expired"` \| `"revoked"` \| `"expiring"` | Yes | Where the key's owner stands on this SOP: `untrained` when no training is recorded, `expired` when it has lapsed, `revoked` when it was withdrawn, `expiring` when it is current but lapses within 30 days. |
+| `training_warning.expires_on` | string \| null | Yes | The day that training lapsed or lapses, as `YYYY-MM-DD`, for `expired` and `expiring`. Null otherwise. |
+
 | Response header | Meaning |
 | --- | --- |
 | `Idempotent-Replay` | `true` when this response is a replay of an earlier request with the same `Idempotency-Key`. |
@@ -130,6 +140,7 @@ run = body["data"]
 | `402` | `PAID_PLAN_REQUIRED` | The workspace's plan does not include the API. The full API is included with xPlant+ Teams and Enterprise; on Hobby and Pro Lab, keys can connect devices only. |
 | `403` | `FORBIDDEN` | The key lacks a scope this operation requires, or its owner's current role in the workspace cannot use it — a key never does more than its owner can in xPlant. `error` names the scope, and for a role, the role it needs. |
 | `403` | `DEVICE_TOKEN_NOT_ACCEPTED` | A device token was sent; this operation needs a workspace API key. |
+| `403` | `TRAINING_REQUIRED` | Your lab requires current training before an SOP is run, and the key's owner has none on this one: it was never recorded, has expired, or was revoked. Nothing is started. Once their training is recorded in xPlant, start the run again. |
 | `404` | `NOT_FOUND` | The SOP, or the plant named in `plant_id`, is not in this workspace. |
 | `409` | `IDEMPOTENCY_IN_FLIGHT` | A request with this `Idempotency-Key` is still being processed; retry after `Retry-After` seconds. |
 | `409` | `SOP_RUN_NOT_EFFECTIVE` | The SOP has no version in force, so there is nothing approved to run. Put a version into force in xPlant, then start the run. |

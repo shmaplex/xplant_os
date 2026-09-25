@@ -99,6 +99,7 @@ created = body["data"]
 
 | Status | Code | When |
 | --- | --- | --- |
+| `400` | `VALIDATION_ERROR` | The body is not valid JSON, and no token was minted. An empty body is not an error: it mints a token with every default. |
 | `401` | `UNAUTHORIZED` | The key is missing, malformed or revoked, or its owner is no longer a member of the workspace. |
 | `402` | `PAID_PLAN_REQUIRED` | The workspace has no paid plan. Connecting devices is included with every paid plan. |
 | `403` | `FORBIDDEN` | The key lacks a scope this operation requires, or its owner's current role in the workspace cannot use it — a key never does more than its owner can in xPlant. `error` names the scope, and for a role, the role it needs. |

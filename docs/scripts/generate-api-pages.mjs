@@ -813,7 +813,7 @@ const plansFor = (s) => s.plans ?? (DEVICE_PLAN_SCOPES.has(s.id) ? "All paid pla
 const KNOWN_CODES = [
   { status: "402", code: "DEVICE_LIMIT_REACHED", when: "Registering a device would go past the plan's device allowance." },
   { status: "409", code: "SOP_RUN_NOT_EFFECTIVE", when: "The SOP has no version in force, so it can't be run yet." },
-  { status: "409", code: "SOP_RUN_CLOSED", when: "The run is completed; its record can't change." },
+  { status: "409", code: "SOP_RUN_CLOSED", when: "The run has ended (completed, failed, cancelled or archived); its record can't change." },
 ];
 
 const opLink = (o) => `[\`${o.method} ${o.path.replace(/^\/api\/v1/, "")}\`](${opUrl(o)})`;
