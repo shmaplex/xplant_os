@@ -26,7 +26,7 @@
  * show a fetch example (and say which release brings the SDK call) until
  * this is bumped.
  */
-export const SDK_VERSION = "0.4.0";
+export const SDK_VERSION = "0.5.0";
 
 const PLANT_ID = "0b8e2f4c-6a1d-4c3e-9f7a-2d5b8c1e4a90";
 const EXPLANT_ID = "7c1d9e2a-3b4f-4a5c-8d6e-1f2a3b4c5d6e";

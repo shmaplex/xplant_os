@@ -24,14 +24,14 @@ curl "https://app.xplantpro.com/api/v1/comments?entity_type=explant&entity_id=7c
 ```
 
 ```js tab="JavaScript" tab-group="lang"
-// Coming in @shmaplex/xplant-sdk 0.5.0; until then, fetch directly.
-const res = await fetch("https://app.xplantpro.com/api/v1/comments?entity_type=explant&entity_id=7c1d9e2a-3b4f-4a5c-8d6e-1f2a3b4c5d6e", {
-  method: "GET",
-  headers: { Authorization: `Bearer ${process.env.XPLANT_API_KEY}` },
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+
+const comments = await client.comments.list({
+  entity_type: "explant",
+  entity_id: "7c1d9e2a-3b4f-4a5c-8d6e-1f2a3b4c5d6e",
 });
-const body = await res.json();
-if (!body.ok) throw new Error(`${res.status} ${body.code}: ${body.error}`);
-const comments = body.data;
 ```
 
 ```python tab="Python" tab-group="lang"

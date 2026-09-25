@@ -20,14 +20,11 @@ curl https://app.xplantpro.com/api/v1/assets/9e1a3c5b-7d9f-4b1d-a3c5-e7f9b1d3f5a
 ```
 
 ```js tab="JavaScript" tab-group="lang"
-// Coming in @shmaplex/xplant-sdk 0.5.0; until then, fetch directly.
-const res = await fetch("https://app.xplantpro.com/api/v1/assets/9e1a3c5b-7d9f-4b1d-a3c5-e7f9b1d3f5a7", {
-  method: "GET",
-  headers: { Authorization: `Bearer ${process.env.XPLANT_API_KEY}` },
-});
-const body = await res.json();
-if (!body.ok) throw new Error(`${res.status} ${body.code}: ${body.error}`);
-const asset = body.data;
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+
+const asset = await client.assets.get("9e1a3c5b-7d9f-4b1d-a3c5-e7f9b1d3f5a7");
 ```
 
 ```python tab="Python" tab-group="lang"

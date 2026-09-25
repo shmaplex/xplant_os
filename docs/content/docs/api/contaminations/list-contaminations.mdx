@@ -26,14 +26,14 @@ curl "https://app.xplantpro.com/api/v1/contaminations?explant_id=7c1d9e2a-3b4f-4
 ```
 
 ```js tab="JavaScript" tab-group="lang"
-// Coming in @shmaplex/xplant-sdk 0.5.0; until then, fetch directly.
-const res = await fetch("https://app.xplantpro.com/api/v1/contaminations?explant_id=7c1d9e2a-3b4f-4a5c-8d6e-1f2a3b4c5d6e&status=active", {
-  method: "GET",
-  headers: { Authorization: `Bearer ${process.env.XPLANT_API_KEY}` },
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+
+const contaminations = await client.contaminations.list({
+  explant_id: "7c1d9e2a-3b4f-4a5c-8d6e-1f2a3b4c5d6e",
+  status: "active",
 });
-const body = await res.json();
-if (!body.ok) throw new Error(`${res.status} ${body.code}: ${body.error}`);
-const contaminations = body.data;
 ```
 
 ```python tab="Python" tab-group="lang"

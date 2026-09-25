@@ -54,15 +54,12 @@ curl -X POST https://app.xplantpro.com/api/v1/plants \
 ```
 
 ```js tab="JavaScript" tab-group="lang"
-// Coming in @shmaplex/xplant-sdk 0.5.0; until then, fetch directly.
-const res = await fetch("https://app.xplantpro.com/api/v1/plants", {
-  method: "POST",
-  headers: {
-    Authorization: `Bearer ${process.env.XPLANT_API_KEY}`,
-    "Idempotency-Key": "import-2026-09-25-row-0412",
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+
+const { plant, warning } = await client.plants.create(
+  {
     species: "Alocasia zebrina",
     common_name: "Zebra Alocasia",
     genus: "Alocasia",
@@ -70,11 +67,10 @@ const res = await fetch("https://app.xplantpro.com/api/v1/plants", {
     initial_stage: "Mother Block",
     external_id: "LINE-0412",
     custom_fields: { mother_stock_tray: "B4", weeks_in_culture: 12 },
-  }),
-});
-const body = await res.json();
-if (!body.ok) throw new Error(`${res.status} ${body.code}: ${body.error}`);
-const plant = body.data;
+  },
+  { idempotencyKey: "import-2026-09-25-row-0412" },
+);
+if (warning) console.warn(warning); // the first stage couldn't be recorded
 ```
 
 ```python tab="Python" tab-group="lang"

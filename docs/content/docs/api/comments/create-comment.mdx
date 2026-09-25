@@ -55,15 +55,12 @@ curl -X POST https://app.xplantpro.com/api/v1/comments \
 ```
 
 ```js tab="JavaScript" tab-group="lang"
-// Coming in @shmaplex/xplant-sdk 0.5.0; until then, fetch directly.
-const res = await fetch("https://app.xplantpro.com/api/v1/comments", {
-  method: "POST",
-  headers: {
-    Authorization: `Bearer ${process.env.XPLANT_API_KEY}`,
-    "Idempotency-Key": "bench-3-line-0412-note-1",
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+
+const comment = await client.comments.create(
+  {
     entity_type: "explant",
     entity_id: "6d2f9a14-8b3e-4c71-a5d0-1f7e3b8c2a96",
     body: "@rivera the Alocasia line on shelf 2 is ready to go onto fresh medium. See #task:Replate-Alocasia-line.",
@@ -75,11 +72,9 @@ const res = await fetch("https://app.xplantpro.com/api/v1/comments", {
         label: "Replate Alocasia line",
       },
     ],
-  }),
-});
-const body = await res.json();
-if (!body.ok) throw new Error(`${res.status} ${body.code}: ${body.error}`);
-const comment = body.data;
+  },
+  { idempotencyKey: "bench-3-line-0412-note-1" },
+);
 ```
 
 ```python tab="Python" tab-group="lang"

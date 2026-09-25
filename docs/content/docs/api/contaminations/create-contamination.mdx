@@ -59,15 +59,12 @@ curl -X POST https://app.xplantpro.com/api/v1/contaminations \
 ```
 
 ```js tab="JavaScript" tab-group="lang"
-// Coming in @shmaplex/xplant-sdk 0.5.0; until then, fetch directly.
-const res = await fetch("https://app.xplantpro.com/api/v1/contaminations", {
-  method: "POST",
-  headers: {
-    Authorization: `Bearer ${process.env.XPLANT_API_KEY}`,
-    "Idempotency-Key": "scanner-3-line-0412-contamination",
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+
+const contamination = await client.contaminations.create(
+  {
     explant_id: "6d2f9a14-8b3e-4c71-a5d0-1f7e3b8c2a96",
     type: "bacteria",
     issue: "Cloudy halo around the base of the Phalaenopsis explant",
@@ -77,11 +74,9 @@ const res = await fetch("https://app.xplantpro.com/api/v1/contaminations", {
     vessels_affected: 2,
     affected_vessel_markings: "P-07 / P-09",
     custom_fields: { hood: "Hood 2" },
-  }),
-});
-const body = await res.json();
-if (!body.ok) throw new Error(`${res.status} ${body.code}: ${body.error}`);
-const contamination = body.data;
+  },
+  { idempotencyKey: "scanner-3-line-0412-contamination" },
+);
 ```
 
 ```python tab="Python" tab-group="lang"

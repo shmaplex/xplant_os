@@ -28,14 +28,11 @@ curl "https://app.xplantpro.com/api/v1/pricing/culture-lines?plant_id=0b8e2f4c-6
 ```
 
 ```js tab="JavaScript" tab-group="lang"
-// Coming in @shmaplex/xplant-sdk 0.5.0; until then, fetch directly.
-const res = await fetch("https://app.xplantpro.com/api/v1/pricing/culture-lines?plant_id=0b8e2f4c-6a1d-4c3e-9f7a-2d5b8c1e4a90", {
-  method: "GET",
-  headers: { Authorization: `Bearer ${process.env.XPLANT_API_KEY}` },
-});
-const body = await res.json();
-if (!body.ok) throw new Error(`${res.status} ${body.code}: ${body.error}`);
-const prices = body.data;
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+
+const prices = await client.pricing.listCultureLines({ plant_id: "0b8e2f4c-6a1d-4c3e-9f7a-2d5b8c1e4a90" });
 ```
 
 ```python tab="Python" tab-group="lang"

@@ -29,14 +29,14 @@ curl "https://app.xplantpro.com/api/v1/pricing/events?plant_id=0b8e2f4c-6a1d-4c3
 ```
 
 ```js tab="JavaScript" tab-group="lang"
-// Coming in @shmaplex/xplant-sdk 0.5.0; until then, fetch directly.
-const res = await fetch("https://app.xplantpro.com/api/v1/pricing/events?plant_id=0b8e2f4c-6a1d-4c3e-9f7a-2d5b8c1e4a90&from=2026-09-01T00%3A00%3A00Z", {
-  method: "GET",
-  headers: { Authorization: `Bearer ${process.env.XPLANT_API_KEY}` },
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+
+const events = await client.pricing.listEvents({
+  plant_id: "0b8e2f4c-6a1d-4c3e-9f7a-2d5b8c1e4a90",
+  from: "2026-09-01T00:00:00Z",
 });
-const body = await res.json();
-if (!body.ok) throw new Error(`${res.status} ${body.code}: ${body.error}`);
-const events = body.data;
 ```
 
 ```python tab="Python" tab-group="lang"

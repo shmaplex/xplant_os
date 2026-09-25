@@ -77,15 +77,12 @@ curl -X POST https://app.xplantpro.com/api/v1/media-recipes \
 ```
 
 ```js tab="JavaScript" tab-group="lang"
-// Coming in @shmaplex/xplant-sdk 0.5.0; until then, fetch directly.
-const res = await fetch("https://app.xplantpro.com/api/v1/media-recipes", {
-  method: "POST",
-  headers: {
-    Authorization: `Bearer ${process.env.XPLANT_API_KEY}`,
-    "Idempotency-Key": "recipes-sync-half-ms-v3",
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+
+const recipe = await client.mediaRecipes.create(
+  {
     title: "MS + 1 mg/L BAP",
     components: [
       { name: "MS basal salts", qty: "4.4", unit: "g/L" },
@@ -98,11 +95,9 @@ const res = await fetch("https://app.xplantpro.com/api/v1/media-recipes", {
     ph_target: 5.8,
     sterilization_notes: "Autoclave for 20 minutes at 121 °C.",
     storage_notes: "Keep poured vessels at 4 °C and use within two weeks.",
-  }),
-});
-const body = await res.json();
-if (!body.ok) throw new Error(`${res.status} ${body.code}: ${body.error}`);
-const recipe = body.data;
+  },
+  { idempotencyKey: "recipes-sync-half-ms-v3" },
+);
 ```
 
 ```python tab="Python" tab-group="lang"

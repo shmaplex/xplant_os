@@ -9,7 +9,7 @@ npm install @shmaplex/xplant-sdk
 
 The source, issues and full reference live at **[github.com/shmaplex/xplant_sdk](https://github.com/shmaplex/xplant_sdk#readme)**. Every endpoint page in the [API reference](/docs/api) shows the SDK call next to curl and Python.
 
-The SDK runs on **Node.js 18+** and any runtime with standard `fetch`: Deno, Bun, edge and serverless functions. **Call the API from your server, not a web page.** The API doesn't send CORS headers, and keys don't belong in front-end code.
+These docs match **@shmaplex/xplant-sdk 0.5.0**. The SDK runs on **Node.js 18+** and any runtime with standard `fetch`: Deno, Bun, edge and serverless functions. **Call the API from your server, not a web page.** The API doesn't send CORS headers, and keys don't belong in front-end code.
 
 ## Create a client
 
@@ -121,8 +121,8 @@ The buffer stamps `recorded_at` and `external_id` on each reading, keeps reading
 | --- | --- |
 | `client.me` | `get` |
 | `client.workspaces` | `list` |
-| `client.plants` | `list`, `get`, `findByExternalId` |
-| `client.explants` | `list`, `get`, `findByExternalId` |
+| `client.plants` | `list`, `get`, `findByExternalId`, `create`, `update` |
+| `client.explants` | `list`, `get`, `findByExternalId`, `create`, `update` |
 | `client.transfers` | `list`, `create` |
 | `client.stages` | `list`, `advance` |
 | `client.events` | `list` |
@@ -133,9 +133,13 @@ The buffer stamps `recorded_at` and `external_id` on each reading, keeps reading
 | `client.labels` | `resolve`, `recordScan` |
 | `client.devices` | `list`, `get`, `register`, `heartbeat`, `listTokens`, `createToken`, `revokeToken`, `recordEvent` |
 | `client.sensorReadings` | `list`, `create`, `createBatch`, `buffer` |
-| `client.equipment` | `recordEvent` |
-
-SDK 0.5.0 adds methods for the newer endpoints: `plants.create` / `update`, `explants.create` / `update`, `contaminations`, `comments`, `assets`, `mediaRecipes`, `equipment.list` / `get` / `listEvents`, `pricing` and `commerce`. Until 0.5.0 is on npm, those endpoints' reference pages show a plain `fetch` example.
+| `client.equipment` | `list`, `get`, `listEvents`, `recordEvent` |
+| `client.contaminations` | `list`, `get`, `create` |
+| `client.comments` | `list`, `create` |
+| `client.assets` | `list`, `get`, `create` |
+| `client.mediaRecipes` | `list`, `get`, `create`, `update` |
+| `client.pricing` | `listCultureLines`, `listEvents` |
+| `client.commerce` | `listOrderLines`, `getSellThrough` |
 
 A device client can only call `sensorReadings.create`, `sensorReadings.createBatch`, `sensorReadings.buffer`, `devices.heartbeat` and `devices.recordEvent`, and only for its own device.
 

@@ -28,14 +28,11 @@ curl "https://app.xplantpro.com/api/v1/commerce/sell-through?from=2026-09-01T00%
 ```
 
 ```js tab="JavaScript" tab-group="lang"
-// Coming in @shmaplex/xplant-sdk 0.5.0; until then, fetch directly.
-const res = await fetch("https://app.xplantpro.com/api/v1/commerce/sell-through?from=2026-09-01T00%3A00%3A00Z&to=2026-09-25T00%3A00%3A00Z", {
-  method: "GET",
-  headers: { Authorization: `Bearer ${process.env.XPLANT_API_KEY}` },
-});
-const body = await res.json();
-if (!body.ok) throw new Error(`${res.status} ${body.code}: ${body.error}`);
-const sellThrough = body.data;
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+
+const sellThrough = await client.commerce.getSellThrough({ from: "2026-09-01T00:00:00Z", to: "2026-09-25T00:00:00Z" });
 ```
 
 ```python tab="Python" tab-group="lang"
