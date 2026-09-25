@@ -4,17 +4,17 @@
 # Post a temperature reading to xPlant using curl.
 #
 # Usage:
-#   export XPLANT_API_KEY="xpk_live_YOUR_KEY_HERE"
+#   export XPLANT_DEVICE_TOKEN="xpd_live_YOUR_TOKEN_HERE"   # a device token, never a workspace key
 #   export XPLANT_DEVICE_ID="YOUR_DEVICE_UUID"
 #   bash curl-example.sh
 
 set -euo pipefail
 
 # Read credentials from environment variables — never hard-code them
-API_KEY="${XPLANT_API_KEY:?Set XPLANT_API_KEY before running this script}"
+DEVICE_TOKEN="${XPLANT_DEVICE_TOKEN:?Set XPLANT_DEVICE_TOKEN before running this script}"
 DEVICE_ID="${XPLANT_DEVICE_ID:?Set XPLANT_DEVICE_ID before running this script}"
 
-BASE_URL="https://xplant.shmaplex.com"
+BASE_URL="https://app.xplantpro.com"
 
 echo "Posting temperature reading to xPlant..."
 
@@ -22,7 +22,7 @@ echo "Posting temperature reading to xPlant..."
 # The -f flag makes curl exit with an error code if the HTTP status is 4xx/5xx
 RESPONSE=$(curl -sf \
   -X POST "${BASE_URL}/api/v1/sensor-readings" \
-  -H "Authorization: Bearer ${API_KEY}" \
+  -H "Authorization: Bearer ${DEVICE_TOKEN}" \
   -H "Content-Type: application/json" \
   -d "{
     \"device_id\": \"${DEVICE_ID}\",
@@ -40,7 +40,7 @@ echo "Sending heartbeat..."
 
 curl -sf \
   -X POST "${BASE_URL}/api/v1/devices/${DEVICE_ID}/heartbeat" \
-  -H "Authorization: Bearer ${API_KEY}" \
+  -H "Authorization: Bearer ${DEVICE_TOKEN}" \
   -H "Content-Type: application/json" \
   -d "{}" \
   | python3 -m json.tool 2>/dev/null

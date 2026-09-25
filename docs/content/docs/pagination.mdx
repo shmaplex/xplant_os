@@ -1,0 +1,101 @@
+---
+title: Pagination
+description: Every list pages by cursor. Pass meta.next_cursor back as cursor until it's null.
+---
+
+List endpoints return one page at a time. `data` is a plain array, and there's no total count.
+
+## Page with the cursor
+
+Every list response carries `meta.next_cursor`. Pass it back unchanged as `cursor`, with the same filters, to get the next page. It's `null` on the last page.
+
+```json
+{ "ok": true, "data": [ … ], "meta": { "next_cursor": "eyJ…" } }
+```
+
+```bash
+curl "https://app.xplantpro.com/api/v1/plants?limit=200" \
+  -H "Authorization: Bearer $XPLANT_API_KEY"
+# then the same request with &cursor=<meta.next_cursor>, until next_cursor is null
+```
+
+- Treat the cursor as opaque: don't parse it, build it or store it for long.
+- Keep the same filters and `limit` for every page of one walk.
+- A cursor that has expired or no longer applies answers `422 INVALID_CURSOR`: start again from the first page.
+- `cursor` can't be combined with an `offset` above 0; that answers `422`.
+
+A cursor picks up exactly where the last page ended, so records created while you're paging don't shift what you see.
+
+## Page size
+
+| List | `limit` default | `limit` maximum |
+| --- | --- | --- |
+| Most lists | 50 | 200 |
+| [Sensor readings](/docs/api/sensor-readings/list-sensor-readings) | 100 | 1,000 |
+| [Devices](/docs/api/devices/list-devices) and [device tokens](/docs/api/devices/list-device-tokens) | 200 | 200 |
+
+Values above the maximum are capped. A missing, zero, negative or non-numeric `limit` falls back to the default.
+
+## In code
+
+The SDK's list methods follow the cursor for you. Awaiting a list gives you one page; iterating it gives you every row:
+
+```js tab="JavaScript" tab-group="lang"
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+
+// One page, as an array.
+const firstPage = await client.plants.list({ limit: 200 });
+
+// Every row, fetched a page at a time as you go.
+for await (const plant of client.plants.list()) {
+  console.log(plant.id);
+}
+
+// Page by page, with a cursor you can save and resume from later.
+for await (const { data, nextCursor, hasMore } of client.explants.list().pages()) {
+  await save(data, nextCursor);
+}
+const resumed = await client.explants.list({ cursor: savedCursor });
+
+// Filters go in the same object:
+for await (const event of client.events.list({ entity: "explant" })) {
+  // …
+}
+```
+
+```python tab="Python" tab-group="lang"
+import os
+import requests
+
+HEADERS = {"Authorization": f"Bearer {os.environ['XPLANT_API_KEY']}"}
+
+
+def all_items(path, params=None, limit=200):
+    """Walks a list by its cursor."""
+    params = {**(params or {}), "limit": limit}
+    while True:
+        body = requests.get(
+            f"https://app.xplantpro.com/api/v1{path}", headers=HEADERS, params=params, timeout=10
+        ).json()
+        if not body["ok"]:
+            raise RuntimeError(f"{body['code']}: {body['error']}")
+        yield from body["data"]
+        next_cursor = (body.get("meta") or {}).get("next_cursor")
+        if not next_cursor:
+            return
+        params["cursor"] = next_cursor
+
+
+for plant in all_items("/plants"):
+    print(plant["id"])
+```
+
+## Sensor readings
+
+`GET /sensor-readings` returns readings newest first. Narrow the window with `since` and `until` (both inclusive; a `since` later than `until` answers `422`), then page through it with the cursor like any other list.
+
+## Offset
+
+Lists still accept `offset` (records to skip) for older integrations, but offsets count records at the moment you ask: a record added ahead of your position shifts the next page, so you can see one twice or miss one. Use the cursor for anything new. To keep a mirror exact, sync from [change history](/docs/guides/change-history) with `since`.

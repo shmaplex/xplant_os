@@ -7,14 +7,15 @@
 # Usage:
 #   esphome run xplant-sensor.yaml
 #
-# Store credentials in secrets.yaml — never paste real keys into this file.
+# Store credentials in secrets.yaml — never paste real tokens into this file.
+# The device carries a device token (xpd_...), never a workspace API key (xpk_...).
 # See README.md for the secrets.yaml template.
 
 substitutions:
   device_name: "xplant-sensor"
-  xplant_base_url: "https://xplant.shmaplex.com"
+  xplant_base_url: "https://app.xplantpro.com"
   # Override these via secrets.yaml or inline for local testing
-  xplant_api_key: "xpk_live_YOUR_KEY_HERE"
+  xplant_device_token: "xpd_live_YOUR_TOKEN_HERE"
   xplant_device_id: "YOUR_DEVICE_UUID"
   reading_interval: "60s"
   heartbeat_interval: "5min"
@@ -64,7 +65,7 @@ sensor:
               url: "${xplant_base_url}/api/v1/sensor-readings"
               headers:
                 Content-Type: application/json
-                Authorization: "Bearer ${xplant_api_key}"
+                Authorization: "Bearer ${xplant_device_token}"
               body: >-
                 {
                   "device_id": "${xplant_device_id}",
@@ -81,7 +82,7 @@ sensor:
               url: "${xplant_base_url}/api/v1/sensor-readings"
               headers:
                 Content-Type: application/json
-                Authorization: "Bearer ${xplant_api_key}"
+                Authorization: "Bearer ${xplant_device_token}"
               body: >-
                 {
                   "device_id": "${xplant_device_id}",
@@ -101,5 +102,5 @@ interval:
           url: "${xplant_base_url}/api/v1/devices/${xplant_device_id}/heartbeat"
           headers:
             Content-Type: application/json
-            Authorization: "Bearer ${xplant_api_key}"
+            Authorization: "Bearer ${xplant_device_token}"
           body: "{}"

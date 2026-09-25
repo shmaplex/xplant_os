@@ -1,0 +1,7 @@
+{
+  "title": "Sensor readings",
+  "pages": [
+    "list-sensor-readings",
+    "create-sensor-readings"
+  ]
+}

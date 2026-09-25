@@ -1,0 +1,9 @@
+{
+  "title": "Pricing and sell-through",
+  "pages": [
+    "list-order-lines",
+    "get-sell-through",
+    "list-culture-line-prices",
+    "list-price-events"
+  ]
+}

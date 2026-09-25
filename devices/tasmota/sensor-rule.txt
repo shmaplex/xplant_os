@@ -5,7 +5,9 @@
 #
 # Before pasting these rules, set your credentials in the Tasmota console:
 #
-#   Backlog Var1 xpk_live_YOUR_KEY_HERE; Var2 YOUR_DEVICE_UUID
+#   Backlog Var1 xpd_live_YOUR_TOKEN_HERE; Var2 YOUR_DEVICE_UUID
+#
+# Var1 is a device token (xpd_...), never a workspace API key (xpk_...).
 #
 # Then paste each Rule block below and enable it:
 #   Rule1 1
@@ -17,7 +19,7 @@
 
 Rule1
   ON AM2301#Temperature DO
-    WebSend [xplant.shmaplex.com/api/v1/sensor-readings]
+    WebSend [app.xplantpro.com/api/v1/sensor-readings]
       {"device_id":"%Var2%","type":"temperature","value":%value%,"unit":"C"}
   ENDON
 
@@ -27,7 +29,7 @@ Rule1
 
 Rule2
   ON AM2301#Humidity DO
-    WebSend [xplant.shmaplex.com/api/v1/sensor-readings]
+    WebSend [app.xplantpro.com/api/v1/sensor-readings]
       {"device_id":"%Var2%","type":"humidity","value":%value%,"unit":"%"}
   ENDON
 
@@ -36,7 +38,7 @@ Rule2
 # Run this once in the console to configure the Bearer token:
 # ---------------------------------------------------------------------------
 
-# WebHeader1 Authorization: Bearer xpk_live_YOUR_KEY_HERE
+# WebHeader1 Authorization: Bearer xpd_live_YOUR_TOKEN_HERE
 
 # ---------------------------------------------------------------------------
 # Heartbeat rule: fires every 5 minutes using a timer
@@ -45,7 +47,7 @@ Rule2
 # Set timer in console: RuleTimer1 300
 Rule3
   ON Rules#Timer=1 DO
-    Backlog WebSend [xplant.shmaplex.com/api/v1/devices/%Var2%/heartbeat] {};
+    Backlog WebSend [app.xplantpro.com/api/v1/devices/%Var2%/heartbeat] {};
     RuleTimer1 300
   ENDON
 

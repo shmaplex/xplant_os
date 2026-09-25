@@ -1,0 +1,9 @@
+{
+  "title": "Transfers and stages",
+  "pages": [
+    "list-stages",
+    "create-stage",
+    "list-transfers",
+    "create-transfer"
+  ]
+}

@@ -14,7 +14,7 @@
 ## Checklist
 
 - [ ] No real API keys, passwords, or credentials anywhere in this diff
-- [ ] `config.h` / `config.example.json` uses placeholder values only (`xpk_live_YOUR_KEY_HERE`, `YOUR_WIFI_SSID`, etc.)
+- [ ] `config.h` / `config.example.json` uses placeholder values only (`xpd_live_YOUR_TOKEN_HERE`, `YOUR_WIFI_SSID`, etc.)
 - [ ] New device folder includes a `README.md` with hardware requirements, wiring diagram, and setup steps
 - [ ] Root `README.md` updated if a new package/device/example was added
 - [ ] Code is commented enough for a hobbyist to follow

@@ -1,77 +1,58 @@
 /**
  * node-example.mjs
  * =================
- * Post a temperature reading to xPlant using the @shmaplex/xplant-sdk.
+ * Post sensor readings and a heartbeat to xPlant as a device, using
+ * @shmaplex/xplant-sdk and a device token.
  *
  * Usage:
  *   npm install @shmaplex/xplant-sdk
- *   XPLANT_API_KEY="xpk_live_YOUR_KEY_HERE" \
+ *   XPLANT_DEVICE_TOKEN="xpd_live_YOUR_TOKEN_HERE" \
  *   XPLANT_DEVICE_ID="YOUR_DEVICE_UUID" \
  *   node node-example.mjs
  *
  * Node.js 18+ is required (native fetch).
  */
 
-// Read credentials from environment variables — never hard-code them
-const apiKey  = process.env.XPLANT_API_KEY;
-const deviceId = process.env.XPLANT_DEVICE_ID;
-
-if (!apiKey)   throw new Error("Set XPLANT_API_KEY before running this script");
-if (!deviceId) throw new Error("Set XPLANT_DEVICE_ID before running this script");
-
-// ---------------------------------------------------------------------------
-// Using the @shmaplex/xplant-sdk (recommended)
-// ---------------------------------------------------------------------------
 import { XPlantClient } from "@shmaplex/xplant-sdk";
 
-const client = new XPlantClient({ apiKey });
+// Read credentials from environment variables — never hard-code them.
+// A device carries a device token (xpd_…), never a workspace key (xpk_…).
+const deviceToken = process.env.XPLANT_DEVICE_TOKEN;
+const deviceId = process.env.XPLANT_DEVICE_ID;
 
-console.log("Posting temperature reading to xPlant...");
+if (!deviceToken) throw new Error("Set XPLANT_DEVICE_TOKEN before running this script");
+if (!deviceId) throw new Error("Set XPLANT_DEVICE_ID before running this script");
 
-// Post a temperature reading
-const reading = await client.sensorReadings.create({
-  device_id: deviceId,
-  type: "temperature",
-  value: 24.5,
-  unit: "C",
-});
+// The SDK refuses a deviceToken that doesn't start with xpd_.
+const device = new XPlantClient({ deviceToken, retry: true });
 
-console.log("Success! Created reading:", reading);
+// Send both readings in one request. `external_id` + `recorded_at` make a
+// retried batch harmless: the same reading is never stored twice.
+const at = new Date().toISOString();
+const stored = await device.sensorReadings.createBatch([
+  { device_id: deviceId, type: "temperature", value: 24.5, unit: "C", recorded_at: at, external_id: `${deviceId}-temperature-${at}` },
+  { device_id: deviceId, type: "humidity", value: 72.1, unit: "%", recorded_at: at, external_id: `${deviceId}-humidity-${at}` },
+]);
+console.log(`Stored ${stored.length} readings.`);
 
-// Post a humidity reading
-await client.sensorReadings.create({
-  device_id: deviceId,
-  type: "humidity",
-  value: 72.1,
-  unit: "%",
-});
-
-console.log("Humidity reading posted.");
-
-// Send a heartbeat
-const heartbeat = await client.devices.heartbeat(deviceId);
-console.log("Heartbeat sent. Last seen:", heartbeat.last_seen_at);
+// Tell xPlant the device is alive.
+await device.devices.heartbeat(deviceId);
+console.log("Heartbeat sent.");
 
 // ---------------------------------------------------------------------------
-// Without the SDK — using raw fetch (no dependencies)
+// Without the SDK — plain fetch
 // ---------------------------------------------------------------------------
-// If you prefer not to install the SDK, here is the equivalent with fetch:
 //
-// const BASE_URL = "https://xplant.shmaplex.com";
-//
-// const res = await fetch(`${BASE_URL}/api/v1/sensor-readings`, {
+// const res = await fetch("https://app.xplantpro.com/api/v1/sensor-readings", {
 //   method: "POST",
 //   headers: {
 //     "Content-Type": "application/json",
-//     Authorization: `Bearer ${apiKey}`,
+//     Authorization: `Bearer ${deviceToken}`,
 //   },
 //   body: JSON.stringify({
-//     device_id: deviceId,
-//     type: "temperature",
-//     value: 24.5,
-//     unit: "C",
+//     readings: [{ device_id: deviceId, type: "temperature", value: 24.5, unit: "C", recorded_at: at }],
 //   }),
 // });
-//
-// if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
-// console.log(await res.json());
+// const body = await res.json();
+// if (!body.ok) throw new Error(`${res.status} ${body.code}: ${body.error}`);
+// console.log(body.data);

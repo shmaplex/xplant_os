@@ -1,0 +1,25 @@
+{
+  "title": "xPlant API",
+  "root": true,
+  "pages": [
+    "---Get started---",
+    "index",
+    "quickstart",
+    "ai-tools",
+    "---Essentials---",
+    "authentication",
+    "scopes",
+    "device-tokens",
+    "requests-and-responses",
+    "errors",
+    "rate-limits",
+    "idempotency",
+    "pagination",
+    "---Guides---",
+    "...guides",
+    "---Reference---",
+    "api",
+    "sdk",
+    "hardware"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "title": "Contaminations",
+  "pages": [
+    "list-contaminations",
+    "create-contamination",
+    "get-contamination"
+  ]
+}

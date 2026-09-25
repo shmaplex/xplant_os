@@ -12,13 +12,15 @@
 
 ---
 
-## Storing the API key securely
+## Storing the device token securely
 
-Use ESPHome's `secrets.yaml` to keep the key out of your config file:
+The device carries a **device token** (`xpd_…`), never a workspace API key. Create one by registering the device and minting its token from your own computer: see [Device tokens: setting up a device](https://docs.xplantpro.com/docs/device-tokens#setting-up-a-device).
+
+Use ESPHome's `secrets.yaml` to keep the token out of your config file:
 
 ```yaml
 # secrets.yaml (never commit this file)
-xplant_api_key: "xpk_live_YOUR_KEY_HERE"
+xplant_device_token: "xpd_live_YOUR_TOKEN_HERE"
 xplant_device_id: "YOUR_DEVICE_UUID"
 wifi_ssid: "YOUR_WIFI_SSID"
 wifi_password: "YOUR_WIFI_PASSWORD"
@@ -27,17 +29,27 @@ wifi_password: "YOUR_WIFI_PASSWORD"
 Reference them in your config:
 
 ```yaml
-xplant_api_key: !secret xplant_api_key
+xplant_device_token: !secret xplant_device_token
 ```
 
 ---
 
 ## Supported sensor types
 
-The `type` field in the POST body can be any string, but xPlant recognises these standard types:
+The `type` field in the POST body must be one of these:
 
-| `type` | `unit` | Description |
+| `type` | `unit` (examples) | Description |
 |---|---|---|
+| `temperature` | `C` or `F` | Air or media temperature |
+| `humidity` | `%` | Relative humidity |
+| `co2` | `ppm` | CO2 concentration |
+| `light` | `lux` | Light level |
+| `ph` | `pH` | Media pH |
+| `other` | any | Anything else; say what in `notes` |
+
+`type` must be one of these values; anything else is rejected with `422 VALIDATION_ERROR`. `unit` is free text (1–20 characters).
+
+---|---|---|
 | `temperature` | `C` or `F` | Air or media temperature |
 | `humidity` | `%` | Relative humidity |
 | `co2` | `ppm` | CO2 concentration |
@@ -47,6 +59,8 @@ The `type` field in the POST body can be any string, but xPlant recognises these
 
 ---
 
-## Getting an API key
+## Getting a device token
 
-Go to [xplant.shmaplex.com/settings/integrations](https://xplant.shmaplex.com/settings/integrations) and generate a key. Store it in `secrets.yaml`.
+1. Create a workspace API key with `write:devices` at [app.xplantpro.com/settings/integrations/api-keys](https://app.xplantpro.com/settings/integrations/api-keys). Keep it on your own computer.
+2. Use it once to register the device and create its token: [Device tokens: setting up a device](https://docs.xplantpro.com/docs/device-tokens#setting-up-a-device).
+3. Put the `xpd_` token and the device id in `secrets.yaml`.

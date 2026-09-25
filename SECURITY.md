@@ -10,12 +10,15 @@ This repository contains open-source SDKs, firmware examples, and hardware bridg
 
 **Never commit your API key to source control.** This is the most common security mistake.
 
-xPlant API keys follow the format:
+xPlant credentials start with a recognisable prefix, so secret scanners can catch them:
 
 ```
-xpk_live_<48 hex chars>   ← production key
-xpk_dev_<48 hex chars>    ← development key
+xpk_live_…   workspace API key (production label)
+xpk_dev_…    workspace API key (development label; it still reads and writes your real workspace)
+xpd_live_…   device token: posts readings, heartbeats and events for one device only
 ```
+
+A device on a bench or in a grow room should carry a device token, never a workspace key. See the [device token guide](https://docs.xplantpro.com/docs/device-tokens).
 
 Rules to follow:
 
@@ -26,7 +29,7 @@ Rules to follow:
 
 ### What to do if you accidentally commit a key
 
-1. **Revoke the key immediately**: go to **Settings > Integrations > API Keys** in your xPlant workspace and delete the compromised key.
+1. **Revoke the key immediately**: open [Settings > Integrations > API Keys](https://app.xplantpro.com/settings/integrations/api-keys) in xPlant and revoke the compromised key. For a leaked device token, [revoke that token](https://docs.xplantpro.com/docs/api/devices/revoke-device-token) with a workspace key and create a fresh one for the device; taking the device out of service in xPlant also revokes all of its tokens at once.
 2. Generate a new key.
 3. Remove the key from git history using `git filter-repo` or BFG Repo Cleaner, then force-push. Treat the old key as permanently compromised regardless of history rewriting.
 
@@ -34,7 +37,7 @@ Rules to follow:
 
 ## Responsible disclosure
 
-If you discover a security vulnerability in this repository (e.g. a code pattern that would lead users to inadvertently expose keys, a prototype pollution vector in the JS SDK, an authentication bypass in example code), please report it privately before disclosing publicly.
+If you discover a security vulnerability in this repository (e.g. a code pattern that would lead users to inadvertently expose keys, or an authentication bypass in example or firmware code), please report it privately before disclosing publicly.
 
 **Contact:** security@shmaplex.com
 
@@ -53,8 +56,7 @@ We will acknowledge your report within 48 hours and aim to release a fix within 
 This repository does **not** contain:
 
 - xPlant application source code
-- Database schemas or RLS policies
 - User data, session tokens, or billing information
-- Supabase or Stripe credentials
+- Any credentials
 
-Vulnerabilities in the main xPlant application should be reported to the same address above.
+The JavaScript SDK lives in [shmaplex/xplant_sdk](https://github.com/shmaplex/xplant_sdk). Vulnerabilities in the SDK or in the xPlant application itself should be reported to the same address above.

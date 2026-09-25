@@ -1,0 +1,28 @@
+---
+title: Hardware and examples
+description: Open-source firmware, gateways and example scripts for connecting lab devices to xPlant.
+---
+
+The [xplant_os repository](https://github.com/shmaplex/xplant_os) holds ready-to-adapt code for common lab hardware. Each device carries a [device token](/docs/device-tokens), never a workspace key.
+
+## Devices
+
+| Package | What it does |
+| --- | --- |
+| [Raspberry Pi gateway](https://github.com/shmaplex/xplant_os/tree/main/devices/raspberry-pi/pi-gateway) | Python bridge from serial or MQTT sensors to xPlant, with a systemd service. |
+| [ESP32 sensor](https://github.com/shmaplex/xplant_os/tree/main/devices/arduino/esp32-sensor) | ESP32 with a DHT22 or BME280, posting temperature and humidity. |
+| [ESPHome](https://github.com/shmaplex/xplant_os/tree/main/devices/esphome) | YAML for ESPHome-flashed sensors. |
+| [Tasmota](https://github.com/shmaplex/xplant_os/tree/main/devices/tasmota) | Rules for Tasmota devices. |
+| [ESP32 scan station](https://github.com/shmaplex/xplant_os/tree/main/devices/arduino/esp32-scan-station) | Concept: a standalone QR and barcode scanner. |
+| [Bench kiosk](https://github.com/shmaplex/xplant_os/tree/main/devices/raspberry-pi/pi-bench-kiosk) | Concept: a touchscreen station for the bench. |
+
+## Examples
+
+| Example | What it shows |
+| --- | --- |
+| [basic-sensor](https://github.com/shmaplex/xplant_os/tree/main/examples/basic-sensor) | Post a reading with curl, Node.js or Python. |
+| [transfer-counter](https://github.com/shmaplex/xplant_os/tree/main/examples/transfer-counter) | Record a transfer from a script or a button. |
+| [contamination-check](https://github.com/shmaplex/xplant_os/tree/main/examples/contamination-check) | Scan a vessel label and record a contamination against it. |
+| [local-dashboard](https://github.com/shmaplex/xplant_os/tree/main/examples/local-dashboard) | Ideas for a local sensor dashboard. |
+
+Built something for your lab's hardware? Contributions are welcome; see [CONTRIBUTING.md](https://github.com/shmaplex/xplant_os/blob/main/CONTRIBUTING.md).
