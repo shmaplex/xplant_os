@@ -24659,7 +24659,7 @@
                   },
                   "transfer_date": {
                     "type": "string",
-                    "description": "When the transfer was done: a date such as `2026-09-24`, or a full ISO 8601 timestamp. Defaults to today (UTC)."
+                    "description": "The day the transfer was done, such as `2026-09-24`. xPlant treats it as a calendar day, so send the day itself. A full ISO 8601 timestamp is also accepted, but it is kept as the moment it names and its day is then read in UTC: `2026-09-26T08:00:00+09:00` is recorded on 25 September. Defaults to today (UTC)."
                   },
                   "from_location": {
                     "type": "string",
@@ -28135,7 +28135,7 @@
               "string",
               "null"
             ],
-            "description": "When the transfer was done, as an ISO 8601 timestamp."
+            "description": "The day the transfer was done. xPlant treats it as a calendar day, not a moment in time. It is returned as an ISO 8601 timestamp, and the day is its first ten characters (`YYYY-MM-DD`): read those, and do not convert the value into another time zone, which can move it to the day before or after."
           },
           "transfer_cycle": {
             "type": [
@@ -28235,6 +28235,6 @@
   },
   "x-docs-source": {
     "ref": "origin/main",
-    "commit": "ecd0a7edf"
+    "commit": "340574e8c"
   }
 }

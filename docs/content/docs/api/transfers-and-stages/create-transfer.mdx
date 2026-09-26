@@ -28,7 +28,7 @@ Send an `Idempotency-Key` header to make retries safe: a repeat with the same ke
 | --- | --- | --- | --- |
 | `plant_id` | string (uuid) | No | The plant this is for. Send exactly one of `plant_id` or `explant_id`. |
 | `explant_id` | string (uuid) | No | The explant this is for. Send exactly one of `plant_id` or `explant_id`. |
-| `transfer_date` | string | No | When the transfer was done: a date such as `2026-09-24`, or a full ISO 8601 timestamp. Defaults to today (UTC). |
+| `transfer_date` | string | No | The day the transfer was done, such as `2026-09-24`. xPlant treats it as a calendar day, so send the day itself. A full ISO 8601 timestamp is also accepted, but it is kept as the moment it names and its day is then read in UTC: `2026-09-26T08:00:00+09:00` is recorded on 25 September. Defaults to today (UTC). |
 | `from_location` | string | No | Where the culture was before the transfer, in your lab's own words — a room, shelf or hood. Up to 200 characters. |
 | `to_location` | string | No | Where the culture went. Up to 200 characters. |
 | `transfer_cycle` | integer | No | Which subculture this is for the plant or explant — 1 for the first. Defaults to one more than the highest cycle already recorded for it. At least 1. |
@@ -102,7 +102,7 @@ transfer = body["data"]
 | `id` | string (uuid) | Yes | — |
 | `entity_type` | `"plant"` \| `"explant"` | Yes | Whether the transfer was of a plant or an explant. |
 | `entity_id` | string (uuid) | Yes | The plant's or explant's id. |
-| `transfer_date` | string \| null | Yes | When the transfer was done, as an ISO 8601 timestamp. |
+| `transfer_date` | string \| null | Yes | The day the transfer was done. xPlant treats it as a calendar day, not a moment in time. It is returned as an ISO 8601 timestamp, and the day is its first ten characters (`YYYY-MM-DD`): read those, and do not convert the value into another time zone, which can move it to the day before or after. |
 | `transfer_cycle` | integer \| null | Yes | Which subculture this was for the plant or explant — 1 for the first. |
 | `from_location` | string \| null | Yes | Where the culture was before the transfer. |
 | `to_location` | string \| null | Yes | Where the culture went. |

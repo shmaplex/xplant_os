@@ -15,6 +15,8 @@ Changes to the v1 API are additive or clearly flagged here. Each endpoint's page
 
 **SDK 0.7.0** covers all three. `sopRuns.complete()` closes a run, and `sopRuns.listEvents()` pages its evidence. `sopRuns.get()` follows the cursor itself, so `run.events` is still the whole trail. `client.rateLimit` holds the latest budget, for [pacing a bulk job](/docs/sdk#pacing-a-bulk-job). It needs API 2.152.0, which is live. See the [release notes](https://github.com/shmaplex/xplant_sdk/releases/tag/v0.7.0).
 
+**Transfer dates are calendar days.** Send `transfer_date` as a day such as `2026-09-24`, and read the day back from the first ten characters of the returned timestamp. See [Record transfers and stages](/docs/guides/transfers-and-stages).
+
 **Custom task categories.** Tasks take an optional `category_label` for your lab's own category: send `category: "other"` with a label of up to 60 characters. See [Sync tasks](/docs/guides/sync-tasks).
 
 **Stage moves are all-or-nothing.** A move either completes or changes nothing; a failure answers `500 STAGE_ADVANCE_FAILED` and is safe to retry with the same `Idempotency-Key`. See [Record transfers and stages](/docs/guides/transfers-and-stages).
