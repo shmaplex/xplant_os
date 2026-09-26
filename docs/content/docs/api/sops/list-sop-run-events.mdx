@@ -32,14 +32,16 @@ curl "https://app.xplantpro.com/api/v1/sop-runs/2a4c6e8b-1d3f-4b5a-a7c9-e1f3a5b7
 ```
 
 ```js tab="JavaScript" tab-group="lang"
-// Not in @shmaplex/xplant-sdk yet, so this uses fetch directly.
-const res = await fetch("https://app.xplantpro.com/api/v1/sop-runs/2a4c6e8b-1d3f-4b5a-a7c9-e1f3a5b7c9d1/events?limit=50", {
-  method: "GET",
-  headers: { Authorization: `Bearer ${process.env.XPLANT_API_KEY}` },
-});
-const body = await res.json();
-if (!body.ok) throw new Error(`${res.status} ${body.code}: ${body.error}`);
-const events = body.data;
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+
+const events = await client.sopRuns.listEvents("2a4c6e8b-1d3f-4b5a-a7c9-e1f3a5b7c9d1", { limit: 50 });
+
+// Or walk the whole trail, a page at a time:
+for await (const event of client.sopRuns.listEvents("2a4c6e8b-1d3f-4b5a-a7c9-e1f3a5b7c9d1")) {
+  console.log(event.recordedAt, event.stepKey, event.eventType);
+}
 ```
 
 ```python tab="Python" tab-group="lang"

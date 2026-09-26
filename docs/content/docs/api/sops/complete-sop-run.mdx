@@ -47,22 +47,18 @@ curl -X POST https://app.xplantpro.com/api/v1/sop-runs/2a4c6e8b-1d3f-4b5a-a7c9-e
 ```
 
 ```js tab="JavaScript" tab-group="lang"
-// Not in @shmaplex/xplant-sdk yet, so this uses fetch directly.
-const res = await fetch("https://app.xplantpro.com/api/v1/sop-runs/2a4c6e8b-1d3f-4b5a-a7c9-e1f3a5b7c9d1/complete", {
-  method: "POST",
-  headers: {
-    Authorization: `Bearer ${process.env.XPLANT_API_KEY}`,
-    "Idempotency-Key": "station-3-wk38-complete",
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
+import { XPlantClient } from "@shmaplex/xplant-sdk";
+
+const client = new XPlantClient({ apiKey: process.env.XPLANT_API_KEY });
+
+const run = await client.sopRuns.complete(
+  "2a4c6e8b-1d3f-4b5a-a7c9-e1f3a5b7c9d1",
+  {
     outcome: "completed",
     notes: "All vessels labelled and moved to shelf 3.",
-  }),
-});
-const body = await res.json();
-if (!body.ok) throw new Error(`${res.status} ${body.code}: ${body.error}`);
-const run = body.data;
+  },
+  { idempotencyKey: "station-3-wk38-complete" },
+);
 ```
 
 ```python tab="Python" tab-group="lang"

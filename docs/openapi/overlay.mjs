@@ -293,7 +293,7 @@ export const overlay = {
     notes:
       "A long run has more evidence than one answer holds. When `meta.events_next_cursor` isn't `null`, pass it as `cursor` to [List a run's evidence](/docs/api/sops/list-sop-run-events) for the rest.",
     sdkNote:
-      "In SDK 0.6.3, `sopRuns.get()` returns only the first 50 pieces of evidence and doesn't pass on `meta.events_next_cursor`. For a longer run, page [List a run's evidence](/docs/api/sops/list-sop-run-events) with `fetch`.",
+      "`sopRuns.get()` follows `meta.events_next_cursor` for you, so `run.events` is always the whole trail. For a very long run, page it with `sopRuns.listEvents()` instead.",
   },
   "GET /api/v1/sop-runs/{id}/events": {
     slug: "list-sop-run-events",
@@ -302,7 +302,8 @@ export const overlay = {
     path: { id: RUN_ID },
     resultVar: "events",
     query: { limit: 50 },
-    sdk: null,
+    sdk: `const events = await client.sopRuns.listEvents("${RUN_ID}", $QUERY);\n\n// Or walk the whole trail, a page at a time:\nfor await (const event of client.sopRuns.listEvents("${RUN_ID}")) {\n  console.log(event.recordedAt, event.stepKey, event.eventType);\n}`,
+    sdkSince: "0.7.0",
     notes:
       "Continue from a run you fetched by passing its `meta.events_next_cursor` as `cursor`, or start without one to walk the whole trail. See [Run an SOP from a bench station](/docs/guides/sop-runs).",
   },
@@ -314,7 +315,8 @@ export const overlay = {
     resultVar: "run",
     idempotencyKey: "station-3-wk38-complete",
     body: { outcome: "completed", notes: "All vessels labelled and moved to shelf 3." },
-    sdk: null,
+    sdk: `const run = await client.sopRuns.complete(\n  "${RUN_ID}",\n  $BODY,\n  { idempotencyKey: "station-3-wk38-complete" },\n);`,
+    sdkSince: "0.7.0",
     notes:
       "Only the person who started the run, or a manager, can close it; anyone else gets `404`. A closed run takes no more evidence, and closing it again answers `409 SOP_RUN_CLOSED`. See [Run an SOP from a bench station](/docs/guides/sop-runs).",
   },
