@@ -22,11 +22,13 @@
  */
 
 /**
- * The SDK version npm serves as `latest`. Entries with `sdkSince` above it
- * show a fetch example (and say which release brings the SDK call) until
- * this is bumped.
+ * The SDK version these docs target lives in sdk-version.mjs. Entries with
+ * `sdkSince` above it show a fetch example (and say which release brings the
+ * SDK call) until it's bumped.
  */
-export const SDK_VERSION = "0.6.2";
+import { SDK_VERSION } from "./sdk-version.mjs";
+
+export { SDK_VERSION };
 
 const PLANT_ID = "0b8e2f4c-6a1d-4c3e-9f7a-2d5b8c1e4a90";
 const EXPLANT_ID = "7c1d9e2a-3b4f-4a5c-8d6e-1f2a3b4c5d6e";

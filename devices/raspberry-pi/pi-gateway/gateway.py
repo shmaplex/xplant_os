@@ -91,6 +91,22 @@ def load_config(path: Path) -> dict[str, Any]:
         {"type": "temperature", "unit": "C",  "gpio_pin": 4},
         {"type": "humidity",    "unit": "%",  "gpio_pin": 4},
     ])
+    # A device has one channel per reading type: readings carry no probe
+    # field, so a second sensor of the same type would share the first one's
+    # external_id and be silently dropped as a duplicate. Refuse the config
+    # instead of losing data.
+    seen_types: set[str] = set()
+    for sensor in config["sensors"]:
+        if sensor["type"] in seen_types:
+            log.error(
+                "Two sensors have type %r. A device has one channel per reading "
+                "type, so register the second probe as its own device (with its "
+                "own device token) and run it from a separate config.",
+                sensor["type"],
+            )
+            sys.exit(1)
+        seen_types.add(sensor["type"])
+
     config.setdefault("reading_interval_seconds", 60)
     config.setdefault("heartbeat_interval_seconds", 300)
     config.setdefault("simulate", False)

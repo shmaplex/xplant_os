@@ -69,13 +69,15 @@ transfer = requests.post(
 ).json()["data"]
 ```
 
-Optional fields: `transfer_date`, `from_location`, `to_location`, `transfer_cycle`, `notes`, and `status`: `completed` (the default) for a transfer that's done, or `pending` for one planned for `transfer_date`, which counts as done only once someone marks it completed in xPlant.
+Optional fields: `transfer_date`, `from_location`, `to_location`, `transfer_cycle`, `notes`, `custom_fields` (your lab's own fields, as on plants and explants), and `status`: `completed` (the default) for a transfer that's done, or `pending` for one planned for `transfer_date`, which counts as done only once someone marks it completed in xPlant.
 
 ## Advance a stage
 
 One call completes the current stage and makes the new one current. `stage` is required; give exactly one of `plant_id` or `explant_id`.
 
 Send `stage` as a key from your lab's stage list. Plants and explants have separate lists: an explant might move to `multiplication` or `root_induction`, a plant to `production`. A stage your lab doesn't use for that kind of record is refused with `422 VALIDATION_ERROR` naming it, and nothing changes; an older display name is accepted and the response gives you the key to send next time.
+
+A move happens completely or not at all: if it fails you get `500 STAGE_ADVANCE_FAILED`, nothing has moved, and retrying with the same `Idempotency-Key` is safe.
 
 Only the person who created the plant or explant, or a manager, can move its stage. Otherwise the answer is `403 STAGE_WRITE_FORBIDDEN`; remember that a key acts with its owner's role.
 

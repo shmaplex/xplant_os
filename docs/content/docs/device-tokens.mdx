@@ -127,7 +127,7 @@ resp = requests.post(
 
 ## One device or many?
 
-A gateway that reads several probes is usually **one device** posting several reading types (`temperature`, `humidity`, `co2`…) under its own `device_id`, with one token. That's the recommended setup.
+A gateway that reads several probes is usually **one device** posting several reading types (`temperature`, `humidity`, `co2`…) under its own `device_id`, with one token. That's the recommended setup. A device has **one channel per reading type**: readings have no probe field, so two probes of the same type on one device would collide. Register the second one as its own device.
 
 If you want each probe to appear as its own device in xPlant (probes in different rooms, for example), register each probe and create a token per probe. The gateway then holds one token per device and uses the matching one for each probe's readings.
 

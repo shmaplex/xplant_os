@@ -11,7 +11,7 @@ From your own computer, with a workspace key: [register the device and create it
 
 How many devices you can register depends on your [plan](https://www.xplantpro.com/en/subscriptions); registering past the allowance answers `402 DEVICE_LIMIT_REACHED`.
 
-A gateway that reads several probes is usually one device posting several reading types. If you'd rather see each probe as its own device, register each one and give the gateway a token per device.
+A gateway that reads several probes is usually one device posting several reading types. A device has **one channel per reading type**: readings have no probe field, so two probes of the same type on one device would collide. Register the second one as its own device. If you'd rather see each probe as its own device, register each one and give the gateway a token per device.
 
 ## 2. Post readings, in batches
 

@@ -123,6 +123,8 @@ The gateway doesn't post each reading as it's taken. It buffers readings and pos
 
 Every reading carries the time it was taken (`recorded_at`) and an `external_id`, so a batch retried after a lost response is never stored twice.
 
+A device has one channel per reading type, so the gateway refuses a config with two sensors of the same `type`. To add a second probe of the same kind, register it as its own device and run it from a separate config with its own device token.
+
 ---
 
 ## Simulate mode

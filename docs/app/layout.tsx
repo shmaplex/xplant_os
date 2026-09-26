@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono } from "next/font/google";
+import { Banner } from "fumadocs-ui/components/banner";
 import { Provider } from "@/components/provider";
+import { SDK_VERSION } from "@/openapi/sdk-version.mjs";
 import { appName, siteUrl } from "@/lib/shared";
 import "./global.css";
 
@@ -42,6 +44,15 @@ export default function Layout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body className="flex min-h-screen flex-col font-sans antialiased">
+        {/* One banner per SDK release: the id changes with the version, so dismissing it hides it until the next one. */}
+        <Banner id={`sdk-${SDK_VERSION}`} className="bg-fd-secondary text-fd-secondary-foreground">
+          <a
+            href={`https://github.com/shmaplex/xplant_sdk/releases/tag/v${SDK_VERSION}`}
+            className="px-2 text-center text-sm font-medium text-pretty underline-offset-4 hover:underline"
+          >
+            @shmaplex/xplant-sdk {SDK_VERSION} is out: what&apos;s new →
+          </a>
+        </Banner>
         <Provider>{children}</Provider>
       </body>
     </html>
