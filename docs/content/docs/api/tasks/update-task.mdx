@@ -132,6 +132,9 @@ The envelope can also carry `meta`:
 
 | Response header | Meaning |
 | --- | --- |
+| `X-RateLimit-Limit` | The request budget this answer reports on, per minute: your key's or device token's (1,000) or your workspace's (3,000), whichever has fewer requests left. Left out when the budget could not be read. |
+| `X-RateLimit-Remaining` | Requests left in that budget this minute, after this one. `0` on a `429`. A workspace's other keys spend its budget too, so this can fall faster than your own requests alone would. |
+| `X-RateLimit-Reset` | Whole seconds until that budget's minute ends and it is full again. Never more than 60. |
 | `X-Request-Id` | Identifies this request. Include it when you contact support. |
 
 ## Errors

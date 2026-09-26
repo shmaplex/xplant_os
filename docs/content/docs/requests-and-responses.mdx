@@ -23,6 +23,8 @@ The base URL itself answers `GET` without a key: it returns the API's name, vers
 
 Every response carries an `X-Request-Id` header that identifies the request. Log it, and include it when you contact [support](mailto:support@xplantpro.com): it lets us find exactly that call.
 
+Successful responses also carry `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`: how much of your request budget is left this minute. See [Rate limits](/docs/rate-limits#watching-your-budget).
+
 Request bodies and responses are JSON. Timestamps are ISO 8601 in UTC, for example `2026-09-25T12:00:00Z`. Ids are UUIDs.
 
 ## The envelope

@@ -7,13 +7,21 @@ Changes to the v1 API are additive or clearly flagged here. Each endpoint's page
 
 ## September 26, 2026
 
+**Close SOP runs from the API.** [Complete an SOP run](/docs/api/sops/complete-sop-run) ends a run as `completed`, `failed` or `cancelled`, exactly as closing it in xPlant does. A `failed` run raises the same deviation alert. See [Run an SOP from a bench station](/docs/guides/sop-runs#4-close-the-run).
+
+**A run's evidence is paged.** [Get an SOP run](/docs/api/sops/get-sop-run) now returns the first 50 pieces of evidence, with `meta.events_next_cursor` for the rest. The new [List a run's evidence](/docs/api/sops/list-sop-run-events) walks the whole trail. See [Reading a run back](/docs/guides/sop-runs#reading-a-run-back).
+
+**Rate-limit headers.** Every successful response and every `429` now carries `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`, so you can slow down before you hit the limit. See [Rate limits](/docs/rate-limits#watching-your-budget).
+
+The new SOP-run calls aren't in the SDK yet, so their pages show `fetch`.
+
 **Custom task categories.** Tasks take an optional `category_label` for your lab's own category: send `category: "other"` with a label of up to 60 characters. See [Sync tasks](/docs/guides/sync-tasks).
 
 **Stage moves are all-or-nothing.** A move either completes or changes nothing; a failure answers `500 STAGE_ADVANCE_FAILED` and is safe to retry with the same `Idempotency-Key`. See [Record transfers and stages](/docs/guides/transfers-and-stages).
 
 **Validation errors name the field**, for example `sop_id: Invalid uuid`, on label scans, SOP runs and step evidence.
 
-**SDK 0.6.3** covers all of the above, and `transfers.create()` now takes `custom_fields`, as plants and explants do. See the [SDK page](/docs/sdk).
+**SDK 0.6.3** covers the task, stage and validation changes, and `transfers.create()` now takes `custom_fields`, as plants and explants do. See the [SDK page](/docs/sdk).
 
 ## September 25, 2026
 

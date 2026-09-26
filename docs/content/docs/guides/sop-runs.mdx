@@ -1,9 +1,9 @@
 ---
 title: Run an SOP from a bench station
-description: Start a run of the SOP in force, confirm steps with scans, and record measurements with their units.
+description: Start a run of the SOP in force, confirm steps with scans, record measurements with their units, and close the run.
 ---
 
-**Scopes:** `read:sops`, `write:sop_runs`, `write:sop_steps`, and `read:sop_runs` to read a run back. **Endpoints:** [Get an SOP](/docs/api/sops/get-sop), [Start an SOP run](/docs/api/sops/create-sop-run), [Record step evidence](/docs/api/sops/create-sop-step-event), [Record a step measurement](/docs/api/sops/create-sop-step-measurement), [Get an SOP run](/docs/api/sops/get-sop-run).
+**Scopes:** `read:sops`, `write:sop_runs`, `write:sop_steps`, and `read:sop_runs` to read a run back. **Endpoints:** [Get an SOP](/docs/api/sops/get-sop), [Start an SOP run](/docs/api/sops/create-sop-run), [Record step evidence](/docs/api/sops/create-sop-step-event), [Record a step measurement](/docs/api/sops/create-sop-step-measurement), [Complete an SOP run](/docs/api/sops/complete-sop-run), [Get an SOP run](/docs/api/sops/get-sop-run), [List a run's evidence](/docs/api/sops/list-sop-run-events).
 
 A bench station (a tablet, a Pi with a touchscreen, a scanner) can walk a technician through an SOP and record what actually happened: who confirmed each step, what was scanned, which pH was measured.
 
@@ -138,6 +138,84 @@ requests.post(
 
 Measurements appear on the run's timeline as `measured` events, alongside the confirmations, so [Get an SOP run](/docs/api/sops/get-sop-run) reads as one story from start to finish.
 
+## 4. Close the run
+
+When the work is done, end the run with an `outcome`: `completed` when the procedure was carried out, `failed` when it was carried out and didn't work, or `cancelled` when it stopped before the end. `notes` is optional and is added after any notes already on the run.
+
+```bash tab="curl" tab-group="lang"
+curl -X POST "https://app.xplantpro.com/api/v1/sop-runs/$RUN_ID/complete" \
+  -H "Authorization: Bearer $XPLANT_API_KEY" \
+  -H "Idempotency-Key: station-3-wk38-complete" \
+  -H "Content-Type: application/json" \
+  -d '{"outcome": "completed", "notes": "All vessels labelled and moved to shelf 3."}'
+```
+
+```js tab="JavaScript" tab-group="lang"
+// Not in @shmaplex/xplant-sdk yet, so this uses fetch directly.
+const res = await fetch(`https://app.xplantpro.com/api/v1/sop-runs/${run.id}/complete`, {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${process.env.XPLANT_API_KEY}`,
+    "Idempotency-Key": "station-3-wk38-complete",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ outcome: "completed", notes: "All vessels labelled and moved to shelf 3." }),
+});
+const body = await res.json();
+if (!body.ok) throw new Error(`${res.status} ${body.code}: ${body.error}`);
+```
+
+```python tab="Python" tab-group="lang"
+requests.post(
+    f"{BASE}/sop-runs/{run['id']}/complete",
+    headers={**HEADERS, "Idempotency-Key": "station-3-wk38-complete"},
+    json={"outcome": "completed", "notes": "All vessels labelled and moved to shelf 3."},
+    timeout=10,
+).raise_for_status()
+```
+
+The run then looks exactly like one closed in xPlant. Its `status` is the outcome, and `completedAt` is set for `completed` (empty for `failed` and `cancelled`). A `failed` run raises the same deviation alert it would in xPlant.
+
+Only the person who started the run, or a manager or above, can close it, and the key's owner must be one of them. For anyone else the answer is `404 NOT_FOUND`, the same as for a run that doesn't exist. A run that has already ended answers `409 SOP_RUN_CLOSED`.
+
+## Reading a run back
+
+[Get an SOP run](/docs/api/sops/get-sop-run) returns the run, its steps and the first 50 pieces of evidence. If there are more, `meta.events_next_cursor` isn't `null`. Pass it as `cursor` to [List a run's evidence](/docs/api/sops/list-sop-run-events), and keep following `meta.next_cursor` until it's `null`:
+
+```js tab="JavaScript" tab-group="lang"
+// The evidence list isn't in @shmaplex/xplant-sdk yet, so this uses fetch directly.
+const get = (path) =>
+  fetch(`https://app.xplantpro.com/api/v1${path}`, {
+    headers: { Authorization: `Bearer ${process.env.XPLANT_API_KEY}` },
+  }).then((r) => r.json());
+
+const first = await get(`/sop-runs/${runId}`);
+const events = [...first.data.events];
+let cursor = first.meta.events_next_cursor;
+while (cursor) {
+  const page = await get(`/sop-runs/${runId}/events?cursor=${encodeURIComponent(cursor)}`);
+  events.push(...page.data);
+  cursor = page.meta.next_cursor;
+}
+```
+
+```python tab="Python" tab-group="lang"
+first = requests.get(f"{BASE}/sop-runs/{run_id}", headers=HEADERS, timeout=10).json()
+events = first["data"]["events"]
+cursor = first["meta"]["events_next_cursor"]
+while cursor:
+    page = requests.get(
+        f"{BASE}/sop-runs/{run_id}/events",
+        headers=HEADERS,
+        params={"cursor": cursor},
+        timeout=10,
+    ).json()
+    events += page["data"]
+    cursor = page["meta"]["next_cursor"]
+```
+
+To read the whole trail from the start, call List a run's evidence without a cursor. A cursor only works on the run it came from.
+
 ## Runs are append-only
 
 Nothing on a run can be edited or deleted. To correct a mistake, record another event that says so. Once a run has **ended** (completed, failed, cancelled or archived), further writes answer `409 SOP_RUN_CLOSED`: its record is what happened. A step that isn't part of the run's version answers `404 NOT_FOUND`.
@@ -148,6 +226,6 @@ Use an `Idempotency-Key` on every write from a station. Bench networks are flaky
 
 Device tokens only cover sensor readings, device events and heartbeats, so a station that runs SOPs needs a workspace key. Keep the damage from a lost or copied station small:
 
-- Give each station **its own key**, named after the station, holding only what it uses. For SOP runs that's `read:sops`, `write:sop_runs` and `write:sop_steps`; add `read:labels` and `write:label_scans` if it scans, and `write:transfers` if it records transfers.
+- Give each station **its own key**, named after the station, holding only what it uses. For SOP runs that's `read:sops`, `write:sop_runs` and `write:sop_steps`, plus `read:sop_runs` if it reads runs back; add `read:labels` and `write:label_scans` if it scans, and `write:transfers` if it records transfers.
 - Keep the key in the station's configuration or secrets store, never in code or a shared repository.
 - If a station goes missing, revoke its key in **Settings → Integrations → API Keys**. Nothing else stops working.

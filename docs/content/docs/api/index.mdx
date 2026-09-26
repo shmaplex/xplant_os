@@ -102,6 +102,8 @@ The machine-readable spec is [openapi.json](/openapi.json) (OpenAPI 3).
 | --- | --- | --- |
 | [`POST /sop-runs`](/docs/api/sops/create-sop-run) | Start an SOP run | `write:sop_runs` |
 | [`GET /sop-runs/{id}`](/docs/api/sops/get-sop-run) | Get an SOP run | `read:sop_runs` |
+| [`POST /sop-runs/{id}/complete`](/docs/api/sops/complete-sop-run) | Complete an SOP run | `write:sop_runs` |
+| [`GET /sop-runs/{id}/events`](/docs/api/sops/list-sop-run-events) | List a run's evidence | `read:sop_runs` |
 | [`POST /sop-runs/{id}/steps/{stepId}/events`](/docs/api/sops/create-sop-step-event) | Record step evidence | `write:sop_steps` |
 | [`POST /sop-runs/{id}/steps/{stepId}/measurements`](/docs/api/sops/create-sop-step-measurement) | Record a step measurement | `write:sop_steps` |
 | [`GET /sops`](/docs/api/sops/list-sops) | List SOPs | `read:sops` |

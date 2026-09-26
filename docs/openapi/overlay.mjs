@@ -286,10 +286,37 @@ export const overlay = {
   "GET /api/v1/sop-runs/{id}": {
     slug: "get-sop-run",
     title: "Get an SOP run",
-    description: "The run, its steps and every piece of evidence recorded against them, in order.",
+    description: "The run, its steps and the first 50 pieces of evidence recorded against them, in order.",
     path: { id: RUN_ID },
     resultVar: "run",
     sdk: `const run = await client.sopRuns.get("${RUN_ID}");`,
+    notes:
+      "A long run has more evidence than one answer holds. When `meta.events_next_cursor` isn't `null`, pass it as `cursor` to [List a run's evidence](/docs/api/sops/list-sop-run-events) for the rest.",
+    sdkNote:
+      "In SDK 0.6.3, `sopRuns.get()` returns only the first 50 pieces of evidence and doesn't pass on `meta.events_next_cursor`. For a longer run, page [List a run's evidence](/docs/api/sops/list-sop-run-events) with `fetch`.",
+  },
+  "GET /api/v1/sop-runs/{id}/events": {
+    slug: "list-sop-run-events",
+    title: "List a run's evidence",
+    description: "Every piece of evidence posted against a run's steps, oldest first, a page at a time.",
+    path: { id: RUN_ID },
+    resultVar: "events",
+    query: { limit: 50 },
+    sdk: null,
+    notes:
+      "Continue from a run you fetched by passing its `meta.events_next_cursor` as `cursor`, or start without one to walk the whole trail. See [Run an SOP from a bench station](/docs/guides/sop-runs).",
+  },
+  "POST /api/v1/sop-runs/{id}/complete": {
+    slug: "complete-sop-run",
+    title: "Complete an SOP run",
+    description: "Ends a run as `completed`, `failed` or `cancelled`, just as closing it in xPlant does.",
+    path: { id: RUN_ID },
+    resultVar: "run",
+    idempotencyKey: "station-3-wk38-complete",
+    body: { outcome: "completed", notes: "All vessels labelled and moved to shelf 3." },
+    sdk: null,
+    notes:
+      "Only the person who started the run, or a manager, can close it; anyone else gets `404`. A closed run takes no more evidence, and closing it again answers `409 SOP_RUN_CLOSED`. See [Run an SOP from a bench station](/docs/guides/sop-runs).",
   },
   "POST /api/v1/sop-runs/{id}/steps/{stepId}/events": {
     slug: "create-sop-step-event",

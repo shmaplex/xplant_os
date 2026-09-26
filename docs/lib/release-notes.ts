@@ -4,6 +4,6 @@
  */
 export const latestRelease = {
   label: "New",
-  text: "Custom task categories, safer stage moves and SDK 0.6.3",
+  text: "Close SOP runs from the API, and rate-limit headers",
   href: "/docs/whats-new",
 };
