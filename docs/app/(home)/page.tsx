@@ -1,5 +1,6 @@
 import { ArrowRight, BookOpen, Braces, Cpu, KeyRound, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { latestRelease } from "@/lib/release-notes";
 import { apiKeysUrl, marketing, siteUrl } from "@/lib/shared";
 
 const cards = [
@@ -60,7 +61,17 @@ export default function HomePage() {
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-16 px-4 py-12 sm:px-6 md:py-20">
       <section className="grid items-center gap-10 lg:grid-cols-[1.1fr_1fr]">
-        <div className="flex flex-col gap-6">
+        <div className="flex min-w-0 flex-col gap-6">
+          <Link
+            href={latestRelease.href}
+            className="group inline-flex w-fit max-w-full items-center gap-2 rounded-full border border-fd-border bg-fd-card py-1 pr-3 pl-1 text-sm transition-colors hover:border-fd-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring"
+          >
+            <span className="shrink-0 rounded-full bg-future-lime px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#0c1a0f]">
+              {latestRelease.label}
+            </span>
+            <span className="min-w-0 truncate text-fd-muted-foreground group-hover:text-fd-foreground">{latestRelease.text}</span>
+            <ArrowRight className="size-3.5 shrink-0 text-fd-muted-foreground" aria-hidden />
+          </Link>
           <p className="font-mono text-xs font-medium uppercase tracking-[0.18em] text-fd-muted-foreground">
             xPlant REST API · v1
           </p>

@@ -1,0 +1,34 @@
+---
+title: What's new
+description: Recent changes to the xPlant API and the JavaScript SDK, newest first.
+---
+
+Changes to the v1 API are additive or clearly flagged here. Each endpoint's page always reflects the API as it runs in production.
+
+## September 26, 2026
+
+**Custom task categories.** Tasks take an optional `category_label` for your lab's own category: send `category: "other"` with a label of up to 60 characters. See [Sync tasks](/docs/guides/sync-tasks).
+
+**Stage moves are all-or-nothing.** A move either completes or changes nothing; a failure answers `500 STAGE_ADVANCE_FAILED` and is safe to retry with the same `Idempotency-Key`. See [Record transfers and stages](/docs/guides/transfers-and-stages).
+
+**Validation errors name the field**, for example `sop_id: Invalid uuid`, on label scans, SOP runs and step evidence.
+
+**SDK 0.6.3** covers all of the above, and `transfers.create()` now takes `custom_fields`, as plants and explants do. See the [SDK page](/docs/sdk).
+
+## September 25, 2026
+
+**Timestamps accept offsets.** `recorded_at`, `occurred_at`, `scanned_at` and the other timestamp fields take `Z` or an offset such as `+02:00`.
+
+**Safer retries for devices.** Device events take an `external_id`. A repeated sensor reading or device event answers `201` with the stored record and `meta.duplicate: true`. See [Idempotency](/docs/idempotency).
+
+**SOP training.** Starting a run follows your lab's training rules: `403 TRAINING_REQUIRED` when enforcement blocks, or `meta.training_warning` when it warns. See [Run an SOP from a bench station](/docs/guides/sop-runs).
+
+**Stages and transfers.** Stages are checked against your lab's stage list, and only the culture's creator or a manager can move one (`403 STAGE_WRITE_FORBIDDEN`). Transfers take a `status` (`completed` or `pending`), and both appear in [change history](/docs/guides/change-history).
+
+**Cursor paging on every list,** plus `until` on sensor readings. See [Pagination](/docs/pagination).
+
+**Request IDs.** Every response carries `X-Request-Id`; quote it when you contact support.
+
+**New endpoints:** contaminations, comments, media files, media recipes, creating and updating plants and explants, equipment, culture line pricing and sell-through. See the [API reference](/docs/api).
+
+**Plans and roles.** A key never does more than its owner can in xPlant, and plans set which parts of the API a key can use. See [Plans and access](/docs/authentication#plans-and-access).
