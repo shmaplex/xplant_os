@@ -57,6 +57,7 @@ task = body["data"]
 | `priority_rank` | number \| null | Yes | Queue position. Lower sorts first; null means the priority label decides. |
 | `priority_source` | string | Yes | Where the current order came from: `default`, `auto`, `manual`. `manual` means a person placed the task, and automated writes leave it where it is unless they send `release: true`. |
 | `category` | string \| null | Yes | — |
+| `category_label` | string \| null | Yes | The workspace's own name for the category, kept beside `category: "other"`. Null when the task has none. |
 | `created_at` | string \| null | Yes | — |
 | `entity_link` | object \| null | No | The plant or explant the task is about. Returned when you create, fetch or update one task; lists leave it out. |
 | `entity_link.entity_type` | `"plant"` \| `"explant"` | Yes | — |
@@ -75,6 +76,7 @@ task = body["data"]
     "priority_rank": 1.5,
     "priority_source": "auto",
     "category": "transfer",
+    "category_label": null,
     "created_at": "2026-09-25T14:12:03.000Z",
     "entity_link": null
   }

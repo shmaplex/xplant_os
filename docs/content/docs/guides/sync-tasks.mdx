@@ -74,6 +74,8 @@ An `Idempotency-Key` built from your own data (the sync run, the line, the job) 
 
 `assigned_to` must be an active member of the workspace. Anything else is rejected with `422 VALIDATION_ERROR` rather than silently dropped.
 
+`category` is one of the nine presets: `media_prep`, `transfer`, `contamination`, `subculture`, `sop_review`, `acclimation`, `cleaning`, `monitoring` or `other`. For your lab's own category, send `category: "other"` with a `category_label` of up to 60 characters, for example `{"category": "other", "category_label": "Hardening off"}`. A label beside any other category, a blank label or an unknown category answers `422 VALIDATION_ERROR` naming the field. Tasks come back with `category_label` too.
+
 ## Ordering: labels, ranks and the hand-placed rule
 
 Two fields position work:

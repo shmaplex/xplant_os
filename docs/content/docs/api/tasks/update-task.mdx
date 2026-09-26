@@ -8,6 +8,8 @@ endpoint: {"method":"PATCH","path":"/api/v1/tasks/{id}","scopes":["write:tasks"]
 
 A task someone placed by hand keeps its position through automated writes. Send `release: true` to hand it back to automatic ordering. Send `clear_entity_link: true` to unlink it from its plant or explant.
 
+A `category_label` needs `category: "other"` in the same request, and `null` clears it. Moving a task to any other category clears its label.
+
 See also: [Sync tasks](/docs/guides/sync-tasks).
 
 ## Path parameters
@@ -24,6 +26,7 @@ See also: [Sync tasks](/docs/guides/sync-tasks).
 | `due_date` | string (date-time) | No | — |
 | `is_all_day` | boolean | No | — |
 | `category` | `"media_prep"` \| `"transfer"` \| `"contamination"` \| `"subculture"` \| `"sop_review"` \| `"acclimation"` \| `"cleaning"` \| `"monitoring"` \| `"other"` | No | — |
+| `category_label` | string \| null | No | 1–60 characters. |
 | `notes` | string | No | Up to 5000 characters. |
 | `priority` | `"low"` \| `"medium"` \| `"high"` \| `"urgent"` | No | — |
 | `priority_rank` | number \| null | No | — |
@@ -91,6 +94,7 @@ result = body["data"]
 | `priority_rank` | number \| null | Yes | Queue position. Lower sorts first; null means the priority label decides. |
 | `priority_source` | string | Yes | Where the current order came from: `default`, `auto`, `manual`. `manual` means a person placed the task, and automated writes leave it where it is unless they send `release: true`. |
 | `category` | string \| null | Yes | — |
+| `category_label` | string \| null | Yes | The workspace's own name for the category, kept beside `category: "other"`. Null when the task has none. |
 | `created_at` | string \| null | Yes | — |
 | `entity_link` | object \| null | No | The plant or explant the task is about. Returned when you create, fetch or update one task; lists leave it out. |
 | `entity_link.entity_type` | `"plant"` \| `"explant"` | Yes | — |
@@ -109,6 +113,7 @@ result = body["data"]
     "priority_rank": 1.5,
     "priority_source": "auto",
     "category": "transfer",
+    "category_label": null,
     "created_at": "2026-09-25T14:12:03.000Z",
     "entity_link": null
   }
