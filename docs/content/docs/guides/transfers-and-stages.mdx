@@ -71,6 +71,8 @@ transfer = requests.post(
 
 Optional fields: `transfer_date`, `from_location`, `to_location`, `transfer_cycle`, `notes`, `custom_fields` (your lab's own fields, as on plants and explants), and `status`: `completed` (the default) for a transfer that's done, or `pending` for one planned for `transfer_date`, which counts as done only once someone marks it completed in xPlant.
 
+`transfer_date` is a calendar day, so send the day itself, such as `2026-09-24`. A full timestamp is accepted too, but its day is read in UTC, so `2026-09-26T08:00:00+09:00` lands on 25 September. Transfers come back with `transfer_date` as a timestamp; take its first ten characters as the day rather than converting it to your time zone, which can shift it by a day.
+
 ## Advance a stage
 
 One call completes the current stage and makes the new one current. `stage` is required; give exactly one of `plant_id` or `explant_id`.

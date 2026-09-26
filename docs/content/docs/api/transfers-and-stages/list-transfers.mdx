@@ -60,7 +60,7 @@ transfers = body["data"]
 | `id` | string (uuid) | Yes | — |
 | `entity_type` | `"plant"` \| `"explant"` | Yes | Whether the transfer was of a plant or an explant. |
 | `entity_id` | string (uuid) | Yes | The plant's or explant's id. |
-| `transfer_date` | string \| null | Yes | When the transfer was done, as an ISO 8601 timestamp. |
+| `transfer_date` | string \| null | Yes | The day the transfer was done. xPlant treats it as a calendar day, not a moment in time. It is returned as an ISO 8601 timestamp, and the day is its first ten characters (`YYYY-MM-DD`): read those, and do not convert the value into another time zone, which can move it to the day before or after. |
 | `transfer_cycle` | integer \| null | Yes | Which subculture this was for the plant or explant — 1 for the first. |
 | `from_location` | string \| null | Yes | Where the culture was before the transfer. |
 | `to_location` | string \| null | Yes | Where the culture went. |
