@@ -151,18 +151,12 @@ curl -X POST "https://app.xplantpro.com/api/v1/sop-runs/$RUN_ID/complete" \
 ```
 
 ```js tab="JavaScript" tab-group="lang"
-// Not in @shmaplex/xplant-sdk yet, so this uses fetch directly.
-const res = await fetch(`https://app.xplantpro.com/api/v1/sop-runs/${run.id}/complete`, {
-  method: "POST",
-  headers: {
-    Authorization: `Bearer ${process.env.XPLANT_API_KEY}`,
-    "Idempotency-Key": "station-3-wk38-complete",
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({ outcome: "completed", notes: "All vessels labelled and moved to shelf 3." }),
-});
-const body = await res.json();
-if (!body.ok) throw new Error(`${res.status} ${body.code}: ${body.error}`);
+const closed = await client.sopRuns.complete(
+  run.id,
+  { outcome: "completed", notes: "All vessels labelled and moved to shelf 3." },
+  { idempotencyKey: "station-3-wk38-complete" },
+);
+console.log(closed.status, closed.completedAt);
 ```
 
 ```python tab="Python" tab-group="lang"
@@ -180,26 +174,21 @@ Only the person who started the run, or a manager or above, can close it, and th
 
 ## Reading a run back
 
-[Get an SOP run](/docs/api/sops/get-sop-run) returns the run, its steps and the first 50 pieces of evidence. If there are more, `meta.events_next_cursor` isn't `null`. Pass it as `cursor` to [List a run's evidence](/docs/api/sops/list-sop-run-events), and keep following `meta.next_cursor` until it's `null`:
+In the SDK, `sopRuns.get()` returns the whole trail in `run.events`, however long it is. For a very long run, `sopRuns.listEvents()` hands it to you a page at a time instead:
 
-```js tab="JavaScript" tab-group="lang"
-// The evidence list isn't in @shmaplex/xplant-sdk yet, so this uses fetch directly.
-const get = (path) =>
-  fetch(`https://app.xplantpro.com/api/v1${path}`, {
-    headers: { Authorization: `Bearer ${process.env.XPLANT_API_KEY}` },
-  }).then((r) => r.json());
+```js
+const run = await client.sopRuns.get(runId);
+console.log(`${run.events.length} pieces of evidence`);
 
-const first = await get(`/sop-runs/${runId}`);
-const events = [...first.data.events];
-let cursor = first.meta.events_next_cursor;
-while (cursor) {
-  const page = await get(`/sop-runs/${runId}/events?cursor=${encodeURIComponent(cursor)}`);
-  events.push(...page.data);
-  cursor = page.meta.next_cursor;
+// Or a page at a time:
+for await (const event of client.sopRuns.listEvents(runId)) {
+  console.log(event.recordedAt, event.stepKey, event.eventType);
 }
 ```
 
-```python tab="Python" tab-group="lang"
+Over plain HTTP, [Get an SOP run](/docs/api/sops/get-sop-run) returns the run, its steps and the first 50 pieces of evidence. If there are more, `meta.events_next_cursor` isn't `null`. Pass it as `cursor` to [List a run's evidence](/docs/api/sops/list-sop-run-events), and keep following `meta.next_cursor` until it's `null`:
+
+```python
 first = requests.get(f"{BASE}/sop-runs/{run_id}", headers=HEADERS, timeout=10).json()
 events = first["data"]["events"]
 cursor = first["meta"]["events_next_cursor"]

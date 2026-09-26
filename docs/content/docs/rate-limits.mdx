@@ -40,6 +40,8 @@ The headers describe **whichever of your two budgets has fewer requests left**. 
 
 If xPlant can't read the counters for a moment, it lets the request through and leaves all three headers out. Treat a missing header as unknown, not as a full budget.
 
+The JavaScript SDK keeps the latest numbers in `client.rateLimit`; see [Pacing a bulk job](/docs/sdk#pacing-a-bulk-job). Over plain HTTP, read the headers:
+
 ```js
 const remaining = res.headers.get("X-RateLimit-Remaining");
 if (remaining !== null && Number(remaining) < 50) {

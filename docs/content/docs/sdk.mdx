@@ -9,7 +9,7 @@ npm install @shmaplex/xplant-sdk
 
 The source, issues and full reference live at **[github.com/shmaplex/xplant_sdk](https://github.com/shmaplex/xplant_sdk#readme)**. Every endpoint page in the [API reference](/docs/api) shows the SDK call next to curl and Python.
 
-These docs match **@shmaplex/xplant-sdk 0.6.3**. The SDK runs on **Node.js 18+** and any runtime with standard `fetch`: Deno, Bun, edge and serverless functions. **Call the API from your server, not a web page.** The API doesn't send CORS headers, and keys don't belong in front-end code.
+These docs match **@shmaplex/xplant-sdk 0.7.0**. The SDK runs on **Node.js 18+** and any runtime with standard `fetch`: Deno, Bun, edge and serverless functions. **Call the API from your server, not a web page.** The API doesn't send CORS headers, and keys don't belong in front-end code.
 
 ## Create a client
 
@@ -96,6 +96,27 @@ With `retry` on, the client:
 - backs off exponentially on `502`, `503`, `504` and connection errors, for reads and for writes that are safe to replay;
 - on endpoints that honour [idempotency](/docs/idempotency), generates an `Idempotency-Key` if you didn't pass one, and reuses it across its own attempts.
 
+## Pacing a bulk job
+
+`client.rateLimit` is the request budget the latest response reported, from its [rate-limit headers](/docs/rate-limits#watching-your-budget): `{ limit, remaining, reset, observedAt }`, or `null`.
+
+```js
+for (const row of rows) {
+  await client.plants.create(row);
+  const budget = client.rateLimit;
+  if (budget && budget.remaining < 50) {
+    // `reset` is whole seconds from `observedAt` until the minute's budget refills
+    const waitMs = budget.reset * 1000 - (Date.now() - budget.observedAt);
+    if (waitMs > 0) await new Promise((resolve) => setTimeout(resolve, waitMs));
+  }
+}
+```
+
+- `limit` and `remaining` are for whichever budget has fewer requests left: the key's (or device token's) 1,000, or the workspace's 3,000.
+- Every success and every `429` updates it; other failures leave it as it was.
+- It's `null` before the first response, and after a success that carried no budget because the API couldn't read it. Treat `null` as unknown, not unlimited.
+- The [sensor readings budget](/docs/rate-limits#sensor-readings-have-their-own-budget) isn't included.
+
 ## Idempotency
 
 Pass `{ idempotencyKey }` as the last argument to any write:
@@ -141,7 +162,7 @@ The buffer stamps `recorded_at` and `external_id` on each reading, keeps reading
 | `client.tasks` | `list`, `get`, `create`, `update` |
 | `client.taskDemand` | `list`, `record` |
 | `client.sops` | `list`, `get` |
-| `client.sopRuns` | `start`, `get`, `recordStepEvent`, `recordMeasurement` |
+| `client.sopRuns` | `start`, `get`, `listEvents`, `recordStepEvent`, `recordMeasurement`, `complete` |
 | `client.labels` | `resolve`, `recordScan` |
 | `client.devices` | `list`, `get`, `register`, `heartbeat`, `listTokens`, `createToken`, `revokeToken`, `recordEvent` |
 | `client.sensorReadings` | `list`, `create`, `createBatch`, `buffer` |
@@ -152,8 +173,6 @@ The buffer stamps `recorded_at` and `external_id` on each reading, keeps reading
 | `client.mediaRecipes` | `list`, `get`, `create`, `update` |
 | `client.pricing` | `listCultureLines`, `listEvents` |
 | `client.commerce` | `listOrderLines`, `getSellThrough` |
-
-0.6.3 doesn't cover [Complete an SOP run](/docs/api/sops/complete-sop-run) or [List a run's evidence](/docs/api/sops/list-sop-run-events) yet; call them with `fetch`, as their pages show. Its `sopRuns.get()` returns only a run's first 50 pieces of evidence.
 
 A device client can only call `sensorReadings.create`, `sensorReadings.createBatch`, `sensorReadings.buffer`, `devices.heartbeat` and `devices.recordEvent`, and only for its own device.
 

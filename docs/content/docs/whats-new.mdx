@@ -13,7 +13,7 @@ Changes to the v1 API are additive or clearly flagged here. Each endpoint's page
 
 **Rate-limit headers.** Every successful response and every `429` now carries `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`, so you can slow down before you hit the limit. See [Rate limits](/docs/rate-limits#watching-your-budget).
 
-The new SOP-run calls aren't in the SDK yet, so their pages show `fetch`.
+**SDK 0.7.0** covers all three. `sopRuns.complete()` closes a run, and `sopRuns.listEvents()` pages its evidence. `sopRuns.get()` follows the cursor itself, so `run.events` is still the whole trail. `client.rateLimit` holds the latest budget, for [pacing a bulk job](/docs/sdk#pacing-a-bulk-job). It needs API 2.152.0, which is live. See the [release notes](https://github.com/shmaplex/xplant_sdk/releases/tag/v0.7.0).
 
 **Custom task categories.** Tasks take an optional `category_label` for your lab's own category: send `category: "other"` with a label of up to 60 characters. See [Sync tasks](/docs/guides/sync-tasks).
 

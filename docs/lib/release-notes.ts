@@ -4,6 +4,6 @@
  */
 export const latestRelease = {
   label: "New",
-  text: "Close SOP runs from the API, and rate-limit headers",
+  text: "SDK 0.7.0: close SOP runs, page their evidence, pace by rate limit",
   href: "/docs/whats-new",
 };

@@ -8,7 +8,7 @@ endpoint: {"method":"GET","path":"/api/v1/sop-runs/{id}","scopes":["read:sop_run
 
 The trail is paged. `events` holds its first 50 records, and `meta.events_next_cursor` says where the rest starts: pass it as `cursor` to List a run's evidence, and keep following `meta.next_cursor` there until it is `null`. When `meta.events_next_cursor` is `null`, `events` is the whole trail.
 
-In SDK 0.6.3, `sopRuns.get()` returns only the first 50 pieces of evidence and doesn't pass on `meta.events_next_cursor`. For a longer run, page [List a run's evidence](/docs/api/sops/list-sop-run-events) with `fetch`.
+`sopRuns.get()` follows `meta.events_next_cursor` for you, so `run.events` is always the whole trail. For a very long run, page it with `sopRuns.listEvents()` instead.
 
 ## Path parameters
 
