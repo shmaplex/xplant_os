@@ -121,7 +121,7 @@ The envelope can also carry `meta`:
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | `previous_stage_id` | string \| null (uuid) | No | The stage this one replaced, which is now `completed`. Null when there was no current stage. |
-| `warning` | string | No | Sent instead of `previous_stage_id` when the stage was saved but could not be made the current one. The history is complete; set the current stage in xPlant. |
+| `warning` | string | No | No longer sent. A stage that cannot be made the current one is now withdrawn, and the move answers `500 STAGE_ADVANCE_FAILED` with nothing moved. Kept so a client written against it still reads the response. |
 
 | Response header | Meaning |
 | --- | --- |
@@ -144,6 +144,6 @@ The envelope can also carry `meta`:
 | `422` | `VALIDATION_ERROR` | A field failed validation, or neither or both of `plant_id` and `explant_id` were sent. `error` names the first problem, for example `stage: stage is required`. |
 | `422` | `VALIDATION_ERROR` | `stage` is not in your lab's stage list for a plant, or for an explant — whichever you sent. `error` starts `stage:` and names the list. Nothing was changed. |
 | `429` | `RATE_LIMIT_EXCEEDED` | Too many requests for this key, device token or workspace. Wait `Retry-After` seconds. |
-| `500` | `STAGE_ADVANCE_FAILED` | The stage could not be saved. Retry with the same `Idempotency-Key`. |
+| `500` | `STAGE_ADVANCE_FAILED` | The stage could not be saved, or could not be made the current one. Nothing moved: the plant or explant is still in the stage it was in. Retry with the same `Idempotency-Key`. |
 
 Branch on `code`, never on the `error` text. See [Errors](/docs/errors).

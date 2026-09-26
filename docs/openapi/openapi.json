@@ -19650,7 +19650,7 @@
                         },
                         "warning": {
                           "type": "string",
-                          "description": "Sent instead of `previous_stage_id` when the stage was saved but could not be made the current one. The history is complete; set the current stage in xPlant."
+                          "description": "No longer sent. A stage that cannot be made the current one is now withdrawn, and the move answers `500 STAGE_ADVANCE_FAILED` with nothing moved. Kept so a client written against it still reads the response."
                         }
                       }
                     }
@@ -19983,7 +19983,7 @@
             }
           },
           "500": {
-            "description": "`STAGE_ADVANCE_FAILED` — The stage could not be saved. Retry with the same `Idempotency-Key`.",
+            "description": "`STAGE_ADVANCE_FAILED` — The stage could not be saved, or could not be made the current one. Nothing moved: the plant or explant is still in the stage it was in. Retry with the same `Idempotency-Key`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -20009,7 +20009,7 @@
             "x-error-codes": [
               {
                 "code": "STAGE_ADVANCE_FAILED",
-                "when": "The stage could not be saved. Retry with the same `Idempotency-Key`."
+                "when": "The stage could not be saved, or could not be made the current one. Nothing moved: the plant or explant is still in the stage it was in. Retry with the same `Idempotency-Key`."
               }
             ],
             "headers": {
@@ -26300,6 +26300,6 @@
   },
   "x-docs-source": {
     "ref": "origin/main",
-    "commit": "6a960f2f3"
+    "commit": "65d9cb840"
   }
 }
