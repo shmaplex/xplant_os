@@ -3,6 +3,8 @@
   "pages": [
     "create-sop-run",
     "get-sop-run",
+    "complete-sop-run",
+    "list-sop-run-events",
     "create-sop-step-event",
     "create-sop-step-measurement",
     "list-sops",

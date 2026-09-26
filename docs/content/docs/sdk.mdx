@@ -153,6 +153,8 @@ The buffer stamps `recorded_at` and `external_id` on each reading, keeps reading
 | `client.pricing` | `listCultureLines`, `listEvents` |
 | `client.commerce` | `listOrderLines`, `getSellThrough` |
 
+0.6.3 doesn't cover [Complete an SOP run](/docs/api/sops/complete-sop-run) or [List a run's evidence](/docs/api/sops/list-sop-run-events) yet; call them with `fetch`, as their pages show. Its `sopRuns.get()` returns only a run's first 50 pieces of evidence.
+
 A device client can only call `sensorReadings.create`, `sensorReadings.createBatch`, `sensorReadings.buffer`, `devices.heartbeat` and `devices.recordEvent`, and only for its own device.
 
 ## Other languages

@@ -15,6 +15,9 @@ Going over either answers:
 ```http
 HTTP/1.1 429 Too Many Requests
 Retry-After: 12
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 12
 
 { "ok": false, "data": null, "error": "…", "code": "RATE_LIMIT_EXCEEDED" }
 ```
@@ -22,6 +25,28 @@ Retry-After: 12
 `Retry-After` is the number of whole seconds until the window resets. Wait that long, then carry on. Retrying immediately just spends more of the budget. The `error` text says which budget ran out, so one runaway integration is easy to tell apart from a busy lab.
 
 These are ceilings to stop abuse and runaway loops, set well above normal use. Polling fifteen endpoints every five seconds is 180 requests a minute.
+
+## Watching your budget
+
+Every successful response and every `429` carries three headers, so you can slow down before you hit the limit:
+
+| Header | Meaning |
+| --- | --- |
+| `X-RateLimit-Limit` | The budget these headers describe, per minute: your key's or device token's (1,000) or your workspace's (3,000). |
+| `X-RateLimit-Remaining` | Requests left in that budget this minute, after this one. `0` on a `429`. |
+| `X-RateLimit-Reset` | Whole seconds until the minute ends and the budget is full again, from 1 to 60. On a `429` it equals `Retry-After`. |
+
+The headers describe **whichever of your two budgets has fewer requests left**. Other keys in the workspace spend its budget too, so `X-RateLimit-Remaining` can fall faster than your own requests would explain, and `X-RateLimit-Limit` can change from one response to the next.
+
+If xPlant can't read the counters for a moment, it lets the request through and leaves all three headers out. Treat a missing header as unknown, not as a full budget.
+
+```js
+const remaining = res.headers.get("X-RateLimit-Remaining");
+if (remaining !== null && Number(remaining) < 50) {
+  const reset = Number(res.headers.get("X-RateLimit-Reset"));
+  await new Promise((r) => setTimeout(r, reset * 1000)); // wait for the next minute
+}
+```
 
 ## Sensor readings have their own budget
 
@@ -32,7 +57,7 @@ These are ceilings to stop abuse and runaway loops, set well above normal use. P
 | Per API key or device token | 5,000 readings per 5 minutes |
 | Per workspace | 10,000 readings per 5 minutes |
 
-One request can carry up to 500 readings, so a batching gateway can reach the readings budget while barely touching the request one. Both answer the same `429 RATE_LIMIT_EXCEEDED` with `Retry-After`.
+One request can carry up to 500 readings, so a batching gateway can reach the readings budget while barely touching the request one. Both answer `429 RATE_LIMIT_EXCEEDED` with `Retry-After`. The `X-RateLimit-*` headers describe only the request budget, so a `429` from the readings budget carries `Retry-After` alone.
 
 ## Staying well inside
 
@@ -40,5 +65,6 @@ One request can carry up to 500 readings, so a batching gateway can reach the re
 - **Sync incrementally.** Use `since` on [change history](/docs/guides/change-history) rather than re-reading everything.
 - **Page with the maximum `limit`** (200) when you really do need everything.
 - **Give each integration its own key**, so one busy job can't starve the others of their per-key budget.
+- **Watch `X-RateLimit-Remaining`** and pause until `X-RateLimit-Reset` when it runs low, rather than waiting for a `429`.
 
-The only rate-limit header is `Retry-After`, sent with a `429` (and with `409 IDEMPOTENCY_IN_FLIGHT`). There are no remaining-quota headers.
+`Retry-After` also comes with `409 IDEMPOTENCY_IN_FLIGHT`, set to `1`: the first request with that key is still running.

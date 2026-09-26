@@ -93,8 +93,8 @@ Device tokens (`xpd_`) don't carry scopes. They can only write readings, heartbe
 | Scope | Allows | Minimum role | Plans | Endpoints |
 | --- | --- | --- | --- | --- |
 | `read:sops` | Read SOP templates and steps | Any member | Teams, Enterprise | [`GET /sops`](/docs/api/sops/list-sops)<br />[`GET /sops/{id}`](/docs/api/sops/get-sop) |
-| `read:sop_runs` | Read SOP execution history: who ran which step, when | Any member | Teams, Enterprise | [`GET /sop-runs/{id}`](/docs/api/sops/get-sop-run) |
-| `write:sop_runs` | Create and advance SOP run sessions | `member` | Teams, Enterprise | [`POST /sop-runs`](/docs/api/sops/create-sop-run) |
+| `read:sop_runs` | Read SOP execution history: who ran which step, when | Any member | Teams, Enterprise | [`GET /sop-runs/{id}`](/docs/api/sops/get-sop-run)<br />[`GET /sop-runs/{id}/events`](/docs/api/sops/list-sop-run-events) |
+| `write:sop_runs` | Create and advance SOP run sessions | `member` | Teams, Enterprise | [`POST /sop-runs`](/docs/api/sops/create-sop-run)<br />[`POST /sop-runs/{id}/complete`](/docs/api/sops/complete-sop-run) |
 | `write:sop_steps` | Post confirmations, scans and measurements against a step of an SOP run | `member` | Teams, Enterprise | [`POST /sop-runs/{id}/steps/{stepId}/events`](/docs/api/sops/create-sop-step-event)<br />[`POST /sop-runs/{id}/steps/{stepId}/measurements`](/docs/api/sops/create-sop-step-measurement) |
 
 ### Labels
